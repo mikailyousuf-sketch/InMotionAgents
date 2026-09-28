@@ -1,9 +1,11 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
-export async function getOrCreateInternalConversation(input: {
+export async function getOrCreateConversation(input: {
   businessId: string;
   customerId?: string | null;
   conversationId?: string | null;
+  channel?: string;
+  externalThreadId?: string | null;
 }) {
   const supabase = createServerSupabaseClient();
 
@@ -18,12 +20,28 @@ export async function getOrCreateInternalConversation(input: {
     if (!error && data) return data;
   }
 
+  if (input.externalThreadId) {
+    const { data, error } = await supabase
+      .from("conversations")
+      .select("*")
+      .eq("business_id", input.businessId)
+      .eq("channel", input.channel ?? "internal")
+      .eq("external_thread_id", input.externalThreadId)
+      .neq("status", "closed")
+      .order("updated_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (!error && data) return data;
+  }
+
   const { data, error } = await supabase
     .from("conversations")
     .insert({
       business_id: input.businessId,
       customer_id: input.customerId ?? null,
-      channel: "internal",
+      channel: input.channel ?? "internal",
+      external_thread_id: input.externalThreadId ?? null,
       status: "ai"
     })
     .select("*")
@@ -31,6 +49,33 @@ export async function getOrCreateInternalConversation(input: {
 
   if (error) throw new Error(error.message);
   return data;
+}
+
+export async function getOrCreateInternalConversation(input: {
+  businessId: string;
+  customerId?: string | null;
+  conversationId?: string | null;
+}) {
+  return getOrCreateConversation({
+    ...input,
+    channel: "internal"
+  });
+}
+
+export async function getConversationHistory(conversationId: string, limit = 20) {
+  const supabase = createServerSupabaseClient();
+  const { data, error } = await supabase
+    .from("messages")
+    .select("sender_type,content,created_at")
+    .eq("conversation_id", conversationId)
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  if (error) throw new Error(error.message);
+
+  return (data ?? [])
+    .reverse()
+    .filter((message) => ["customer", "ai", "human"].includes(message.sender_type));
 }
 
 export async function saveMessage(input: {
