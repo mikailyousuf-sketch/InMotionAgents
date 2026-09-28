@@ -47,7 +47,11 @@ export default async function ConversationsPage() {
               </div>
               <div>
                 <span className="muted">Status</span>
-                <div>{conversation.status === "human" ? "Human takeover" : conversation.status}</div>
+                <div>
+                  <span className={`attention-pill ${conversation.status}`}>
+                    {conversation.status === "human" ? "Needs attention" : conversation.status === "ai" ? "AI handling" : conversation.status}
+                  </span>
+                </div>
               </div>
               <div>
                 <span className="muted">Updated</span>
