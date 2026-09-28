@@ -42,16 +42,18 @@ function formatBusinessContext(context: Awaited<ReturnType<typeof getBusinessCon
 
   return {
     name: context.business.name,
+    description: context.business.description,
+    phone: context.business.phone,
+    email: context.business.email,
+    website: context.business.website,
     timezone: context.business.timezone,
     bookingProvider: context.business.booking_provider,
+    tone: context.business.tone,
+    agentName: context.business.agent_name,
     hours,
     services,
-    rules: [
-      "Bookings may be cancelled or rescheduled if more than 12 hours remain.",
-      "Emergency or clinically sensitive matters must be escalated to a human.",
-      "Never promise a refund or diagnose a medical condition.",
-      "You may answer business questions and help arrange appointments."
-    ]
+    policies: context.policies,
+    faqs: context.faqs
   };
 }
 
@@ -377,7 +379,8 @@ export async function runAgentTurn(input: {
 
   const system = `You are the customer-facing AI receptionist for ${business.name}.
 Today is ${now} in the business timezone ${business.timezone}.
-Be concise, warm and professional. Never invent business information.
+Speak in the configured business tone: ${business.tone || "friendly_professional"}.
+Be concise, natural and professional. Never invent business information.
 Use only the business data below as the source of truth.
 Use booking tools whenever availability, booking, rescheduling, or cancellation requires live data.
 
