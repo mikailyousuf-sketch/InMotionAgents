@@ -8,6 +8,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <nav className="nav">
           <Link href="/dashboard">Dashboard</Link>
           <Link href="/">Agent Simulator</Link>
+          <Link href="/conversations">Conversations</Link>
           <Link href="/onboarding">Onboarding</Link>
         </nav>
       </aside>
