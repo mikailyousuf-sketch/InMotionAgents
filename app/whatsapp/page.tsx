@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AppShell } from "@/components/AppShell";
 
 type Row = { role: "customer" | "agent"; text: string };
@@ -11,6 +11,15 @@ export default function WhatsAppTestPage() {
   const [message, setMessage] = useState("");
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(false);
+  const [businesses, setBusinesses] = useState<{ name: string; slug: string }[]>([]);
+  const [businessSlug, setBusinessSlug] = useState("northstar-dental");
+
+  useEffect(() => {
+    fetch("/api/businesses")
+      .then((response) => response.json())
+      .then((data) => setBusinesses(data.businesses ?? []))
+      .catch(() => {});
+  }, []);
 
   async function send() {
     const text = message.trim();
@@ -27,7 +36,8 @@ export default function WhatsAppTestPage() {
         body: JSON.stringify({
           from: phone,
           name,
-          message: text
+          message: text,
+          businessSlug
         })
       });
 
@@ -54,6 +64,20 @@ export default function WhatsAppTestPage() {
 
       <div className="grid" style={{ gridTemplateColumns: "220px 1fr", marginTop: 24 }}>
         <div className="card">
+          <label className="muted">Workspace</label>
+          <select
+            value={businessSlug}
+            onChange={(e) => {
+              setBusinessSlug(e.target.value);
+              setRows([]);
+            }}
+            style={{ width: "100%", margin: "8px 0 16px", padding: 10 }}
+          >
+            {businesses.map((business) => (
+              <option key={business.slug} value={business.slug}>{business.name}</option>
+            ))}
+          </select>
+
           <label className="muted">WhatsApp number</label>
           <input
             value={phone}
