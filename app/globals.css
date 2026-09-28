@@ -95,3 +95,12 @@ button, input, textarea { font: inherit; }
 .attention-pill { display:inline-flex; align-items:center; padding:5px 8px; border-radius:999px; font-size:12px; border:1px solid var(--line); }
 .attention-pill.human { background:rgba(239,68,68,.12); }
 .attention-pill.ai { background:rgba(34,197,94,.08); }
+
+.inbox-layout { display:grid; grid-template-columns:minmax(0,1fr); gap:16px; }
+.thread { display:grid; gap:10px; max-height:58vh; overflow:auto; padding:4px 2px 14px; }
+.thread-message { max-width:76%; padding:11px 13px; border-radius:14px; border:1px solid var(--line); }
+.thread-message.incoming { justify-self:start; background:var(--panel-2); }
+.thread-message.outgoing { justify-self:end; background:#f5f5f5; color:#111; }
+.thread-sender { font-size:11px; text-transform:capitalize; opacity:.7; margin-bottom:4px; }
+.staff-composer { display:grid; gap:10px; margin-top:14px; padding-top:14px; border-top:1px solid var(--line); }
+.staff-composer textarea { min-height:90px; resize:vertical; width:100%; background:var(--panel-2); color:var(--text); border:1px solid var(--line); border-radius:12px; padding:12px; }
