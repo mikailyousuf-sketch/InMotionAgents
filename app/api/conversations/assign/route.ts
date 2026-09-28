@@ -1,5 +1,6 @@
 import { createAuthServerClient } from "@/lib/supabase/auth-server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { writeAuditLog } from "@/lib/audit/log";
 
 export async function POST(request: Request) {
   const auth = await createAuthServerClient();
@@ -54,6 +55,15 @@ export async function POST(request: Request) {
     .eq("id", conversationId);
 
   if (error) return Response.json({ error: error.message }, { status: 500 });
+
+  await writeAuditLog({
+    businessId: conversation.business_id,
+    actorUserId: user.id,
+    action: "conversation.assigned",
+    entityType: "conversation",
+    entityId: conversation.id,
+    metadata: { assignedUserId }
+  });
 
   return Response.json({ ok: true });
 }
