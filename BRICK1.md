@@ -8,8 +8,7 @@
 - [x] Supabase connection helpers
 - [x] Initial multi-tenant booking schema
 - [x] External integration mapping tables
-- [ ] Run migration in connected Supabase project
-- [ ] Add local/Vercel environment variables
-- [ ] Deploy first Vercel preview
-- [ ] Replace hard-coded demo business context with Supabase-loaded data
-- [ ] First verified response from stored business data
+- [x] Agent loads business profile, services and opening hours from Supabase
+- [ ] Run `0002_demo_seed.sql` in the connected Supabase project
+- [ ] Verify local AI responses are coming from Supabase data
+- [ ] Deploy first Vercel preview at milestone
