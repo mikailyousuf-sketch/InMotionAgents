@@ -16,6 +16,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <Link href="/whatsapp">WhatsApp Test</Link>
           <NotificationBell />
           <Link href="/automations">Automations</Link>
+          <Link href="/guardrails">Guardrails</Link>
+          <Link href="/operations">Operations</Link>
           <Link href="/usage">Usage</Link>
           <Link href="/settings">Settings</Link>
           <Link href="/team">Team</Link>
