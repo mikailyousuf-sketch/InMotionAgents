@@ -19,6 +19,7 @@ import {
 } from "@/lib/crm/identity";
 import { applyLeadSignal } from "@/lib/crm/lead-intelligence";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { recordUsage } from "@/lib/billing/usage";
 
 const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -357,6 +358,19 @@ export async function runAgentTurn(input: {
     content: input.userMessage
   });
 
+  await Promise.all([
+    recordUsage({
+      businessId: context.business.id,
+      eventType: "agent_turn",
+      metadata: { channel: input.channel ?? "internal" }
+    }),
+    recordUsage({
+      businessId: context.business.id,
+      eventType: "message_inbound",
+      metadata: { channel: input.channel ?? "internal" }
+    })
+  ]);
+
   if (conversation.status === "human") {
     return {
       message: "A team member has taken over this conversation. The AI will stay paused.",
@@ -445,6 +459,12 @@ ${businessContext}`;
         direction: "outbound",
         senderType: "ai",
         content: responseMessage
+      });
+
+      await recordUsage({
+        businessId: context.business.id,
+        eventType: "message_outbound",
+        metadata: { channel: input.channel ?? "internal" }
       });
 
       return {
