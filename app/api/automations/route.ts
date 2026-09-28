@@ -1,21 +1,9 @@
 import { createAuthServerClient } from "@/lib/supabase/auth-server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { getPrimaryUserBusiness } from "@/lib/auth/access";
 
-async function getBusinessAndRole(userId:string){
-  const admin=createServerSupabaseClient();
-  const {data:memberships}=await admin
-    .from("business_members")
-    .select("role,businesses(id,name)")
-    .eq("user_id",userId);
-
-  const first=(memberships??[])
-    .map((row:any)=>({
-      role:row.role,
-      business:Array.isArray(row.businesses)?row.businesses[0]:row.businesses
-    }))
-    .find((row:any)=>row.business?.id);
-
-  return first??null;
+async function getBusinessAndRole(_userId: string) {
+  return getPrimaryUserBusiness();
 }
 
 export async function GET(){
