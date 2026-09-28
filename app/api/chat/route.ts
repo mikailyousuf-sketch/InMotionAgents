@@ -7,6 +7,11 @@ import {
   cancelBookingFromAgent,
   rescheduleBookingFromAgent
 } from "@/lib/booking/agent-tools";
+import {
+  getOrCreateInternalConversation,
+  saveMessage,
+  requestHumanHandover
+} from "@/lib/crm/conversations";
 
 export const runtime = "nodejs";
 
@@ -118,6 +123,20 @@ const tools: OpenAI.Chat.Completions.ChatCompletionTool[] = [
   {
     type: "function",
     function: {
+      name: "request_human_handover",
+      description: "Hand the conversation to a human staff member when the customer asks for a person or the issue requires human intervention.",
+      parameters: {
+        type: "object",
+        properties: {
+          reason: { type: "string" }
+        },
+        additionalProperties: false
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
       name: "reschedule_booking",
       description: "Move an existing booking to a new confirmed available start time when policy permits.",
       parameters: {
@@ -134,7 +153,12 @@ const tools: OpenAI.Chat.Completions.ChatCompletionTool[] = [
   }
 ];
 
-async function runTool(name: string, rawArguments: string, businessId: string) {
+async function runTool(
+  name: string,
+  rawArguments: string,
+  businessId: string,
+  conversationId: string
+) {
   const args = JSON.parse(rawArguments || "{}");
 
   if (name === "check_availability") {
@@ -152,6 +176,14 @@ async function runTool(name: string, rawArguments: string, businessId: string) {
   if (name === "reschedule_booking") {
     return rescheduleBookingFromAgent({ businessId, ...args });
   }
+  if (name === "request_human_handover") {
+    const conversation = await requestHumanHandover({
+      businessId,
+      conversationId,
+      reason: args.reason
+    });
+    return { status: conversation.status };
+  }
 
   throw new Error(`Unknown tool: ${name}`);
 }
@@ -167,6 +199,32 @@ export async function POST(request: Request) {
     const businessSlug = typeof body?.businessSlug === "string" ? body.businessSlug : "northstar-dental";
 
     const context = await getBusinessContext(businessSlug);
+    const conversation = await getOrCreateInternalConversation({
+      businessId: context.business.id,
+      conversationId: typeof body?.conversationId === "string" ? body.conversationId : null
+    });
+
+    const latestUserMessage = [...messages].reverse().find(
+      (message: { role?: string; content?: string }) => message?.role === "user" && message?.content
+    );
+
+    if (latestUserMessage?.content) {
+      await saveMessage({
+        businessId: context.business.id,
+        conversationId: conversation.id,
+        direction: "inbound",
+        senderType: "customer",
+        content: String(latestUserMessage.content)
+      });
+    }
+
+    if (conversation.status === "human") {
+      return Response.json({
+        message: "A team member has taken over this conversation. The AI will stay paused.",
+        conversationId: conversation.id,
+        handover: true
+      });
+    }
     const business = formatBusinessContext(context);
     const businessContext = JSON.stringify(business, null, 2);
 
@@ -183,7 +241,8 @@ BOOKING RULES:
 - Do not call create_booking until the customer clearly chooses a slot and gives their name.
 - When create_booking succeeds, clearly confirm the booking.
 - For cancellations/reschedules, identify the booking first when necessary.
-- If a tool returns a policy error requiring human assistance, explain that and offer human handover.
+- If a tool returns a policy error requiring human assistance, call request_human_handover.
+- If the customer asks to speak to a person, manager, receptionist, staff member, or human, call request_human_handover immediately.
 - Interpret relative dates such as tomorrow using today's date above.
 - Times should be discussed in the business timezone.
 - Do not expose internal IDs unless needed to distinguish multiple bookings.
@@ -215,10 +274,21 @@ ${businessContext}`;
       conversation.push(assistant);
 
       if (!assistant.tool_calls?.length) {
+        const responseMessage = assistant.content || "I couldn't create a response.";
+
+        await saveMessage({
+          businessId: context.business.id,
+          conversationId: conversation.id,
+          direction: "outbound",
+          senderType: "ai",
+          content: responseMessage
+        });
+
         return Response.json({
-          message: assistant.content || "I couldn't create a response.",
+          message: responseMessage,
           source: "supabase",
-          bookingTools: true
+          bookingTools: true,
+          conversationId: conversation.id
         });
       }
 
@@ -229,7 +299,8 @@ ${businessContext}`;
           const result = await runTool(
             toolCall.function.name,
             toolCall.function.arguments,
-            context.business.id
+            context.business.id,
+            conversation.id
           );
 
           conversation.push({
