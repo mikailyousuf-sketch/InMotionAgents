@@ -17,6 +17,7 @@ import {
   attachConversationToCustomer
 } from "@/lib/crm/identity";
 import { applyLeadSignal } from "@/lib/crm/lead-intelligence";
+import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
 
@@ -213,7 +214,22 @@ async function runTool(
     return checkAvailability({ businessId, ...args });
   }
   if (name === "create_booking") {
-    return createBookingFromAgent({ businessId, ...args });
+    const result = await createBookingFromAgent({ businessId, ...args });
+
+    if (result.customerId) {
+      await attachConversationToCustomer({
+        businessId,
+        conversationId,
+        customerId: result.customerId
+      });
+      await applyLeadSignal({
+        businessId,
+        customerId: result.customerId,
+        signal: "booking_created"
+      });
+    }
+
+    return result;
   }
   if (name === "find_bookings") {
     return findBookings({ businessId, ...args });
@@ -247,12 +263,26 @@ async function runTool(
     };
   }
   if (name === "mark_lead_signal") {
-    if (!customerId) {
+    let resolvedCustomerId = customerId ?? null;
+
+    if (!resolvedCustomerId) {
+      const supabase = createServerSupabaseClient();
+      const { data: currentConversation } = await supabase
+        .from("conversations")
+        .select("customer_id")
+        .eq("id", conversationId)
+        .single();
+
+      resolvedCustomerId = currentConversation?.customer_id ?? null;
+    }
+
+    if (!resolvedCustomerId) {
       return { skipped: true, reason: "No customer profile is attached yet" };
     }
+
     const customer = await applyLeadSignal({
       businessId,
-      customerId,
+      customerId: resolvedCustomerId,
       signal: args.signal
     });
     return { customerId: customer.id, leadStatus: customer.lead_status };
