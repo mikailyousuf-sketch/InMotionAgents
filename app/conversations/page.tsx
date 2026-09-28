@@ -1,22 +1,27 @@
 import Link from "next/link";
 import { AppShell } from "@/components/AppShell";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { getPrimaryUserBusiness } from "@/lib/auth/access";
 
 export const dynamic = "force-dynamic";
 
 export default async function ConversationsPage() {
+  const { business } = await getPrimaryUserBusiness();
   const supabase = createServerSupabaseClient();
 
-  const { data: conversations } = await supabase
+  const { data: conversations, error } = await supabase
     .from("conversations")
     .select("id,status,channel,started_at,updated_at,customers(full_name,phone)")
+    .eq("business_id", business.id)
     .order("updated_at", { ascending: false })
     .limit(50);
+
+  if (error) throw new Error(error.message);
 
   return (
     <AppShell>
       <h1>Conversations</h1>
-      <p className="muted">Live AI and human-handled threads.</p>
+      <p className="muted">{business.name} · live AI and human-handled threads.</p>
 
       <div className="card" style={{ marginTop: 24, padding: 0, overflow: "hidden" }}>
         {(conversations ?? []).length === 0 ? (
@@ -42,7 +47,7 @@ export default async function ConversationsPage() {
               </div>
               <div>
                 <span className="muted">Status</span>
-                <div>{conversation.status === "human" ? "Human takeover" : "AI handling"}</div>
+                <div>{conversation.status === "human" ? "Human takeover" : conversation.status}</div>
               </div>
               <div>
                 <span className="muted">Updated</span>
