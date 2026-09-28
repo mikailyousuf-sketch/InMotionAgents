@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { AppShell } from "@/components/AppShell";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
@@ -22,7 +23,8 @@ export default async function ConversationsPage() {
           <p className="muted" style={{ padding: 18 }}>No conversations yet.</p>
         ) : (
           (conversations ?? []).map((conversation: any) => (
-            <div
+            <Link
+              href={`/conversations/${conversation.id}`}
               key={conversation.id}
               style={{
                 display: "grid",
@@ -46,7 +48,7 @@ export default async function ConversationsPage() {
                 <span className="muted">Updated</span>
                 <div>{new Date(conversation.updated_at).toLocaleString("en-ZA")}</div>
               </div>
-            </div>
+            </Link>
           ))
         )}
       </div>
