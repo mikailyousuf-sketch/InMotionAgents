@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { WorkspaceSwitcher } from "@/components/WorkspaceSwitcher";
+import { NotificationBell } from "@/components/NotificationBell";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   return (
@@ -13,11 +14,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <Link href="/conversations">Conversations</Link>
           <Link href="/customers">Customers</Link>
           <Link href="/whatsapp">WhatsApp Test</Link>
+          <NotificationBell />
           <Link href="/automations">Automations</Link>
           <Link href="/usage">Usage</Link>
           <Link href="/settings">Settings</Link>
           <Link href="/team">Team</Link>
           <Link href="/integrations">Integrations</Link>
+          <Link href="/notification-settings">Notification rules</Link>
           <Link href="/onboarding">New workspace</Link>
         </nav>
         <form action="/api/auth/logout" method="post" style={{ marginTop: 24 }}>
