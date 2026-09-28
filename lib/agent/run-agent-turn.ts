@@ -437,12 +437,52 @@ ${businessContext}`;
   let consecutiveToolFailures = 0;
 
   for (let step = 0; step < 6; step++) {
-    const completion = await client.chat.completions.create({
-      model: process.env.OPENAI_MODEL || "gpt-5-mini",
-      messages: modelMessages,
-      tools,
-      tool_choice: "auto"
-    });
+    let completion: OpenAI.Chat.Completions.ChatCompletion;
+
+    try {
+      completion = await client.chat.completions.create({
+        model: process.env.OPENAI_MODEL || "gpt-5-mini",
+        messages: modelMessages,
+        tools,
+        tool_choice: "auto"
+      });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "AI provider failed";
+
+      await recordAgentEvent({
+        businessId: context.business.id,
+        conversationId: conversation.id,
+        customerId: customerId ?? conversation.customer_id ?? null,
+        eventType: "ai_provider_failure",
+        severity: "error",
+        message: errorMessage,
+        metadata: { step }
+      });
+
+      await requestHumanHandover({
+        businessId: context.business.id,
+        conversationId: conversation.id,
+        reason: "The AI receptionist is temporarily unavailable and a team member needs to assist."
+      });
+
+      const fallback = "I’m having a temporary system issue, so I’ve passed this conversation to a team member who can help you.";
+
+      await saveMessage({
+        businessId: context.business.id,
+        conversationId: conversation.id,
+        customerId: customerId ?? conversation.customer_id ?? null,
+        direction: "outbound",
+        senderType: "ai",
+        content: fallback
+      });
+
+      return {
+        message: fallback,
+        conversationId: conversation.id,
+        customerId: customerId ?? conversation.customer_id ?? null,
+        handover: true
+      };
+    }
 
     const assistant = completion.choices[0]?.message;
     if (!assistant) throw new Error("No assistant response");
