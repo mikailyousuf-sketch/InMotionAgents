@@ -37,3 +37,19 @@ export async function listUserBusinesses() {
   if (error) throw new Error(error.message);
   return memberships ?? [];
 }
+
+
+export async function getPrimaryUserBusiness() {
+  const memberships = await listUserBusinesses();
+
+  const first = memberships
+    .map((row: any) => ({
+      role: row.role,
+      business: Array.isArray(row.businesses) ? row.businesses[0] : row.businesses
+    }))
+    .find((row: any) => row.business?.id);
+
+  if (!first?.business) redirect("/onboarding");
+
+  return first;
+}
