@@ -20,6 +20,7 @@ import {
 import { applyLeadSignal } from "@/lib/crm/lead-intelligence";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { recordUsage } from "@/lib/billing/usage";
+import { getAgentGuardrails, formatGuardrailsForPrompt, recordAgentEvent } from "@/lib/agent/guardrails";
 
 const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -381,6 +382,7 @@ export async function runAgentTurn(input: {
   }
 
   const history = await getConversationHistory(conversation.id, 18);
+  const guardrails = await getAgentGuardrails(context.business.id);
   const business = formatBusinessContext(context);
   const businessContext = JSON.stringify(business, null, 2);
 
@@ -414,6 +416,11 @@ BOOKING RULES:
 - Times should be discussed in the business timezone.
 - Do not expose internal IDs unless needed to distinguish multiple bookings.
 
+CUSTOM RECEPTIONIST GUARDRAILS:
+${formatGuardrailsForPrompt(guardrails)}
+
+When a configured guardrail says to hand over, do not improvise around it. Call request_human_handover and briefly tell the customer a team member will assist.
+
 Do not provide medical diagnoses or medical advice. For urgent or sensitive medical matters, tell the customer to contact the practice or appropriate emergency services.
 
 BUSINESS DATA:
@@ -426,6 +433,8 @@ ${businessContext}`;
       content: message.content
     })) as OpenAI.Chat.Completions.ChatCompletionMessageParam[]
   ];
+
+  let consecutiveToolFailures = 0;
 
   for (let step = 0; step < 6; step++) {
     const completion = await client.chat.completions.create({
@@ -487,23 +496,109 @@ ${businessContext}`;
           customerId ?? conversation.customer_id
         );
 
+        consecutiveToolFailures = 0;
+
         modelMessages.push({
           role: "tool",
           tool_call_id: toolCall.id,
           content: JSON.stringify({ ok: true, result })
         });
       } catch (error) {
+        consecutiveToolFailures += 1;
+        const errorMessage = error instanceof Error ? error.message : "Tool failed";
+
+        await recordAgentEvent({
+          businessId: context.business.id,
+          conversationId: conversation.id,
+          customerId: customerId ?? conversation.customer_id ?? null,
+          eventType: "tool_failure",
+          severity: "warning",
+          message: `${toolCall.function.name}: ${errorMessage}`,
+          metadata: {
+            tool: toolCall.function.name,
+            step,
+            consecutiveToolFailures
+          }
+        });
+
         modelMessages.push({
           role: "tool",
           tool_call_id: toolCall.id,
           content: JSON.stringify({
             ok: false,
-            error: error instanceof Error ? error.message : "Tool failed"
+            error: errorMessage
           })
         });
+
+        if (consecutiveToolFailures >= 2) {
+          await requestHumanHandover({
+            businessId: context.business.id,
+            conversationId: conversation.id,
+            reason: "The receptionist could not safely complete the requested action after repeated system failures."
+          });
+
+          await recordAgentEvent({
+            businessId: context.business.id,
+            conversationId: conversation.id,
+            customerId: customerId ?? conversation.customer_id ?? null,
+            eventType: "automatic_handover",
+            severity: "warning",
+            message: "Repeated tool failures triggered an automatic human handover.",
+            metadata: { lastTool: toolCall.function.name }
+          });
+
+          const fallback = "I’m having trouble completing that safely right now, so I’ve handed this over to a team member who can assist you.";
+
+          await saveMessage({
+            businessId: context.business.id,
+            conversationId: conversation.id,
+            customerId: customerId ?? conversation.customer_id ?? null,
+            direction: "outbound",
+            senderType: "ai",
+            content: fallback
+          });
+
+          return {
+            message: fallback,
+            conversationId: conversation.id,
+            customerId: customerId ?? conversation.customer_id ?? null,
+            handover: true
+          };
+        }
       }
     }
   }
 
-  throw new Error("Agent tool loop exceeded maximum steps");
+  await requestHumanHandover({
+    businessId: context.business.id,
+    conversationId: conversation.id,
+    reason: "The receptionist reached its safe action limit and needs human assistance."
+  });
+
+  await recordAgentEvent({
+    businessId: context.business.id,
+    conversationId: conversation.id,
+    customerId: customerId ?? conversation.customer_id ?? null,
+    eventType: "tool_loop_limit",
+    severity: "warning",
+    message: "Agent tool loop exceeded the safe step limit and was handed over."
+  });
+
+  const fallback = "I’m going to hand this over to a team member so we can make sure this is handled correctly.";
+
+  await saveMessage({
+    businessId: context.business.id,
+    conversationId: conversation.id,
+    customerId: customerId ?? conversation.customer_id ?? null,
+    direction: "outbound",
+    senderType: "ai",
+    content: fallback
+  });
+
+  return {
+    message: fallback,
+    conversationId: conversation.id,
+    customerId: customerId ?? conversation.customer_id ?? null,
+    handover: true
+  };
 }
