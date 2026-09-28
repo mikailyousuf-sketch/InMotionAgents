@@ -12,6 +12,11 @@ import {
   saveMessage,
   requestHumanHandover
 } from "@/lib/crm/conversations";
+import {
+  findOrCreateCustomerByIdentity,
+  attachConversationToCustomer
+} from "@/lib/crm/identity";
+import { applyLeadSignal } from "@/lib/crm/lead-intelligence";
 
 export const runtime = "nodejs";
 
@@ -123,6 +128,48 @@ const tools: OpenAI.Chat.Completions.ChatCompletionTool[] = [
   {
     type: "function",
     function: {
+      name: "capture_customer_identity",
+      description: "Capture or update the customer's identity when they provide a name, phone number, or email address.",
+      parameters: {
+        type: "object",
+        properties: {
+          fullName: { type: "string" },
+          phone: { type: "string" },
+          email: { type: "string" }
+        },
+        additionalProperties: false
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "mark_lead_signal",
+      description: "Update the customer lead stage based on the strongest clear buying signal in the conversation.",
+      parameters: {
+        type: "object",
+        properties: {
+          signal: {
+            type: "string",
+            enum: [
+              "general_question",
+              "pricing_interest",
+              "availability_interest",
+              "booking_intent",
+              "booking_created",
+              "payment_intent",
+              "not_interested"
+            ]
+          }
+        },
+        required: ["signal"],
+        additionalProperties: false
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
       name: "request_human_handover",
       description: "Hand the conversation to a human staff member when the customer asks for a person or the issue requires human intervention.",
       parameters: {
@@ -157,7 +204,8 @@ async function runTool(
   name: string,
   rawArguments: string,
   businessId: string,
-  conversationId: string
+  conversationId: string,
+  customerId?: string | null
 ) {
   const args = JSON.parse(rawArguments || "{}");
 
@@ -175,6 +223,39 @@ async function runTool(
   }
   if (name === "reschedule_booking") {
     return rescheduleBookingFromAgent({ businessId, ...args });
+  }
+  if (name === "capture_customer_identity") {
+    const customer = await findOrCreateCustomerByIdentity({
+      businessId,
+      identity: {
+        fullName: args.fullName,
+        phone: args.phone,
+        email: args.email
+      }
+    });
+    await attachConversationToCustomer({
+      businessId,
+      conversationId,
+      customerId: customer.id
+    });
+    return {
+      customerId: customer.id,
+      fullName: customer.full_name,
+      phone: customer.phone,
+      email: customer.email,
+      leadStatus: customer.lead_status
+    };
+  }
+  if (name === "mark_lead_signal") {
+    if (!customerId) {
+      return { skipped: true, reason: "No customer profile is attached yet" };
+    }
+    const customer = await applyLeadSignal({
+      businessId,
+      customerId,
+      signal: args.signal
+    });
+    return { customerId: customer.id, leadStatus: customer.lead_status };
   }
   if (name === "request_human_handover") {
     const conversation = await requestHumanHandover({
@@ -241,6 +322,9 @@ BOOKING RULES:
 - Do not call create_booking until the customer clearly chooses a slot and gives their name.
 - When create_booking succeeds, clearly confirm the booking.
 - For cancellations/reschedules, identify the booking first when necessary.
+- If the customer gives their name, phone number, or email address and that identity is not yet captured, call capture_customer_identity.
+- Use mark_lead_signal for meaningful commercial intent: pricing/availability interest, booking intent, successful booking, payment intent, or clear loss of interest.
+- Do not over-classify casual FAQ questions as qualified leads.
 - If a tool returns a policy error requiring human assistance, call request_human_handover.
 - If the customer asks to speak to a person, manager, receptionist, staff member, or human, call request_human_handover immediately.
 - Interpret relative dates such as tomorrow using today's date above.
@@ -288,7 +372,8 @@ ${businessContext}`;
           message: responseMessage,
           source: "supabase",
           bookingTools: true,
-          conversationId: conversation.id
+          conversationId: conversation.id,
+          customerId: conversation.customer_id ?? null
         });
       }
 
@@ -300,7 +385,8 @@ ${businessContext}`;
             toolCall.function.name,
             toolCall.function.arguments,
             context.business.id,
-            conversation.id
+            conversation.id,
+            conversation.customer_id
           );
 
           conversation.push({
