@@ -102,10 +102,38 @@ export async function saveMessage(input: {
 
   if (error) throw new Error(error.message);
 
-  await supabase
-    .from("conversations")
-    .update({ updated_at: new Date().toISOString() })
-    .eq("id", input.conversationId);
+  const now = new Date().toISOString();
+
+  if (input.senderType === "customer") {
+    const { data: conversation } = await supabase
+      .from("conversations")
+      .select("unread_for_staff")
+      .eq("id", input.conversationId)
+      .maybeSingle();
+
+    await supabase
+      .from("conversations")
+      .update({
+        updated_at: now,
+        last_customer_message_at: now,
+        unread_for_staff: Number(conversation?.unread_for_staff ?? 0) + 1
+      })
+      .eq("id", input.conversationId);
+  } else if (input.senderType === "human") {
+    await supabase
+      .from("conversations")
+      .update({
+        updated_at: now,
+        last_staff_message_at: now,
+        unread_for_staff: 0
+      })
+      .eq("id", input.conversationId);
+  } else {
+    await supabase
+      .from("conversations")
+      .update({ updated_at: now })
+      .eq("id", input.conversationId);
+  }
 }
 
 export async function requestHumanHandover(input: {
