@@ -1,4 +1,5 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { dispatchStaffEvent } from "@/lib/notifications/engine";
 
 export async function getOrCreateConversation(input: {
   businessId: string;
@@ -132,6 +133,29 @@ export async function requestHumanHandover(input: {
     conversation_id: input.conversationId,
     action: "requested",
     reason: input.reason ?? null
+  });
+
+  const { data: customer } = data.customer_id
+    ? await supabase
+        .from("customers")
+        .select("full_name,phone")
+        .eq("id", data.customer_id)
+        .maybeSingle()
+    : { data: null };
+
+  await dispatchStaffEvent({
+    businessId: input.businessId,
+    eventType: "human_handover",
+    conversationId: input.conversationId,
+    customerId: data.customer_id ?? null,
+    title: "Human handover required",
+    body: customer?.full_name
+      ? `${customer.full_name} needs human assistance${input.reason ? `: ${input.reason}` : "."}`
+      : `A customer needs human assistance${input.reason ? `: ${input.reason}` : "."}`,
+    metadata: {
+      reason: input.reason ?? null,
+      customer_phone: customer?.phone ?? null
+    }
   });
 
   return data;
