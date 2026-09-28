@@ -1,6 +1,11 @@
+import { createAuthServerClient } from "@/lib/supabase/auth-server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 export async function POST(request: Request) {
+  const auth = await createAuthServerClient();
+  const { data: { user } } = await auth.auth.getUser();
+  if (!user) return Response.json({ error: "Unauthorized" }, { status: 401 });
+
   const body = await request.json();
   const conversationId = String(body?.conversationId || "");
   const action = String(body?.action || "");
@@ -10,6 +15,23 @@ export async function POST(request: Request) {
   }
 
   const supabase = createServerSupabaseClient();
+
+  const { data: existing } = await supabase
+    .from("conversations")
+    .select("id,business_id")
+    .eq("id", conversationId)
+    .maybeSingle();
+
+  if (!existing) return Response.json({ error: "Conversation not found" }, { status: 404 });
+
+  const { data: membership } = await supabase
+    .from("business_members")
+    .select("role")
+    .eq("business_id", existing.business_id)
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (!membership) return Response.json({ error: "Forbidden" }, { status: 403 });
 
   const nextStatus = action === "return_to_ai" ? "ai" : action === "close" ? "closed" : "human";
 
@@ -21,6 +43,7 @@ export async function POST(request: Request) {
       updated_at: new Date().toISOString()
     })
     .eq("id", conversationId)
+    .eq("business_id", existing.business_id)
     .select("*")
     .single();
 
