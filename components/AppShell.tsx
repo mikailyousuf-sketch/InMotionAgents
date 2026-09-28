@@ -1,34 +1,26 @@
-import Link from "next/link";
 import { WorkspaceSwitcher } from "@/components/WorkspaceSwitcher";
-import { NotificationBell } from "@/components/NotificationBell";
+import { ProductNavigation } from "@/components/ProductNavigation";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="shell">
       <aside className="sidebar">
-        <div className="brand">InMotion Agents</div>
+        <div className="brand-lockup">
+          <div className="brand-mark">IM</div>
+          <div>
+            <div className="brand">InMotion</div>
+            <div className="brand-sub">AI Receptionist</div>
+          </div>
+        </div>
+
         <WorkspaceSwitcher />
-        <nav className="nav">
-          <Link href="/dashboard">Dashboard</Link>
-          <Link href="/">Agent Simulator</Link>
-          <Link href="/conversations">Conversations</Link>
-          <Link href="/customers">Customers</Link>
-          <Link href="/whatsapp">WhatsApp Test</Link>
-          <NotificationBell />
-          <Link href="/automations">Automations</Link>
-          <Link href="/guardrails">Guardrails</Link>
-          <Link href="/operations">Operations</Link>
-          <Link href="/usage">Usage</Link>
-          <Link href="/settings">Settings</Link>
-          <Link href="/team">Team</Link>
-          <Link href="/integrations">Integrations</Link>
-          <Link href="/notification-settings">Notification rules</Link>
-          <Link href="/onboarding">New workspace</Link>
-        </nav>
-        <form action="/api/auth/logout" method="post" style={{ marginTop: 24 }}>
+        <ProductNavigation />
+
+        <form action="/api/auth/logout" method="post" className="sidebar-logout">
           <button type="submit" className="link-button">Log out</button>
         </form>
       </aside>
+
       <main className="main">{children}</main>
     </div>
   );
