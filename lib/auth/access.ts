@@ -1,3 +1,4 @@
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createAuthServerClient } from "@/lib/supabase/auth-server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
@@ -38,18 +39,20 @@ export async function listUserBusinesses() {
   return memberships ?? [];
 }
 
-
 export async function getPrimaryUserBusiness() {
   const memberships = await listUserBusinesses();
+  const cookieStore = await cookies();
+  const preferredId = cookieStore.get("inmotion_business_id")?.value;
 
-  const first = memberships
+  const normalized = memberships
     .map((row: any) => ({
       role: row.role,
       business: Array.isArray(row.businesses) ? row.businesses[0] : row.businesses
     }))
-    .find((row: any) => row.business?.id);
+    .filter((row: any) => row.business?.id);
 
-  if (!first?.business) redirect("/onboarding");
+  if (!normalized.length) redirect("/onboarding");
 
-  return first;
+  const preferred = normalized.find((row: any) => row.business.id === preferredId);
+  return preferred ?? normalized[0];
 }
