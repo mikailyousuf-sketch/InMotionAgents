@@ -1,4 +1,5 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { scheduleLeadFollowup } from "@/lib/automations/triggers";
 
 export type LeadSignal =
   | "general_question"
@@ -65,5 +66,13 @@ export async function applyLeadSignal(input: {
     .single();
 
   if (updateError) throw new Error(updateError.message);
+
+  if (["warm", "qualified"].includes(data.lead_status)) {
+    await scheduleLeadFollowup({
+      businessId: input.businessId,
+      customerId: input.customerId
+    });
+  }
+
   return data;
 }
