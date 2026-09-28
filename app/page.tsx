@@ -11,6 +11,7 @@ export default function HomePage() {
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [conversationId, setConversationId] = useState<string | null>(null);
 
   async function sendMessage() {
     const value = input.trim();
@@ -25,9 +26,10 @@ export default function HomePage() {
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: next })
+        body: JSON.stringify({ messages: next, conversationId })
       });
       const data = await response.json();
+      if (data.conversationId) setConversationId(data.conversationId);
       setMessages((current) => [...current, { role: "assistant", content: data.message ?? "Something went wrong." }]);
     } catch {
       setMessages((current) => [...current, { role: "assistant", content: "I could not reach the agent service." }]);
