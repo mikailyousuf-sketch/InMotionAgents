@@ -1,6 +1,7 @@
 import { createAuthServerClient } from "@/lib/supabase/auth-server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { cancelEscalationsForConversation } from "@/lib/notifications/engine";
+import { writeAuditLog } from "@/lib/audit/log";
 
 export async function POST(request: Request) {
   const auth = await createAuthServerClient();
@@ -59,6 +60,14 @@ export async function POST(request: Request) {
   if (["takeover", "return_to_ai", "close"].includes(action)) {
     await cancelEscalationsForConversation(conversation.id);
   }
+
+  await writeAuditLog({
+    businessId: conversation.business_id,
+    actorUserId: user.id,
+    action: `conversation.${action}`,
+    entityType: "conversation",
+    entityId: conversation.id
+  });
 
   return Response.json({ conversation });
 }
