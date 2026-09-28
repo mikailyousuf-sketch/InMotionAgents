@@ -148,3 +148,24 @@ button, input, textarea { font: inherit; }
   .receptionist-workspace { grid-template-columns:1fr; }
   .receptionist-sidebar { position:static; margin-top:0; }
 }
+
+.ops-row {
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  align-items:center;
+  padding:11px 0;
+  border-bottom:1px solid var(--line);
+}
+.severity-pill {
+  display:inline-flex;
+  align-items:center;
+  padding:5px 8px;
+  border-radius:999px;
+  font-size:12px;
+  border:1px solid var(--line);
+  text-transform:capitalize;
+}
+.severity-pill.warning { background:rgba(245,158,11,.12); }
+.severity-pill.error { background:rgba(239,68,68,.14); }
+.severity-pill.info { background:rgba(59,130,246,.10); }
