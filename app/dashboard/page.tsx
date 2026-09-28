@@ -11,6 +11,8 @@ export default async function DashboardPage() {
 
   const startOfDay = new Date();
   startOfDay.setHours(0,0,0,0);
+  const startOfTomorrow = new Date(startOfDay);
+  startOfTomorrow.setDate(startOfTomorrow.getDate() + 1);
 
   const [
     { count: todayConversations },
@@ -28,7 +30,9 @@ export default async function DashboardPage() {
     supabase.from("customers").select("*",{count:"exact",head:true})
       .eq("business_id",business.id).in("lead_status",["warm","qualified"]),
     supabase.from("bookings").select("*",{count:"exact",head:true})
-      .eq("business_id",business.id).gte("starts_at",startOfDay.toISOString()),
+      .eq("business_id",business.id)
+      .gte("starts_at",startOfDay.toISOString())
+      .lt("starts_at",startOfTomorrow.toISOString()),
     supabase.from("conversations").select("*",{count:"exact",head:true})
       .eq("business_id",business.id).eq("status","human"),
     supabase.from("conversations").select("*",{count:"exact",head:true})
@@ -53,7 +57,7 @@ export default async function DashboardPage() {
   ].filter(Boolean) as {label:string;href:string}[];
 
   const attention = Number(handovers ?? 0) + Number(unread ?? 0);
-  const receptionistReady = serviceCount && hoursCount;
+  const receptionistReady = Boolean(serviceCount && hoursCount);
 
   return (
     <AppShell>
