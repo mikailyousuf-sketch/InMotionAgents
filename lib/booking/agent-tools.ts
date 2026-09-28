@@ -137,6 +137,7 @@ export async function createBookingFromAgent(input: {
 
   return {
     bookingId: booking.id,
+    customerId: customer.id,
     customer: customer.full_name,
     service: service.name,
     startsAt: booking.starts_at,
