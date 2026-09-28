@@ -3,6 +3,7 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { sendWhatsAppText } from "@/lib/whatsapp/client";
 import { saveMessage } from "@/lib/crm/conversations";
 import { cancelEscalationsForConversation } from "@/lib/notifications/engine";
+import { writeAuditLog } from "@/lib/audit/log";
 
 export async function POST(request: Request) {
   const auth = await createAuthServerClient();
@@ -99,6 +100,15 @@ export async function POST(request: Request) {
     .eq("id", conversation.id);
 
   await cancelEscalationsForConversation(conversation.id);
+
+  await writeAuditLog({
+    businessId: conversation.business_id,
+    actorUserId: user.id,
+    action: "conversation.staff_reply",
+    entityType: "conversation",
+    entityId: conversation.id,
+    metadata: { channel: conversation.channel, externalMessageId }
+  });
 
   return Response.json({ ok: true, externalMessageId });
 }
