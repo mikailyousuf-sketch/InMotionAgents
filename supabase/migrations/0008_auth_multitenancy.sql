@@ -1,4 +1,9 @@
-create type public.business_role as enum ('owner','admin','staff');
+do $
+begin
+  create type public.business_role as enum ('owner','admin','staff');
+exception
+  when duplicate_object then null;
+end $;
 
 create table if not exists public.user_profiles (
   id uuid primary key references auth.users(id) on delete cascade,
