@@ -4,6 +4,7 @@ export type AvailabilitySlot = {
   startsAt: string;
   endsAt: string;
   resourceId: string | null;
+  resourceName?: string;
 };
 
 export class InMotionBookingProvider {
@@ -25,13 +26,26 @@ export class InMotionBookingProvider {
 
     if (serviceError || !service) throw new Error("Service not found");
 
+    const { data: mappings, error: mappingError } = await supabase
+      .from("resource_services")
+      .select("resource_id")
+      .eq("service_id", input.serviceId);
+
+    if (mappingError) throw new Error(mappingError.message);
+
+    const allowedResourceIds = (mappings ?? []).map((row) => row.resource_id);
+
     let resourceQuery = supabase
       .from("resources")
       .select("id,name")
       .eq("business_id", input.businessId)
       .eq("active", true);
 
-    if (input.resourceId) resourceQuery = resourceQuery.eq("id", input.resourceId);
+    if (input.resourceId) {
+      resourceQuery = resourceQuery.eq("id", input.resourceId);
+    } else if (allowedResourceIds.length > 0) {
+      resourceQuery = resourceQuery.in("id", allowedResourceIds);
+    }
 
     const { data: resources, error: resourceError } = await resourceQuery;
     if (resourceError) throw new Error(resourceError.message);
@@ -73,16 +87,22 @@ export class InMotionBookingProvider {
         const dayHours = (hours ?? []).find((h) => h.day_of_week === day);
         if (!dayHours || dayHours.closed || !dayHours.opens_at || !dayHours.closes_at) continue;
 
-        const datePrefix = cursor.toISOString().slice(0, 10);
-        const open = new Date(`${datePrefix}T${String(dayHours.opens_at).slice(0,8)}+02:00`);
-        const close = new Date(`${datePrefix}T${String(dayHours.closes_at).slice(0,8)}+02:00`);
+        const datePrefix = new Intl.DateTimeFormat("en-CA", {
+          timeZone: "Africa/Johannesburg",
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit"
+        }).format(cursor);
+
+        const open = new Date(`${datePrefix}T${String(dayHours.opens_at).slice(0, 8)}+02:00`);
+        const close = new Date(`${datePrefix}T${String(dayHours.closes_at).slice(0, 8)}+02:00`);
 
         const start = new Date(cursor);
         const end = new Date(start.getTime() + durationMs);
         if (start < open || end > close) continue;
 
         const overlapsBooking = (bookings ?? []).some((b) => {
-          if (b.resource_id && b.resource_id !== resource.id) return false;
+          if (b.resource_id !== resource.id) return false;
           return new Date(b.starts_at) < end && new Date(b.ends_at) > start;
         });
 
@@ -95,7 +115,8 @@ export class InMotionBookingProvider {
           slots.push({
             startsAt: start.toISOString(),
             endsAt: end.toISOString(),
-            resourceId: resource.id
+            resourceId: resource.id,
+            resourceName: resource.name
           });
         }
       }
@@ -115,7 +136,7 @@ export class InMotionBookingProvider {
   }) {
     const supabase = createServerSupabaseClient();
 
-    const { data: existing, error: conflictError } = await supabase
+    let conflictQuery = supabase
       .from("bookings")
       .select("id")
       .eq("business_id", input.businessId)
@@ -123,10 +144,11 @@ export class InMotionBookingProvider {
       .lt("starts_at", input.endsAt)
       .gt("ends_at", input.startsAt);
 
-    if (conflictError) throw new Error(conflictError.message);
+    if (input.resourceId) conflictQuery = conflictQuery.eq("resource_id", input.resourceId);
 
-    const conflict = (existing ?? []).length > 0;
-    if (conflict) throw new Error("That time is no longer available");
+    const { data: existing, error: conflictError } = await conflictQuery;
+    if (conflictError) throw new Error(conflictError.message);
+    if ((existing ?? []).length > 0) throw new Error("That time is no longer available");
 
     const { data, error } = await supabase
       .from("bookings")
@@ -171,7 +193,7 @@ export class InMotionBookingProvider {
   }) {
     const supabase = createServerSupabaseClient();
 
-    const { data: existing, error: conflictError } = await supabase
+    let conflictQuery = supabase
       .from("bookings")
       .select("id")
       .eq("business_id", input.businessId)
@@ -180,6 +202,9 @@ export class InMotionBookingProvider {
       .lt("starts_at", input.endsAt)
       .gt("ends_at", input.startsAt);
 
+    if (input.resourceId) conflictQuery = conflictQuery.eq("resource_id", input.resourceId);
+
+    const { data: existing, error: conflictError } = await conflictQuery;
     if (conflictError) throw new Error(conflictError.message);
     if ((existing ?? []).length > 0) throw new Error("That time is no longer available");
 
