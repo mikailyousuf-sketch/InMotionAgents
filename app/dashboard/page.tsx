@@ -1,13 +1,30 @@
 import { AppShell } from "@/components/AppShell";
+import { createServerSupabaseClient } from "@/lib/supabase/server";
 
-const cards = [
-  ["Conversations", "0"],
-  ["Leads", "0"],
-  ["Bookings", "0"],
-  ["Human handovers", "0"]
-];
+export const dynamic = "force-dynamic";
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  const supabase = createServerSupabaseClient();
+
+  const [
+    { count: conversationCount },
+    { count: leadCount },
+    { count: bookingCount },
+    { count: handoverCount }
+  ] = await Promise.all([
+    supabase.from("conversations").select("*", { count: "exact", head: true }),
+    supabase.from("customers").select("*", { count: "exact", head: true }).in("lead_status", ["warm", "qualified"]),
+    supabase.from("bookings").select("*", { count: "exact", head: true }).in("status", ["pending", "confirmed"]),
+    supabase.from("conversations").select("*", { count: "exact", head: true }).eq("status", "human")
+  ]);
+
+  const cards = [
+    ["Conversations", String(conversationCount ?? 0)],
+    ["Active leads", String(leadCount ?? 0)],
+    ["Bookings", String(bookingCount ?? 0)],
+    ["Human handovers", String(handoverCount ?? 0)]
+  ];
+
   return (
     <AppShell>
       <h1>Dashboard</h1>
@@ -21,9 +38,9 @@ export default function DashboardPage() {
         ))}
       </div>
       <div className="card" style={{ marginTop: 16 }}>
-        <h3 style={{ marginTop: 0 }}>Brick 1 status</h3>
-        <p className="status"><span className="dot" /> Core app scaffold ready</p>
-        <p className="muted">Next: connect Supabase data, then make the simulator answer from the business profile.</p>
+        <h3 style={{ marginTop: 0 }}>Current milestone</h3>
+        <p className="status"><span className="dot" /> AI + bookings + CRM + human handover working</p>
+        <p className="muted">Next: automatic customer identity/lead updates and WhatsApp transport layer.</p>
       </div>
     </AppShell>
   );
