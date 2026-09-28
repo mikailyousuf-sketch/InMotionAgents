@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AppShell } from "@/components/AppShell";
 
 type Message = { role: "user" | "assistant"; content: string };
@@ -12,6 +12,15 @@ export default function HomePage() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
+  const [businesses, setBusinesses] = useState<{ name: string; slug: string }[]>([]);
+  const [businessSlug, setBusinessSlug] = useState("northstar-dental");
+
+  useEffect(() => {
+    fetch("/api/businesses")
+      .then((response) => response.json())
+      .then((data) => setBusinesses(data.businesses ?? []))
+      .catch(() => {});
+  }, []);
 
   async function sendMessage() {
     const value = input.trim();
@@ -26,7 +35,7 @@ export default function HomePage() {
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: next, conversationId })
+        body: JSON.stringify({ messages: next, conversationId, businessSlug })
       });
       const data = await response.json();
       if (data.conversationId) setConversationId(data.conversationId);
@@ -42,7 +51,21 @@ export default function HomePage() {
     <AppShell>
       <div className="chat">
         <h1>Agent Simulator</h1>
-        <p className="muted">Northstar Dental · internal test channel</p>
+        <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center" }}>
+          <p className="muted">Internal test channel</p>
+          <select
+            value={businessSlug}
+            onChange={(e) => {
+              setBusinessSlug(e.target.value);
+              setConversationId(null);
+              setMessages([{ role: "assistant", content: "Hi 👋 How can I help?" }]);
+            }}
+          >
+            {businesses.map((business) => (
+              <option key={business.slug} value={business.slug}>{business.name}</option>
+            ))}
+          </select>
+        </div>
         <div className="messages">
           {messages.map((message, index) => (
             <div className={`bubble ${message.role}`} key={index}>{message.content}</div>
