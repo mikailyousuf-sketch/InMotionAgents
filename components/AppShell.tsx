@@ -13,6 +13,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <Link href="/conversations">Conversations</Link>
           <Link href="/customers">Customers</Link>
           <Link href="/whatsapp">WhatsApp Test</Link>
+          <Link href="/automations">Automations</Link>
           <Link href="/usage">Usage</Link>
           <Link href="/settings">Settings</Link>
           <Link href="/team">Team</Link>
