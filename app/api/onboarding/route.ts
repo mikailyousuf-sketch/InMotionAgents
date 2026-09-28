@@ -1,5 +1,6 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAuthServerClient } from "@/lib/supabase/auth-server";
+import { ensureDevelopmentSubscription } from "@/lib/billing/usage";
 
 function slugify(value: string) {
   return value
@@ -74,6 +75,8 @@ export async function POST(request: Request) {
     user_id: user.id,
     role: "owner"
   });
+
+  await ensureDevelopmentSubscription(business.id);
 
   await Promise.all([
     supabase.from("services").delete().eq("business_id", business.id),
