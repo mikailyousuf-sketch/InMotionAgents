@@ -30,7 +30,7 @@ export async function GET(request: Request) {
   const [{ data: members }, { data: invites }] = await Promise.all([
     admin
       .from("business_members")
-      .select("user_id,role,created_at,user_profiles(full_name)")
+      .select("user_id,role,created_at")
       .eq("business_id", businessId)
       .order("created_at"),
     admin
@@ -41,7 +41,19 @@ export async function GET(request: Request) {
       .order("created_at", { ascending: false })
   ]);
 
-  return Response.json({ members: members ?? [], invites: invites ?? [] });
+  const userIds = (members ?? []).map((member:any) => member.user_id);
+  const { data: profiles } = userIds.length
+    ? await admin.from("user_profiles").select("id,full_name").in("id", userIds)
+    : { data: [] as any[] };
+
+  const profileMap = new Map((profiles ?? []).map((profile:any) => [profile.id, profile]));
+
+  const hydratedMembers = (members ?? []).map((member:any) => ({
+    ...member,
+    user_profiles: profileMap.get(member.user_id) ?? null
+  }));
+
+  return Response.json({ members: hydratedMembers, invites: invites ?? [] });
 }
 
 export async function POST(request: Request) {
