@@ -7,6 +7,8 @@ import {
   setExternalMessageId,
   recordWhatsAppDeliveryEvent
 } from "@/lib/whatsapp/messages";
+import { findOrCreateCustomerByIdentity } from "@/lib/crm/identity";
+import { parseOptPreference, setContactPreference } from "@/lib/automations/preferences";
 
 export const runtime = "nodejs";
 
@@ -109,12 +111,59 @@ export async function POST(request: Request) {
             (contact: any) => String(contact?.wa_id ?? "") === String(message.from ?? "")
           );
 
+          const customer = await findOrCreateCustomerByIdentity({
+            businessId: business.id,
+            identity: {
+              phone,
+              fullName: matchingContact?.profile?.name ?? null
+            }
+          });
+
+          const preference = parseOptPreference(String(message.text.body));
+
+          if (preference) {
+            await setContactPreference({
+              businessId: business.id,
+              customerId: customer.id,
+              channel: "whatsapp",
+              optedOut: preference === "opt_out",
+              source: "whatsapp_keyword"
+            });
+
+            await setExternalMessageId({
+              conversationId: (await runAgentTurn({
+                businessSlug: business.slug,
+                userMessage: String(message.text.body),
+                channel: "whatsapp",
+                externalThreadId: whatsappId,
+                customer: {
+                  id: customer.id,
+                  phone,
+                  fullName: matchingContact?.profile?.name ?? null
+                }
+              })).conversationId,
+              externalMessageId,
+              content: String(message.text.body)
+            });
+
+            await sendWhatsAppText({
+              phoneNumberId,
+              to: whatsappId,
+              body: preference === "opt_out"
+                ? "You’ve been opted out of automated WhatsApp messages. Reply START to opt back in."
+                : "You’ve been opted back in to automated WhatsApp messages."
+            });
+
+            continue;
+          }
+
           const result = await runAgentTurn({
             businessSlug: business.slug,
             userMessage: String(message.text.body),
             channel: "whatsapp",
             externalThreadId: whatsappId,
             customer: {
+              id: customer.id,
               phone,
               fullName: matchingContact?.profile?.name ?? null
             }
