@@ -11,8 +11,10 @@ export default async function ConversationsPage() {
 
   const { data: conversations, error } = await supabase
     .from("conversations")
-    .select("id,status,channel,started_at,updated_at,customers(full_name,phone)")
+    .select("id,status,channel,started_at,updated_at,assigned_user_id,unread_for_staff,customers(full_name,phone)")
     .eq("business_id", business.id)
+    .order("status", { ascending: false })
+    .order("unread_for_staff", { ascending: false })
     .order("updated_at", { ascending: false })
     .limit(50);
 
@@ -33,10 +35,11 @@ export default async function ConversationsPage() {
               key={conversation.id}
               style={{
                 display: "grid",
-                gridTemplateColumns: "1.5fr 1fr 1fr",
+                gridTemplateColumns: "1.5fr 1fr 1fr 90px",
                 gap: 12,
                 padding: 16,
-                borderBottom: "1px solid var(--line)"
+                borderBottom: "1px solid var(--line)",
+                alignItems: "center"
               }}
             >
               <div>
@@ -56,6 +59,11 @@ export default async function ConversationsPage() {
               <div>
                 <span className="muted">Updated</span>
                 <div>{new Date(conversation.updated_at).toLocaleString("en-ZA")}</div>
+              </div>
+              <div>
+                {(conversation.unread_for_staff ?? 0) > 0 && (
+                  <span className="unread-count">{conversation.unread_for_staff}</span>
+                )}
               </div>
             </Link>
           ))
