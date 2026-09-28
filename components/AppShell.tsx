@@ -9,6 +9,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <Link href="/dashboard">Dashboard</Link>
           <Link href="/">Agent Simulator</Link>
           <Link href="/conversations">Conversations</Link>
+          <Link href="/customers">Customers</Link>
           <Link href="/onboarding">Onboarding</Link>
         </nav>
       </aside>
