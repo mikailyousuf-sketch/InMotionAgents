@@ -110,11 +110,27 @@ export async function createBookingFromAgent(input: {
   const start = new Date(input.startsAt);
   const end = new Date(start.getTime() + service.duration_minutes * 60_000);
 
+  const liveSlots = await provider.getAvailability({
+    businessId: input.businessId,
+    serviceId: service.id,
+    from: start.toISOString(),
+    to: end.toISOString(),
+    resourceId: input.resourceId
+  });
+
+  const exactSlot = liveSlots.find(
+    (slot) => new Date(slot.startsAt).getTime() === start.getTime()
+  );
+
+  if (!exactSlot) {
+    throw new Error("That selected time is no longer available. Please check availability again.");
+  }
+
   const booking = await provider.createBooking({
     businessId: input.businessId,
     customerId: customer.id,
     serviceId: service.id,
-    resourceId: input.resourceId,
+    resourceId: exactSlot.resourceId ?? undefined,
     startsAt: start.toISOString(),
     endsAt: end.toISOString()
   });
