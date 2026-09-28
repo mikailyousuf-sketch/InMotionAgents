@@ -1,6 +1,7 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { InMotionBookingProvider } from "@/lib/booking/inmotion-provider";
 import { recordUsage } from "@/lib/billing/usage";
+import { scheduleBookingAutomations } from "@/lib/automations/triggers";
 
 const provider = new InMotionBookingProvider();
 
@@ -140,6 +141,11 @@ export async function createBookingFromAgent(input: {
     businessId: input.businessId,
     eventType: "booking_created",
     metadata: { serviceId: service.id }
+  });
+
+  await scheduleBookingAutomations({
+    businessId: input.businessId,
+    bookingId: booking.id
   });
 
   return {
