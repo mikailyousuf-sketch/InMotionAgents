@@ -1,4 +1,5 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { createAuthServerClient } from "@/lib/supabase/auth-server";
 
 function slugify(value: string) {
   return value
@@ -9,6 +10,13 @@ function slugify(value: string) {
 }
 
 export async function POST(request: Request) {
+  const auth = await createAuthServerClient();
+  const { data: { user } } = await auth.auth.getUser();
+
+  if (!user) {
+    return Response.json({ error: "You must be logged in to create a workspace." }, { status: 401 });
+  }
+
   const body = await request.json();
   const supabase = createServerSupabaseClient();
 
@@ -19,6 +27,25 @@ export async function POST(request: Request) {
 
   const slug = slugify(body?.business?.slug || name);
   const timezone = body?.business?.timezone || "Africa/Johannesburg";
+
+  const { data: existing } = await supabase
+    .from("businesses")
+    .select("id,created_by")
+    .eq("slug", slug)
+    .maybeSingle();
+
+  if (existing?.id) {
+    const { data: membership } = await supabase
+      .from("business_members")
+      .select("role")
+      .eq("business_id", existing.id)
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (!membership || !["owner", "admin"].includes(membership.role)) {
+      return Response.json({ error: "That workspace slug already exists." }, { status: 409 });
+    }
+  }
 
   const { data: business, error: businessError } = await supabase
     .from("businesses")
@@ -32,7 +59,8 @@ export async function POST(request: Request) {
       website: body?.business?.website || null,
       tone: body?.business?.tone || "friendly_professional",
       agent_name: body?.business?.agentName || "Ava",
-      onboarding_complete: true
+      onboarding_complete: true,
+      created_by: existing?.created_by || user.id
     }, { onConflict: "slug" })
     .select("*")
     .single();
@@ -40,6 +68,12 @@ export async function POST(request: Request) {
   if (businessError || !business) {
     return Response.json({ error: businessError?.message || "Could not create business" }, { status: 500 });
   }
+
+  await supabase.from("business_members").upsert({
+    business_id: business.id,
+    user_id: user.id,
+    role: "owner"
+  });
 
   await Promise.all([
     supabase.from("services").delete().eq("business_id", business.id),
