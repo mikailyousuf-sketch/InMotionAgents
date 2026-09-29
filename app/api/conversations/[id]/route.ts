@@ -31,7 +31,8 @@ export async function GET(_: Request, { params }: { params: Promise<{ id: string
   const [
     { data: messages, error: messagesError },
     { data: customer },
-    { data: members }
+    { data: members },
+    { data: handoverSummary }
   ] = await Promise.all([
     supabase
       .from("messages")
@@ -50,7 +51,12 @@ export async function GET(_: Request, { params }: { params: Promise<{ id: string
     supabase
       .from("business_members")
       .select("user_id,role")
-      .eq("business_id", conversation.business_id)
+      .eq("business_id", conversation.business_id),
+    supabase
+      .from("handover_summaries")
+      .select("*")
+      .eq("conversation_id", conversation.id)
+      .maybeSingle()
   ]);
 
   if (messagesError) return Response.json({ error: messagesError.message }, { status: 500 });
@@ -90,6 +96,7 @@ export async function GET(_: Request, { params }: { params: Promise<{ id: string
     messages: messages ?? [],
     customer,
     bookings: bookings ?? [],
-    team
+    team,
+    handoverSummary
   });
 }
