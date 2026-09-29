@@ -14,6 +14,15 @@ const catalog = [
     ]
   },
   {
+    provider: "voice",
+    name: "Phone / Voice",
+    description: "Connect your business phone line so the same receptionist can answer calls, summarize them and hand over when needed.",
+    fields: [
+      { key: "phone_number", label: "Business phone number" },
+      { key: "provider_name", label: "Telephony provider" }
+    ]
+  },
+  {
     provider: "inmotion_booking",
     name: "InMotion Booking",
     description: "Use the native InMotion scheduling engine as the booking source of truth.",
@@ -156,6 +165,12 @@ export default function IntegrationsPage() {
                 {item.provider === "whatsapp" && (
                   <p className="muted" style={{ fontSize: 12 }}>
                     Access tokens and app secrets stay server-side. This screen only stores non-secret Meta identifiers.
+                  </p>
+                )}
+
+                {item.provider === "voice" && (
+                  <p className="muted" style={{ fontSize: 12 }}>
+                    The Calls workspace is ready. Live answering and transfers will be connected when we choose the production voice provider.
                   </p>
                 )}
 
