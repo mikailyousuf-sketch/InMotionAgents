@@ -3,31 +3,70 @@ import { isOptedOut } from "@/lib/automations/preferences";
 import { sendWhatsAppText } from "@/lib/whatsapp/client";
 import { recordUsage } from "@/lib/billing/usage";
 
-export async function processDueOutboundJobs(limit = 25) {
-  const supabase = createServerSupabaseClient();
+type ProcessOptions = {
+  businessId?: string;
+  limit?: number;
+};
 
-  const { data: jobs, error } = await supabase
+export async function processDueOutboundJobs(options: ProcessOptions = {}) {
+  const supabase = createServerSupabaseClient();
+  const limit = options.limit ?? 25;
+  const now = new Date().toISOString();
+
+  let pendingQuery = supabase
     .from("outbound_jobs")
     .select("*")
     .eq("status", "pending")
-    .lte("scheduled_for", new Date().toISOString())
+    .lte("scheduled_for", now)
     .order("scheduled_for")
     .limit(limit);
 
-  if (error) throw new Error(error.message);
+  let failedQuery = supabase
+    .from("outbound_jobs")
+    .select("*")
+    .eq("status", "failed")
+    .not("next_attempt_at", "is", null)
+    .lte("next_attempt_at", now)
+    .order("next_attempt_at")
+    .limit(limit);
+
+  if (options.businessId) {
+    pendingQuery = pendingQuery.eq("business_id", options.businessId);
+    failedQuery = failedQuery.eq("business_id", options.businessId);
+  }
+
+  const [
+    { data: pendingJobs, error: pendingError },
+    { data: retryJobs, error: retryError }
+  ] = await Promise.all([pendingQuery, failedQuery]);
+
+  if (pendingError) throw new Error(pendingError.message);
+  if (retryError) throw new Error(retryError.message);
+
+  const jobs = [...(pendingJobs ?? []), ...(retryJobs ?? [])]
+    .sort((a, b) => {
+      const aTime = new Date(a.next_attempt_at || a.scheduled_for).getTime();
+      const bTime = new Date(b.next_attempt_at || b.scheduled_for).getTime();
+      return aTime - bTime;
+    })
+    .slice(0, limit);
 
   const results: any[] = [];
 
-  for (const job of jobs ?? []) {
+  for (const job of jobs) {
+    const previousStatus = job.status;
+    const nextAttempts = Number(job.attempts ?? 0) + 1;
+
     const { data: claimed } = await supabase
       .from("outbound_jobs")
       .update({
         status: "processing",
-        attempts: Number(job.attempts ?? 0) + 1,
+        attempts: nextAttempts,
+        next_attempt_at: null,
         updated_at: new Date().toISOString()
       })
       .eq("id", job.id)
-      .eq("status", "pending")
+      .eq("status", previousStatus)
       .select("*")
       .maybeSingle();
 
@@ -47,6 +86,7 @@ export async function processDueOutboundJobs(limit = 25) {
             .update({
               status: "skipped",
               last_error: "Customer opted out",
+              next_attempt_at: null,
               updated_at: new Date().toISOString()
             })
             .eq("id", claimed.id);
@@ -57,7 +97,7 @@ export async function processDueOutboundJobs(limit = 25) {
       }
 
       if (claimed.channel !== "whatsapp") {
-        throw new Error(`Unsupported outbound channel: ${claimed.channel}`);
+        throw new Error("Unsupported outbound channel: " + claimed.channel);
       }
 
       const { data: connections } = await supabase
@@ -85,9 +125,7 @@ export async function processDueOutboundJobs(limit = 25) {
         body: claimed.rendered_body
       });
 
-      const externalMessageId =
-        sendResult?.messages?.[0]?.id ??
-        null;
+      const externalMessageId = sendResult?.messages?.[0]?.id ?? null;
 
       await supabase
         .from("outbound_jobs")
@@ -96,6 +134,7 @@ export async function processDueOutboundJobs(limit = 25) {
           sent_at: new Date().toISOString(),
           external_message_id: externalMessageId,
           last_error: null,
+          next_attempt_at: null,
           updated_at: new Date().toISOString()
         })
         .eq("id", claimed.id);
@@ -111,19 +150,29 @@ export async function processDueOutboundJobs(limit = 25) {
 
       results.push({ id: claimed.id, status: "sent", externalMessageId });
     } catch (error) {
+      const message = error instanceof Error ? error.message : "Unknown send error";
+      const maxAttempts = Number(claimed.max_attempts ?? 3);
+      const canRetry = nextAttempts < maxAttempts;
+      const retryDelayMinutes = Math.min(60, Math.pow(2, Math.max(0, nextAttempts - 1)) * 5);
+      const retryAt = canRetry
+        ? new Date(Date.now() + retryDelayMinutes * 60_000).toISOString()
+        : null;
+
       await supabase
         .from("outbound_jobs")
         .update({
           status: "failed",
-          last_error: error instanceof Error ? error.message : "Unknown send error",
+          last_error: message,
+          next_attempt_at: retryAt,
           updated_at: new Date().toISOString()
         })
         .eq("id", claimed.id);
 
       results.push({
         id: claimed.id,
-        status: "failed",
-        error: error instanceof Error ? error.message : "Unknown send error"
+        status: canRetry ? "retry_scheduled" : "failed",
+        retryAt,
+        error: message
       });
     }
   }
