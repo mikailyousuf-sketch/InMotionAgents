@@ -21,6 +21,13 @@ export default function SettingsPage() {
   const [hours,setHours]=useState<Hour[]>([]);
   const [policies,setPolicies]=useState<Policy[]>([]);
   const [faqs,setFaqs]=useState<Faq[]>([]);
+  const [bookingSettings,setBookingSettings]=useState({
+    cancellationWindowHours:12,
+    rescheduleWindowHours:12,
+    slotIntervalMinutes:15,
+    allowCustomerCancellation:true,
+    allowCustomerReschedule:true
+  });
 
   useEffect(()=>{ load(); },[]);
 
@@ -68,6 +75,13 @@ export default function SettingsPage() {
     })));
     setPolicies((data.policies??[]).map((p:any)=>({id:p.id,title:p.title,content:p.content,type:p.policy_type||"general"})));
     setFaqs((data.faqs??[]).map((f:any)=>({id:f.id,question:f.question,answer:f.answer})));
+    setBookingSettings({
+      cancellationWindowHours:Number(data.bookingSettings?.cancellation_window_hours??12),
+      rescheduleWindowHours:Number(data.bookingSettings?.reschedule_window_hours??12),
+      slotIntervalMinutes:Number(data.bookingSettings?.slot_interval_minutes??15),
+      allowCustomerCancellation:data.bookingSettings?.allow_customer_cancellation!==false,
+      allowCustomerReschedule:data.bookingSettings?.allow_customer_reschedule!==false
+    });
   }
 
   function patch<T>(setter:React.Dispatch<React.SetStateAction<T[]>>,index:number,change:Partial<T>){
@@ -78,7 +92,7 @@ export default function SettingsPage() {
     setStatus("Saving...");
     const response=await fetch("/api/settings",{
       method:"POST",headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({businessId,business,services,resources,hours,policies,faqs})
+      body:JSON.stringify({businessId,business,services,resources,hours,policies,faqs,bookingSettings})
     });
     const data=await response.json();
     setStatus(response.ok?"Saved":data.error||"Could not save");
@@ -151,6 +165,79 @@ export default function SettingsPage() {
           </div>
         </div>)}
         {editable&&<button onClick={()=>setResources(c=>[...c,{name:"",type:"staff",serviceNames:services.filter(s=>s.name.trim()).map(s=>s.name)}])}>+ Add resource</button>}
+
+        <h3>Booking rules</h3>
+        <div className="booking-settings-grid">
+          <label className="field-label">
+            <span>Cancellation window</span>
+            <div className="number-with-suffix">
+              <input
+                disabled={!editable}
+                type="number"
+                min={0}
+                value={bookingSettings.cancellationWindowHours}
+                onChange={e=>setBookingSettings({...bookingSettings,cancellationWindowHours:Number(e.target.value)})}
+              />
+              <span>hours before</span>
+            </div>
+          </label>
+
+          <label className="field-label">
+            <span>Reschedule window</span>
+            <div className="number-with-suffix">
+              <input
+                disabled={!editable}
+                type="number"
+                min={0}
+                value={bookingSettings.rescheduleWindowHours}
+                onChange={e=>setBookingSettings({...bookingSettings,rescheduleWindowHours:Number(e.target.value)})}
+              />
+              <span>hours before</span>
+            </div>
+          </label>
+
+          <label className="field-label">
+            <span>Booking interval</span>
+            <select
+              disabled={!editable}
+              value={bookingSettings.slotIntervalMinutes}
+              onChange={e=>setBookingSettings({...bookingSettings,slotIntervalMinutes:Number(e.target.value)})}
+            >
+              <option value={5}>5 minutes</option>
+              <option value={10}>10 minutes</option>
+              <option value={15}>15 minutes</option>
+              <option value={20}>20 minutes</option>
+              <option value={30}>30 minutes</option>
+              <option value={60}>60 minutes</option>
+            </select>
+          </label>
+
+          <label className="settings-toggle">
+            <input
+              disabled={!editable}
+              type="checkbox"
+              checked={bookingSettings.allowCustomerCancellation}
+              onChange={e=>setBookingSettings({...bookingSettings,allowCustomerCancellation:e.target.checked})}
+            />
+            <span>
+              <strong>Allow AI cancellations</strong>
+              <small>Outside the cancellation window.</small>
+            </span>
+          </label>
+
+          <label className="settings-toggle">
+            <input
+              disabled={!editable}
+              type="checkbox"
+              checked={bookingSettings.allowCustomerReschedule}
+              onChange={e=>setBookingSettings({...bookingSettings,allowCustomerReschedule:e.target.checked})}
+            />
+            <span>
+              <strong>Allow AI rescheduling</strong>
+              <small>Outside the reschedule window.</small>
+            </span>
+          </label>
+        </div>
 
         <h3>Opening hours</h3>
         {hours.map((h,i)=><div className="hours-row" key={h.dayOfWeek}>
