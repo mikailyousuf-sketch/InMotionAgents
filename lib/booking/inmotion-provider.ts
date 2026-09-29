@@ -56,7 +56,8 @@ export class InMotionBookingProvider {
       { data: service, error: serviceError },
       { data: business, error: businessError },
       { data: mappings, error: mappingError },
-      { data: hours, error: hoursError }
+      { data: hours, error: hoursError },
+      { data: bookingSettings, error: bookingSettingsError }
     ] = await Promise.all([
       supabase
         .from("services")
@@ -77,13 +78,19 @@ export class InMotionBookingProvider {
         .from("business_hours")
         .select("day_of_week,opens_at,closes_at,closed")
         .eq("business_id", input.businessId)
-        .is("location_id", null)
+        .is("location_id", null),
+      supabase
+        .from("booking_settings")
+        .select("slot_interval_minutes")
+        .eq("business_id", input.businessId)
+        .maybeSingle()
     ]);
 
     if (serviceError || !service || !service.active) throw new Error("Service not found or inactive");
     if (businessError || !business) throw new Error("Business not found");
     if (mappingError) throw new Error(mappingError.message);
     if (hoursError) throw new Error(hoursError.message);
+    if (bookingSettingsError) throw new Error(bookingSettingsError.message);
 
     const timezone = business.timezone || "Africa/Johannesburg";
     try {
@@ -143,6 +150,8 @@ export class InMotionBookingProvider {
     if (resourceHoursError) throw new Error(resourceHoursError.message);
 
     const durationMs = service.duration_minutes * 60_000;
+    const slotIntervalMinutes = Number(bookingSettings?.slot_interval_minutes ?? 15);
+    const slotIntervalMs = slotIntervalMinutes * 60_000;
     const from = new Date(input.from);
     const to = new Date(input.to);
 
@@ -158,9 +167,9 @@ export class InMotionBookingProvider {
       );
 
       for (
-        let cursor = ceilToQuarterHour(from);
+        let cursor = new Date(Math.ceil(from.getTime() / slotIntervalMs) * slotIntervalMs);
         cursor < to;
-        cursor = new Date(cursor.getTime() + 15 * 60_000)
+        cursor = new Date(cursor.getTime() + slotIntervalMs)
       ) {
         const start = cursor;
         const end = new Date(start.getTime() + durationMs);
