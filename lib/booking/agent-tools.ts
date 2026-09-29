@@ -3,6 +3,10 @@ import { InMotionBookingProvider } from "@/lib/booking/inmotion-provider";
 import { recordUsage } from "@/lib/billing/usage";
 import { scheduleBookingAutomations } from "@/lib/automations/triggers";
 import { cancelPendingJobsForBooking } from "@/lib/automations/queue";
+import {
+  findOrCreateCustomerByIdentity,
+  normalizeCustomerPhone
+} from "@/lib/crm/identity";
 
 const provider = new InMotionBookingProvider();
 
@@ -48,49 +52,6 @@ async function getServiceByName(businessId: string, serviceName: string) {
   return match;
 }
 
-async function getOrCreateCustomer(
-  businessId: string,
-  input: { fullName: string; phone?: string; email?: string }
-) {
-  const supabase = createServerSupabaseClient();
-
-  if (input.phone) {
-    const { data } = await supabase
-      .from("customers")
-      .select("*")
-      .eq("business_id", businessId)
-      .eq("phone", input.phone)
-      .maybeSingle();
-
-    if (data) return data;
-  }
-
-  if (input.email) {
-    const { data } = await supabase
-      .from("customers")
-      .select("*")
-      .eq("business_id", businessId)
-      .eq("email", input.email)
-      .maybeSingle();
-
-    if (data) return data;
-  }
-
-  const { data, error } = await supabase
-    .from("customers")
-    .insert({
-      business_id: businessId,
-      full_name: input.fullName,
-      phone: input.phone ?? null,
-      email: input.email ?? null
-    })
-    .select("*")
-    .single();
-
-  if (error) throw new Error(error.message);
-  return data;
-}
-
 export async function checkAvailability(input: {
   businessId: string;
   serviceName: string;
@@ -122,10 +83,13 @@ export async function createBookingFromAgent(input: {
   email?: string;
 }) {
   const service = await getServiceByName(input.businessId, input.serviceName);
-  const customer = await getOrCreateCustomer(input.businessId, {
-    fullName: input.customerName,
-    phone: input.phone,
-    email: input.email
+  const customer = await findOrCreateCustomerByIdentity({
+    businessId: input.businessId,
+    identity: {
+      fullName: input.customerName,
+      phone: input.phone,
+      email: input.email
+    }
   });
 
   const start = new Date(input.startsAt);
@@ -191,7 +155,7 @@ export async function findBookings(input: {
       .from("customers")
       .select("id")
       .eq("business_id", input.businessId)
-      .eq("phone", input.phone);
+      .eq("phone", normalizeCustomerPhone(input.phone));
     customerIds = (data ?? []).map((row) => row.id);
   } else if (input.customerName) {
     const { data } = await supabase
