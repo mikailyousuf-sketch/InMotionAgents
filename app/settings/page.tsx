@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { AppShell } from "@/components/AppShell";
 
 type Service={id?:string;name:string;description:string;durationMinutes:number;price:number|string;currency:string};
-type Resource={id?:string;name:string;type:string};
+type Resource={id?:string;name:string;type:string;serviceNames:string[]};
 type Hour={id?:string;dayOfWeek:number;label:string;opensAt:string;closesAt:string;closed:boolean};
 type Policy={id?:string;title:string;content:string;type:string};
 type Faq={id?:string;question:string;answer:string};
@@ -45,7 +45,23 @@ export default function SettingsPage() {
       id:s.id,name:s.name,description:s.description||"",durationMinutes:s.duration_minutes,
       price:s.price_cents==null?"":s.price_cents/100,currency:s.currency||"ZAR"
     })));
-    setResources((data.resources??[]).map((r:any)=>({id:r.id,name:r.name,type:r.resource_type||"staff"})));
+    const serviceById = new Map((data.services??[]).map((s:any)=>[s.id,s.name]));
+    const mappingByResource = new Map<string,string[]>();
+
+    for (const row of data.resourceServices??[]) {
+      const name = serviceById.get(row.service_id);
+      if (!name) continue;
+      const current = mappingByResource.get(row.resource_id) ?? [];
+      current.push(name);
+      mappingByResource.set(row.resource_id,current);
+    }
+
+    setResources((data.resources??[]).map((r:any)=>({
+      id:r.id,
+      name:r.name,
+      type:r.resource_type||"staff",
+      serviceNames:mappingByResource.get(r.id)??[]
+    })));
     setHours((data.hours??[]).map((h:any)=>({
       id:h.id,dayOfWeek:h.day_of_week,label:dayNames[h.day_of_week],opensAt:(h.opens_at||"08:00").slice(0,5),
       closesAt:(h.closes_at||"17:00").slice(0,5),closed:Boolean(h.closed)
@@ -108,8 +124,33 @@ export default function SettingsPage() {
             <option value="staff">Staff</option><option value="room">Room</option><option value="table">Table</option>
             <option value="court">Court</option><option value="vehicle">Vehicle</option><option value="other">Other</option>
           </select>
+
+          <div className="resource-service-picker">
+            <span className="muted">Can handle</span>
+            <div className="resource-service-options">
+              {services.filter(service=>service.name.trim()).map(service=>{
+                const checked=r.serviceNames.includes(service.name);
+                return (
+                  <label key={service.id||service.name}>
+                    <input
+                      disabled={!editable}
+                      type="checkbox"
+                      checked={checked}
+                      onChange={e=>{
+                        const next=e.target.checked
+                          ? Array.from(new Set([...r.serviceNames,service.name]))
+                          : r.serviceNames.filter(name=>name!==service.name);
+                        patch(setResources,i,{serviceNames:next});
+                      }}
+                    />
+                    {service.name}
+                  </label>
+                );
+              })}
+            </div>
+          </div>
         </div>)}
-        {editable&&<button onClick={()=>setResources(c=>[...c,{name:"",type:"staff"}])}>+ Add resource</button>}
+        {editable&&<button onClick={()=>setResources(c=>[...c,{name:"",type:"staff",serviceNames:services.filter(s=>s.name.trim()).map(s=>s.name)}])}>+ Add resource</button>}
 
         <h3>Opening hours</h3>
         {hours.map((h,i)=><div className="hours-row" key={h.dayOfWeek}>
