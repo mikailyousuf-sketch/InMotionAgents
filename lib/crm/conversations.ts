@@ -1,5 +1,6 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { dispatchStaffEvent } from "@/lib/notifications/engine";
+import { generateHandoverSummary } from "@/lib/agent/intelligence";
 
 export async function getOrCreateConversation(input: {
   businessId: string;
@@ -171,20 +172,28 @@ export async function requestHumanHandover(input: {
         .maybeSingle()
     : { data: null };
 
-  await dispatchStaffEvent({
-    businessId: input.businessId,
-    eventType: "human_handover",
-    conversationId: input.conversationId,
-    customerId: data.customer_id ?? null,
-    title: "Human handover required",
-    body: customer?.full_name
-      ? `${customer.full_name} needs human assistance${input.reason ? `: ${input.reason}` : "."}`
-      : `A customer needs human assistance${input.reason ? `: ${input.reason}` : "."}`,
-    metadata: {
-      reason: input.reason ?? null,
-      customer_phone: customer?.phone ?? null
-    }
-  });
+  await Promise.all([
+    dispatchStaffEvent({
+      businessId: input.businessId,
+      eventType: "human_handover",
+      conversationId: input.conversationId,
+      customerId: data.customer_id ?? null,
+      title: "Human handover required",
+      body: customer?.full_name
+        ? `${customer.full_name} needs human assistance${input.reason ? `: ${input.reason}` : "."}`
+        : `A customer needs human assistance${input.reason ? `: ${input.reason}` : "."}`,
+      metadata: {
+        reason: input.reason ?? null,
+        customer_phone: customer?.phone ?? null
+      }
+    }),
+    generateHandoverSummary({
+      businessId: input.businessId,
+      conversationId: input.conversationId,
+      customerId: data.customer_id ?? null,
+      reason: input.reason ?? null
+    })
+  ]);
 
   return data;
 }
