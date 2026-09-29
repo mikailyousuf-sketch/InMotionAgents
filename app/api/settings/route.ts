@@ -30,14 +30,19 @@ export async function GET(request: Request) {
     { data: hours },
     { data: resources },
     { data: policies },
-    { data: faqs }
+    { data: faqs },
+    { data: resourceServices }
   ] = await Promise.all([
     admin.from("businesses").select("*").eq("id", businessId).single(),
     admin.from("services").select("*").eq("business_id", businessId).eq("active", true).order("name"),
     admin.from("business_hours").select("*").eq("business_id", businessId).order("day_of_week"),
     admin.from("resources").select("*").eq("business_id", businessId).eq("active", true).order("name"),
     admin.from("business_policies").select("*").eq("business_id", businessId).eq("active", true).order("title"),
-    admin.from("business_faqs").select("*").eq("business_id", businessId).eq("active", true).order("question")
+    admin.from("business_faqs").select("*").eq("business_id", businessId).eq("active", true).order("question"),
+    admin
+      .from("resource_services")
+      .select("resource_id,service_id,services!inner(business_id)")
+      .eq("services.business_id", businessId)
   ]);
 
   return Response.json({
@@ -47,6 +52,7 @@ export async function GET(request: Request) {
     resources: resources ?? [],
     policies: policies ?? [],
     faqs: faqs ?? [],
+    resourceServices: resourceServices ?? [],
     role: membership.role
   });
 }
@@ -230,6 +236,59 @@ export async function POST(request: Request) {
       : admin.from("business_faqs").insert(payload);
     const { error } = await query;
     if (error) return Response.json({ error:error.message },{status:500});
+  }
+
+  const { data: activeServices, error: activeServicesError } = await admin
+    .from("services")
+    .select("id,name")
+    .eq("business_id", businessId)
+    .eq("active", true);
+
+  if (activeServicesError) return Response.json({ error: activeServicesError.message }, { status: 500 });
+
+  const { data: activeResources, error: activeResourcesError } = await admin
+    .from("resources")
+    .select("id,name")
+    .eq("business_id", businessId)
+    .eq("active", true);
+
+  if (activeResourcesError) return Response.json({ error: activeResourcesError.message }, { status: 500 });
+
+  const activeResourceIds = (activeResources ?? []).map((resource:any) => resource.id);
+  if (activeResourceIds.length) {
+    const { error: mappingDeleteError } = await admin
+      .from("resource_services")
+      .delete()
+      .in("resource_id", activeResourceIds);
+
+    if (mappingDeleteError) return Response.json({ error: mappingDeleteError.message }, { status: 500 });
+  }
+
+  const serviceByName = new Map(
+    (activeServices ?? []).map((service:any) => [String(service.name).trim().toLowerCase(), service.id])
+  );
+  const resourceByName = new Map(
+    (activeResources ?? []).map((resource:any) => [String(resource.name).trim().toLowerCase(), resource.id])
+  );
+
+  const mappingRows:any[] = [];
+  for (const resource of resources) {
+    const resourceId = resourceByName.get(String(resource.name || "").trim().toLowerCase());
+    if (!resourceId) continue;
+
+    const assigned = Array.isArray(resource.serviceNames) ? resource.serviceNames : [];
+    for (const serviceName of assigned) {
+      const serviceId = serviceByName.get(String(serviceName || "").trim().toLowerCase());
+      if (serviceId) mappingRows.push({ resource_id: resourceId, service_id: serviceId });
+    }
+  }
+
+  if (mappingRows.length) {
+    const { error: mappingInsertError } = await admin
+      .from("resource_services")
+      .upsert(mappingRows, { onConflict: "resource_id,service_id" });
+
+    if (mappingInsertError) return Response.json({ error: mappingInsertError.message }, { status: 500 });
   }
 
   return Response.json({ ok: true });
