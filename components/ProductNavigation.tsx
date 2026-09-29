@@ -9,13 +9,15 @@ const main = [
   { href: "/dashboard", label: "Home", icon: "⌂" },
   { href: "/conversations", label: "Inbox", icon: "◌" },
   { href: "/customers", label: "Customers", icon: "◎" },
-  { href: "/automations", label: "Automations", icon: "↻" }
+  { href: "/automations", label: "Automations", icon: "↻" },
+  { href: "/improve", label: "Improve", icon: "✦" }
 ];
 
 const manage = [
   { href: "/settings", label: "Business profile" },
   { href: "/team", label: "Team" },
-  { href: "/integrations", label: "Connections" }
+  { href: "/integrations", label: "Connections" },
+  { href: "/custom-work", label: "Custom work" }
 ];
 
 const advanced = [
