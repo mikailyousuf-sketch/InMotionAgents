@@ -37,11 +37,6 @@ function zonedParts(date: Date, timezone: string) {
   };
 }
 
-function ceilToQuarterHour(date: Date) {
-  const ms = 15 * 60_000;
-  return new Date(Math.ceil(date.getTime() / ms) * ms);
-}
-
 export class InMotionBookingProvider {
   async getAvailability(input: {
     businessId: string;
