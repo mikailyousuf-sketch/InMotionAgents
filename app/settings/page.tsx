@@ -52,7 +52,7 @@ export default function SettingsPage() {
       id:s.id,name:s.name,description:s.description||"",durationMinutes:s.duration_minutes,
       price:s.price_cents==null?"":s.price_cents/100,currency:s.currency||"ZAR"
     })));
-    const serviceById = new Map((data.services??[]).map((s:any)=>[s.id,s.name]));
+    const serviceById = new Map<string,string>((data.services??[]).map((s:any)=>[String(s.id),String(s.name)]));
     const mappingByResource = new Map<string,string[]>();
 
     for (const row of data.resourceServices??[]) {
@@ -95,7 +95,12 @@ export default function SettingsPage() {
       body:JSON.stringify({businessId,business,services,resources,hours,policies,faqs,bookingSettings})
     });
     const data=await response.json();
-    setStatus(response.ok?"Saved":data.error||"Could not save");
+    if(response.ok){
+      await load();
+      setStatus("Saved");
+    }else{
+      setStatus(data.error||"Could not save");
+    }
   }
 
   if(!business) return <AppShell><p className="muted">Loading settings...</p></AppShell>;
