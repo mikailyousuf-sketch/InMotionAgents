@@ -11,6 +11,7 @@ export default function ConversationDetailClient({ conversationId }: { conversat
   const [bookings, setBookings] = useState<any[]>([]);
   const [team, setTeam] = useState<any[]>([]);
   const [notes, setNotes] = useState<any[]>([]);
+  const [handoverSummary, setHandoverSummary] = useState<any>(null);
   const [message, setMessage] = useState("");
   const [note, setNote] = useState("");
   const [sending, setSending] = useState(false);
@@ -34,6 +35,7 @@ export default function ConversationDetailClient({ conversationId }: { conversat
     setBookings(data.bookings ?? []);
     setTeam(data.team ?? []);
     setNotes(notesData.notes ?? []);
+    setHandoverSummary(data.handoverSummary ?? null);
 
     setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 20);
   }
@@ -143,6 +145,19 @@ export default function ConversationDetailClient({ conversationId }: { conversat
             </div>
           </div>
         </div>
+
+        {status === "human" && handoverSummary && (
+          <div className="card handover-summary-card" style={{ marginTop: 16 }}>
+            <div className="eyebrow">AI handover summary</div>
+            <h3 style={{ marginTop: 0 }}>What staff need to know</h3>
+            <div className="handover-summary-grid">
+              <div><span>Customer wants</span><strong>{handoverSummary.customer_request || "Human assistance"}</strong></div>
+              <div><span>AI already did</span><strong>{handoverSummary.ai_actions || "Reviewed the conversation"}</strong></div>
+              <div><span>Blocker</span><strong>{handoverSummary.blocker || handoverSummary.reason || "Human judgment required"}</strong></div>
+              <div><span>Next action</span><strong>{handoverSummary.suggested_next_action || "Review and reply to the customer"}</strong></div>
+            </div>
+          </div>
+        )}
 
         <div className="card" style={{ marginTop: 16 }}>
           <h3 style={{ marginTop: 0 }}>Conversation</h3>
