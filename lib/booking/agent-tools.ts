@@ -2,6 +2,7 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { InMotionBookingProvider } from "@/lib/booking/inmotion-provider";
 import { recordUsage } from "@/lib/billing/usage";
 import { scheduleBookingAutomations } from "@/lib/automations/triggers";
+import { cancelPendingJobsForBooking } from "@/lib/automations/queue";
 
 const provider = new InMotionBookingProvider();
 
@@ -213,6 +214,13 @@ export async function cancelBookingFromAgent(input: {
   }
 
   const cancelled = await provider.cancelBooking(input);
+
+  await cancelPendingJobsForBooking({
+    businessId: input.businessId,
+    bookingId: input.bookingId,
+    reason: "Cancelled because booking was cancelled"
+  });
+
   return { bookingId: cancelled.id, status: cancelled.status };
 }
 
@@ -250,6 +258,17 @@ export async function rescheduleBookingFromAgent(input: {
     startsAt: start.toISOString(),
     endsAt: end.toISOString(),
     resourceId: input.resourceId ?? booking.resource_id ?? undefined
+  });
+
+  await cancelPendingJobsForBooking({
+    businessId: input.businessId,
+    bookingId: input.bookingId,
+    reason: "Cancelled because booking was rescheduled"
+  });
+
+  await scheduleBookingAutomations({
+    businessId: input.businessId,
+    bookingId: input.bookingId
   });
 
   return {
