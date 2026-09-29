@@ -6,13 +6,13 @@ export type CustomerIdentity = {
   email?: string | null;
 };
 
-function cleanPhone(phone?: string | null) {
+export function normalizeCustomerPhone(phone?: string | null) {
   if (!phone) return null;
-  const normalized = phone.replace(/\s+/g, "").trim();
+  const normalized = phone.replace(/\D/g, "").trim();
   return normalized || null;
 }
 
-function cleanEmail(email?: string | null) {
+export function normalizeCustomerEmail(email?: string | null) {
   if (!email) return null;
   const normalized = email.trim().toLowerCase();
   return normalized || null;
@@ -23,8 +23,8 @@ export async function findOrCreateCustomerByIdentity(input: {
   identity: CustomerIdentity;
 }) {
   const supabase = createServerSupabaseClient();
-  const phone = cleanPhone(input.identity.phone);
-  const email = cleanEmail(input.identity.email);
+  const phone = normalizeCustomerPhone(input.identity.phone);
+  const email = normalizeCustomerEmail(input.identity.email);
   const fullName = input.identity.fullName?.trim() || null;
 
   if (phone) {
