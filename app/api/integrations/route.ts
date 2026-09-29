@@ -51,7 +51,7 @@ export async function POST(request:Request){
   const inputConfig=body?.config||{};
 
   // Only non-secret connection metadata is persisted here.
-  for(const key of ["phone_number_id","whatsapp_business_account_id","calendar_id","external_business_id","base_url","location_id","booking_mode"]){
+  for(const key of ["phone_number_id","whatsapp_business_account_id","calendar_id","external_business_id","base_url","location_id","booking_mode","phone_number","provider_name"]){
     if(inputConfig[key]) safeConfig[key]=String(inputConfig[key]);
   }
 
