@@ -31,7 +31,8 @@ export async function GET(request: Request) {
     { data: resources },
     { data: policies },
     { data: faqs },
-    { data: resourceServices }
+    { data: resourceServices },
+    { data: bookingSettings }
   ] = await Promise.all([
     admin.from("businesses").select("*").eq("id", businessId).single(),
     admin.from("services").select("*").eq("business_id", businessId).eq("active", true).order("name"),
@@ -42,7 +43,12 @@ export async function GET(request: Request) {
     admin
       .from("resource_services")
       .select("resource_id,service_id,services!inner(business_id)")
-      .eq("services.business_id", businessId)
+      .eq("services.business_id", businessId),
+    admin
+      .from("booking_settings")
+      .select("*")
+      .eq("business_id", businessId)
+      .maybeSingle()
   ]);
 
   return Response.json({
@@ -53,6 +59,13 @@ export async function GET(request: Request) {
     policies: policies ?? [],
     faqs: faqs ?? [],
     resourceServices: resourceServices ?? [],
+    bookingSettings: bookingSettings ?? {
+      cancellation_window_hours: 12,
+      reschedule_window_hours: 12,
+      slot_interval_minutes: 15,
+      allow_customer_cancellation: true,
+      allow_customer_reschedule: true
+    },
     role: membership.role
   });
 }
@@ -71,6 +84,23 @@ export async function POST(request: Request) {
   }
 
   const admin = createServerSupabaseClient();
+
+  const bookingSettings = body.bookingSettings ?? {};
+  const { error: bookingSettingsError } = await admin
+    .from("booking_settings")
+    .upsert({
+      business_id: businessId,
+      cancellation_window_hours: Math.max(0, Number(bookingSettings.cancellationWindowHours ?? 12)),
+      reschedule_window_hours: Math.max(0, Number(bookingSettings.rescheduleWindowHours ?? 12)),
+      slot_interval_minutes: [5,10,15,20,30,60].includes(Number(bookingSettings.slotIntervalMinutes))
+        ? Number(bookingSettings.slotIntervalMinutes)
+        : 15,
+      allow_customer_cancellation: bookingSettings.allowCustomerCancellation !== false,
+      allow_customer_reschedule: bookingSettings.allowCustomerReschedule !== false,
+      updated_at: new Date().toISOString()
+    }, { onConflict: "business_id" });
+
+  if (bookingSettingsError) return Response.json({ error: bookingSettingsError.message }, { status: 500 });
 
   const { error: businessError } = await admin
     .from("businesses")
