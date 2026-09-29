@@ -6,6 +6,24 @@ import { cancelPendingJobsForBooking } from "@/lib/automations/queue";
 
 const provider = new InMotionBookingProvider();
 
+async function getBookingSettings(businessId: string) {
+  const supabase = createServerSupabaseClient();
+  const { data, error } = await supabase
+    .from("booking_settings")
+    .select("cancellation_window_hours,reschedule_window_hours,allow_customer_cancellation,allow_customer_reschedule")
+    .eq("business_id", businessId)
+    .maybeSingle();
+
+  if (error) throw new Error(error.message);
+
+  return data ?? {
+    cancellation_window_hours: 12,
+    reschedule_window_hours: 12,
+    allow_customer_cancellation: true,
+    allow_customer_reschedule: true
+  };
+}
+
 function normalize(text: string) {
   return text.trim().toLowerCase();
 }
@@ -208,9 +226,18 @@ export async function cancelBookingFromAgent(input: {
     bookingId: input.bookingId
   });
 
-  const twelveHours = 12 * 60 * 60 * 1000;
-  if (new Date(booking.starts_at).getTime() - Date.now() < twelveHours) {
-    throw new Error("This booking is within the 12-hour cancellation window and requires human assistance.");
+  const settings = await getBookingSettings(input.businessId);
+  if (!settings.allow_customer_cancellation) {
+    throw new Error("Customer cancellation requires human assistance for this business.");
+  }
+
+  const cancellationWindowMs = Number(settings.cancellation_window_hours ?? 12) * 60 * 60 * 1000;
+  if (new Date(booking.starts_at).getTime() - Date.now() < cancellationWindowMs) {
+    throw new Error(
+      "This booking is within the " +
+      Number(settings.cancellation_window_hours ?? 12) +
+      "-hour cancellation window and requires human assistance."
+    );
   }
 
   const cancelled = await provider.cancelBooking(input);
@@ -235,9 +262,18 @@ export async function rescheduleBookingFromAgent(input: {
     bookingId: input.bookingId
   });
 
-  const twelveHours = 12 * 60 * 60 * 1000;
-  if (new Date(booking.starts_at).getTime() - Date.now() < twelveHours) {
-    throw new Error("This booking is within the 12-hour reschedule window and requires human assistance.");
+  const settings = await getBookingSettings(input.businessId);
+  if (!settings.allow_customer_reschedule) {
+    throw new Error("Customer rescheduling requires human assistance for this business.");
+  }
+
+  const rescheduleWindowMs = Number(settings.reschedule_window_hours ?? 12) * 60 * 60 * 1000;
+  if (new Date(booking.starts_at).getTime() - Date.now() < rescheduleWindowMs) {
+    throw new Error(
+      "This booking is within the " +
+      Number(settings.reschedule_window_hours ?? 12) +
+      "-hour reschedule window and requires human assistance."
+    );
   }
 
   const supabase = createServerSupabaseClient();
