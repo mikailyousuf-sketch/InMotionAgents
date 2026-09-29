@@ -3,11 +3,11 @@
 import { useEffect, useState } from "react";
 import { AppShell } from "@/components/AppShell";
 
-type Service={name:string;description:string;durationMinutes:number;price:number|string;currency:string};
-type Resource={name:string;type:string};
-type Hour={dayOfWeek:number;label:string;opensAt:string;closesAt:string;closed:boolean};
-type Policy={title:string;content:string;type:string};
-type Faq={question:string;answer:string};
+type Service={id?:string;name:string;description:string;durationMinutes:number;price:number|string;currency:string};
+type Resource={id?:string;name:string;type:string};
+type Hour={id?:string;dayOfWeek:number;label:string;opensAt:string;closesAt:string;closed:boolean};
+type Policy={id?:string;title:string;content:string;type:string};
+type Faq={id?:string;question:string;answer:string};
 
 const dayNames=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
 
@@ -42,16 +42,16 @@ export default function SettingsPage() {
       agentName:data.business?.agent_name || "Ava"
     });
     setServices((data.services??[]).map((s:any)=>({
-      name:s.name,description:s.description||"",durationMinutes:s.duration_minutes,
+      id:s.id,name:s.name,description:s.description||"",durationMinutes:s.duration_minutes,
       price:s.price_cents==null?"":s.price_cents/100,currency:s.currency||"ZAR"
     })));
-    setResources((data.resources??[]).map((r:any)=>({name:r.name,type:r.resource_type||"staff"})));
+    setResources((data.resources??[]).map((r:any)=>({id:r.id,name:r.name,type:r.resource_type||"staff"})));
     setHours((data.hours??[]).map((h:any)=>({
-      dayOfWeek:h.day_of_week,label:dayNames[h.day_of_week],opensAt:(h.opens_at||"08:00").slice(0,5),
+      id:h.id,dayOfWeek:h.day_of_week,label:dayNames[h.day_of_week],opensAt:(h.opens_at||"08:00").slice(0,5),
       closesAt:(h.closes_at||"17:00").slice(0,5),closed:Boolean(h.closed)
     })));
-    setPolicies((data.policies??[]).map((p:any)=>({title:p.title,content:p.content,type:p.policy_type||"general"})));
-    setFaqs((data.faqs??[]).map((f:any)=>({question:f.question,answer:f.answer})));
+    setPolicies((data.policies??[]).map((p:any)=>({id:p.id,title:p.title,content:p.content,type:p.policy_type||"general"})));
+    setFaqs((data.faqs??[]).map((f:any)=>({id:f.id,question:f.question,answer:f.answer})));
   }
 
   function patch<T>(setter:React.Dispatch<React.SetStateAction<T[]>>,index:number,change:Partial<T>){
