@@ -9,6 +9,7 @@ import {
 } from "@/lib/whatsapp/messages";
 import { findOrCreateCustomerByIdentity } from "@/lib/crm/identity";
 import { parseOptPreference, setContactPreference } from "@/lib/automations/preferences";
+import { writeAuditLog } from "@/lib/audit/log";
 
 export const runtime = "nodejs";
 
@@ -50,7 +51,21 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   const rawBody = await request.text();
 
+  await writeAuditLog({
+    action: "whatsapp_webhook.received",
+    entityType: "whatsapp_webhook",
+    metadata: {
+      signaturePresent: Boolean(request.headers.get("x-hub-signature-256")),
+      contentLength: rawBody.length
+    }
+  });
+
   if (!verifySignature(rawBody, request.headers.get("x-hub-signature-256"))) {
+    await writeAuditLog({
+      action: "whatsapp_webhook.signature_failed",
+      entityType: "whatsapp_webhook",
+      metadata: { signaturePresent: Boolean(request.headers.get("x-hub-signature-256")) }
+    });
     return new Response("Invalid webhook signature", { status: 401 });
   }
 
@@ -59,6 +74,10 @@ export async function POST(request: Request) {
   try {
     payload = JSON.parse(rawBody);
   } catch {
+    await writeAuditLog({
+      action: "whatsapp_webhook.invalid_json",
+      entityType: "whatsapp_webhook"
+    });
     return new Response("Invalid JSON", { status: 400 });
   }
 
@@ -72,13 +91,32 @@ export async function POST(request: Request) {
         const value = change?.value;
         const phoneNumberId = value?.metadata?.phone_number_id;
 
+        await writeAuditLog({
+          action: "whatsapp_webhook.change_received",
+          entityType: "whatsapp_webhook",
+          metadata: {
+            field: change?.field ?? null,
+            phoneNumberId: phoneNumberId ?? null,
+            messageCount: Array.isArray(value?.messages) ? value.messages.length : 0,
+            statusCount: Array.isArray(value?.statuses) ? value.statuses.length : 0
+          }
+        });
+
         if (!phoneNumberId) continue;
 
         let business: Awaited<ReturnType<typeof resolveWhatsAppBusiness>> | null = null;
 
         for (const status of value?.statuses ?? []) {
           try {
-            if (!business) business = await resolveWhatsAppBusiness(phoneNumberId);
+            if (!business) {
+            business = await resolveWhatsAppBusiness(phoneNumberId);
+            await writeAuditLog({
+              businessId: business.id,
+              action: "whatsapp_webhook.business_resolved",
+              entityType: "whatsapp_webhook",
+              metadata: { phoneNumberId, businessSlug: business.slug }
+            });
+          }
             await recordWhatsAppDeliveryEvent({
               businessId: business.id,
               externalMessageId: String(status.id),
@@ -189,6 +227,13 @@ export async function POST(request: Request) {
     return new Response("EVENT_RECEIVED", { status: 200 });
   } catch (error) {
     console.error("WhatsApp webhook processing error", error);
+    await writeAuditLog({
+      action: "whatsapp_webhook.processing_failed",
+      entityType: "whatsapp_webhook",
+      metadata: {
+        error: error instanceof Error ? error.message : String(error)
+      }
+    });
 
     // Returning 200 prevents endless webhook retries for application-level failures.
     return new Response("EVENT_RECEIVED", { status: 200 });
