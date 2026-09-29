@@ -77,7 +77,15 @@ export async function scheduleBookingAutomations(input: {
       },
       metadata: {
         trigger: automation.trigger_type
-      }
+      },
+      dedupeKey: [
+        "booking",
+        booking.id,
+        "automation",
+        automation.id,
+        "scheduled",
+        scheduledFor
+      ].join(":")
     });
 
     created.push(job);
@@ -137,7 +145,15 @@ export async function scheduleLeadFollowup(input: {
       metadata: {
         trigger: "lead_followup",
         lead_status: customer.lead_status
-      }
+      },
+      dedupeKey: [
+        "lead",
+        customer.id,
+        "automation",
+        automation.id,
+        "status",
+        customer.lead_status || "unknown"
+      ].join(":")
     });
 
     created.push(job);
