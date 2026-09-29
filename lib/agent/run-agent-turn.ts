@@ -21,6 +21,7 @@ import { applyLeadSignal } from "@/lib/crm/lead-intelligence";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { recordUsage } from "@/lib/billing/usage";
 import { getAgentGuardrails, formatGuardrailsForPrompt, recordAgentEvent } from "@/lib/agent/guardrails";
+import { createKnowledgeSuggestion } from "@/lib/agent/intelligence";
 
 const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -173,6 +174,22 @@ const tools: OpenAI.Chat.Completions.ChatCompletionTool[] = [
   {
     type: "function",
     function: {
+      name: "flag_knowledge_gap",
+      description: "Record a question the receptionist cannot answer confidently from approved business knowledge so the owner can teach it later.",
+      parameters: {
+        type: "object",
+        properties: {
+          question: { type: "string" },
+          reason: { type: "string" }
+        },
+        required: ["question"],
+        additionalProperties: false
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
       name: "request_human_handover",
       description: "Hand the conversation to a human staff member when the customer asks for a person or the issue requires human intervention.",
       parameters: {
@@ -288,6 +305,23 @@ async function runTool(
       signal: args.signal
     });
     return { customerId: customer.id, leadStatus: customer.lead_status };
+  }
+  if (name === "flag_knowledge_gap") {
+    const suggestion = await createKnowledgeSuggestion({
+      businessId,
+      conversationId,
+      customerId: customerId ?? null,
+      type: "unanswered_question",
+      title: args.question,
+      sourceQuestion: args.question,
+      suggestedAnswer: null,
+      metadata: {
+        reason: args.reason ?? null,
+        source: "live_conversation"
+      }
+    });
+
+    return { recorded: true, suggestionId: suggestion.id };
   }
   if (name === "request_human_handover") {
     const conversation = await requestHumanHandover({
