@@ -124,7 +124,20 @@ export default function SettingsPage() {
 
         <h3>Services</h3>
         {services.map((s,i)=><div className="repeat-row" key={i}>
-          <input disabled={!editable} value={s.name} onChange={e=>patch(setServices,i,{name:e.target.value})} placeholder="Service"/>
+          <input
+            disabled={!editable}
+            value={s.name}
+            onChange={e=>{
+              const previous=s.name;
+              const next=e.target.value;
+              patch(setServices,i,{name:next});
+              setResources(current=>current.map(resource=>({
+                ...resource,
+                serviceNames:resource.serviceNames.map(name=>name===previous?next:name)
+              })));
+            }}
+            placeholder="Service"
+          />
           <input disabled={!editable} type="number" value={s.durationMinutes} onChange={e=>patch(setServices,i,{durationMinutes:Number(e.target.value)})} placeholder="Minutes"/>
           <input disabled={!editable} type="number" value={s.price} onChange={e=>patch(setServices,i,{price:e.target.value})} placeholder="Price"/>
           <input disabled={!editable} value={s.description} onChange={e=>patch(setServices,i,{description:e.target.value})} placeholder="Description"/>
