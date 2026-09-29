@@ -715,3 +715,110 @@ h2 { font-size:20px; }
   .attention-banner > span { display:none; }
   .onboarding-topbar .brand-sub { display:none; }
 }
+
+.improve-grid {
+  max-width:1180px;
+  display:grid;
+  grid-template-columns:minmax(0,1.55fr) minmax(280px,.7fr);
+  gap:16px;
+  align-items:start;
+}
+.learning-card {
+  padding:18px;
+  border-bottom:1px solid var(--line-soft);
+}
+.learning-card:last-child { border-bottom:0; }
+.learning-top {
+  display:flex;
+  justify-content:space-between;
+  gap:14px;
+  align-items:flex-start;
+  margin-bottom:14px;
+}
+.learning-top h3 { margin:4px 0 0; }
+.learning-type {
+  text-transform:uppercase;
+  letter-spacing:.09em;
+  font-size:9px;
+  font-weight:800;
+  color:var(--muted-2);
+}
+.confidence {
+  border:1px solid var(--line);
+  border-radius:999px;
+  padding:5px 8px;
+  font-size:10px;
+  color:var(--muted);
+}
+.source-question {
+  display:grid;
+  gap:5px;
+  padding:11px 12px;
+  margin-bottom:12px;
+  border-radius:10px;
+  background:#0e0e10;
+  border:1px solid var(--line-soft);
+}
+.source-question span {
+  font-size:10px;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  color:var(--muted-2);
+}
+.learning-card textarea,
+.history-input {
+  width:100%;
+  min-height:110px;
+  resize:vertical;
+  background:#17171a;
+  color:var(--text);
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:11px 12px;
+}
+.history-input { min-height:220px; }
+.learning-actions {
+  display:flex;
+  justify-content:flex-end;
+  gap:8px;
+  margin-top:14px;
+}
+.privacy-note {
+  margin:10px 0 0;
+  color:var(--muted-2);
+  font-size:10px;
+  line-height:1.45;
+}
+.handover-summary-card {
+  border-color:rgba(240,179,93,.22);
+  background:linear-gradient(180deg,rgba(240,179,93,.045),var(--panel));
+}
+.handover-summary-grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+.handover-summary-grid > div {
+  display:grid;
+  gap:4px;
+  padding:11px;
+  border:1px solid var(--line-soft);
+  border-radius:10px;
+  background:#0f0f11;
+}
+.handover-summary-grid span {
+  color:var(--muted-2);
+  font-size:10px;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+}
+.handover-summary-grid strong {
+  font-size:12px;
+  line-height:1.45;
+}
+@media (max-width:1000px) {
+  .improve-grid { grid-template-columns:1fr; }
+}
+@media (max-width:650px) {
+  .handover-summary-grid { grid-template-columns:1fr; }
+}
