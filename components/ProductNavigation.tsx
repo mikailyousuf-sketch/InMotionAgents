@@ -7,10 +7,13 @@ import { NotificationBell } from "@/components/NotificationBell";
 
 const main = [
   { href: "/dashboard", label: "Home", icon: "⌂" },
+  { href: "/receptionist", label: "Your Receptionist", icon: "✦" },
   { href: "/conversations", label: "Inbox", icon: "◌" },
+  { href: "/calls", label: "Calls", icon: "☎" },
+  { href: "/bookings", label: "Bookings", icon: "□" },
   { href: "/customers", label: "Customers", icon: "◎" },
   { href: "/automations", label: "Automations", icon: "↻" },
-  { href: "/improve", label: "Improve", icon: "✦" }
+  { href: "/improve", label: "Improve", icon: "＋" }
 ];
 
 const manage = [
@@ -93,7 +96,7 @@ export function ProductNavigation() {
       </nav>
 
       <nav className="mobile-nav">
-        {main.slice(0,3).map(item=>(
+        {main.filter(item=>["/dashboard","/receptionist","/conversations"].includes(item.href)).map(item=>(
           <Link key={item.href} href={item.href} className={active(item.href)?"active":""}>
             <span>{item.icon}</span><small>{item.label}</small>
           </Link>
