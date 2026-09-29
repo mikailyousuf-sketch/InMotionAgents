@@ -23,7 +23,8 @@ export default async function DashboardPage() {
     { data: whatsapp },
     { count: serviceCount },
     { count: hoursCount },
-    { data: recentConversations }
+    { data: recentConversations },
+    { count: pendingSuggestions }
   ] = await Promise.all([
     supabase.from("conversations").select("*",{count:"exact",head:true})
       .eq("business_id",business.id).gte("started_at",startOfDay.toISOString()),
@@ -47,7 +48,11 @@ export default async function DashboardPage() {
       .select("id,status,updated_at,unread_for_staff,customers(full_name,phone)")
       .eq("business_id",business.id)
       .order("updated_at",{ascending:false})
-      .limit(5)
+      .limit(5),
+    supabase.from("knowledge_suggestions")
+      .select("*",{count:"exact",head:true})
+      .eq("business_id",business.id)
+      .eq("status","pending")
   ]);
 
   const needsSetup = [
@@ -170,6 +175,10 @@ export default async function DashboardPage() {
             <Link href="/conversations">Open inbox <span>→</span></Link>
             <Link href="/settings">Update business info <span>→</span></Link>
             <Link href="/automations">Manage follow-ups <span>→</span></Link>
+            <Link href="/improve">
+              Improve receptionist
+              <span>{pendingSuggestions ? `${pendingSuggestions} →` : "→"}</span>
+            </Link>
           </div>
         </aside>
       </div>
