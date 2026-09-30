@@ -31,7 +31,7 @@ export default async function CallsPage(){
           </div>
           <div className="section-stat glass-chip">
             <PhoneCall size={15} strokeWidth={1.7}/>
-            <span>Voice connection coming next</span>
+            <span>SIP voice foundation ready</span>
           </div>
         </header>
 
@@ -39,7 +39,7 @@ export default async function CallsPage(){
           <div className="section-panel-head">
             <div>
               <h2>Recent calls</h2>
-              <p>Once voice is connected, every call will appear here automatically.</p>
+              <p>Live calls will appear here once the SIP trunk and OpenAI voice webhook are connected.</p>
             </div>
             <Phone size={17} strokeWidth={1.6}/>
           </div>
@@ -48,7 +48,7 @@ export default async function CallsPage(){
             <div className="section-empty">
               <span><Phone size={21} strokeWidth={1.5}/></span>
               <strong>No calls yet</strong>
-              <p>The call workspace is ready for the production voice connection.</p>
+              <p>The call workspace is ready. Connect the SIP trunk and OpenAI voice webhook to begin receiving calls.</p>
             </div>
           ) : calls.map((call:any)=>{
             const customer=Array.isArray(call.customers)?call.customers[0]:call.customers;
