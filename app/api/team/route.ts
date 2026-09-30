@@ -120,6 +120,38 @@ export async function PATCH(request: Request) {
   if (role === "owner" && manager.role !== "owner") return Response.json({ error: "Only an owner can promote owners" }, { status: 403 });
 
   const admin = createServerSupabaseClient();
+
+  const { data: target } = await admin
+    .from("business_members")
+    .select("role")
+    .eq("business_id", businessId)
+    .eq("user_id", memberUserId)
+    .maybeSingle();
+
+  if (!target) {
+    return Response.json({ error: "Team member not found" }, { status: 404 });
+  }
+
+  if (target.role === "owner" && manager.role !== "owner") {
+    return Response.json({ error: "Only an owner can change another owner's role" }, { status: 403 });
+  }
+
+  if (target.role === "owner" && role !== "owner") {
+    const { count, error: countError } = await admin
+      .from("business_members")
+      .select("user_id", { count: "exact", head: true })
+      .eq("business_id", businessId)
+      .eq("role", "owner");
+
+    if (countError) return Response.json({ error: countError.message }, { status: 500 });
+
+    if ((count ?? 0) <= 1) {
+      return Response.json({
+        error: "This workspace must always have at least one owner"
+      }, { status: 409 });
+    }
+  }
+
   const { error } = await admin
     .from("business_members")
     .update({ role })
