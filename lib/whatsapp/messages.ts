@@ -1,5 +1,102 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
+const STALE_RECEIPT_MINUTES = 10;
+
+export async function claimWhatsAppMessage(externalMessageId: string) {
+  const supabase = createServerSupabaseClient();
+
+  const { error: insertError } = await supabase
+    .from("webhook_receipts")
+    .insert({
+      provider: "whatsapp",
+      external_event_id: externalMessageId,
+      status: "processing",
+      updated_at: new Date().toISOString()
+    });
+
+  if (!insertError) return true;
+
+  if (insertError.code !== "23505") {
+    throw new Error(insertError.message);
+  }
+
+  const { data: existing, error: readError } = await supabase
+    .from("webhook_receipts")
+    .select("id,status,updated_at")
+    .eq("provider", "whatsapp")
+    .eq("external_event_id", externalMessageId)
+    .maybeSingle();
+
+  if (readError) throw new Error(readError.message);
+  if (!existing) return false;
+
+  if (existing.status === "completed") return false;
+
+  const staleCutoff = Date.now() - STALE_RECEIPT_MINUTES * 60_000;
+  const stale = new Date(existing.updated_at).getTime() < staleCutoff;
+
+  if (existing.status !== "failed" && !stale) return false;
+
+  let retryQuery = supabase
+    .from("webhook_receipts")
+    .update({
+      status: "processing",
+      last_error: null,
+      updated_at: new Date().toISOString()
+    })
+    .eq("id", existing.id);
+
+  retryQuery = existing.status === "failed"
+    ? retryQuery.eq("status", "failed")
+    : retryQuery.eq("status", "processing").lt("updated_at", new Date(staleCutoff).toISOString());
+
+  const { data: reclaimed, error: reclaimError } = await retryQuery
+    .select("id")
+    .maybeSingle();
+
+  if (reclaimError) throw new Error(reclaimError.message);
+  return Boolean(reclaimed);
+}
+
+export async function completeWhatsAppMessageReceipt(input: {
+  externalMessageId: string;
+  businessId?: string | null;
+}) {
+  const supabase = createServerSupabaseClient();
+  const { error } = await supabase
+    .from("webhook_receipts")
+    .update({
+      status: "completed",
+      business_id: input.businessId ?? null,
+      last_error: null,
+      updated_at: new Date().toISOString()
+    })
+    .eq("provider", "whatsapp")
+    .eq("external_event_id", input.externalMessageId);
+
+  if (error) throw new Error(error.message);
+}
+
+export async function failWhatsAppMessageReceipt(input: {
+  externalMessageId: string;
+  businessId?: string | null;
+  error: string;
+}) {
+  const supabase = createServerSupabaseClient();
+  const { error } = await supabase
+    .from("webhook_receipts")
+    .update({
+      status: "failed",
+      business_id: input.businessId ?? null,
+      last_error: input.error.slice(0, 2000),
+      updated_at: new Date().toISOString()
+    })
+    .eq("provider", "whatsapp")
+    .eq("external_event_id", input.externalMessageId);
+
+  if (error) throw new Error(error.message);
+}
+
 export async function whatsappMessageAlreadyProcessed(externalMessageId: string) {
   const supabase = createServerSupabaseClient();
   const { data } = await supabase
