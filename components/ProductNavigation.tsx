@@ -3,16 +3,29 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import {
+  Bot,
+  CalendarDays,
+  ChevronDown,
+  ChevronRight,
+  Gauge,
+  Inbox,
+  Phone,
+  RefreshCw,
+  Settings2,
+  Sparkles,
+  UsersRound
+} from "lucide-react";
 import { NotificationBell } from "@/components/NotificationBell";
 
 const main = [
-  { href: "/dashboard", label: "Dashboard", icon: "⌂" },
-  { href: "/conversations", label: "Inbox", icon: "✉" },
-  { href: "/calls", label: "Calls", icon: "⌕" },
-  { href: "/bookings", label: "Bookings", icon: "▣" },
-  { href: "/customers", label: "Customers", icon: "◎" },
-  { href: "/receptionist", label: "Receptionist", icon: "◐" },
-  { href: "/automations", label: "Automations", icon: "⌘" }
+  { href: "/dashboard", label: "Dashboard", icon: Gauge },
+  { href: "/conversations", label: "Inbox", icon: Inbox },
+  { href: "/calls", label: "Calls", icon: Phone },
+  { href: "/bookings", label: "Bookings", icon: CalendarDays },
+  { href: "/customers", label: "Customers", icon: UsersRound },
+  { href: "/receptionist", label: "Receptionist", icon: Bot },
+  { href: "/automations", label: "Automations", icon: RefreshCw }
 ];
 
 const manage = [
@@ -53,19 +66,23 @@ export function ProductNavigation() {
   return (
     <>
       <nav className="product-nav command-nav">
-        {main.map(item=>(
-          <Link key={item.href} href={item.href} className={active(item.href)?"active":""}>
-            <span className="nav-icon">{item.icon}</span>
-            <span>{item.label}</span>
-          </Link>
-        ))}
+        {main.map(item=>{
+          const Icon = item.icon;
+          return (
+            <Link key={item.href} href={item.href} className={active(item.href)?"active":""}>
+              <span className="nav-icon"><Icon size={16} strokeWidth={1.8} /></span>
+              <span>{item.label}</span>
+            </Link>
+          );
+        })}
 
         <NotificationBell />
 
         {["owner","admin"].includes(role) && (
           <div className="nav-group">
             <button className="nav-group-button" onClick={()=>setManageOpen(v=>!v)}>
-              <span>Manage</span><span>{manageOpen?"−":"+"}</span>
+              <span className="nav-group-label"><Settings2 size={13} /> Manage</span>
+              {manageOpen ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
             </button>
             {manageOpen && (
               <div className="nav-submenu">
@@ -81,7 +98,8 @@ export function ProductNavigation() {
 
         <div className="nav-group">
           <button className="nav-group-button muted-nav" onClick={()=>setAdvancedOpen(v=>!v)}>
-            <span>Advanced</span><span>{advancedOpen?"−":"+"}</span>
+            <span className="nav-group-label"><Sparkles size={13} /> Advanced</span>
+            {advancedOpen ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
           </button>
           {advancedOpen && (
             <div className="nav-submenu">
@@ -96,13 +114,16 @@ export function ProductNavigation() {
       </nav>
 
       <nav className="mobile-nav">
-        {main.filter(item=>["/dashboard","/conversations","/bookings"].includes(item.href)).map(item=>(
-          <Link key={item.href} href={item.href} className={active(item.href)?"active":""}>
-            <span>{item.icon}</span><small>{item.label}</small>
-          </Link>
-        ))}
+        {main.filter(item=>["/dashboard","/conversations","/bookings"].includes(item.href)).map(item=>{
+          const Icon = item.icon;
+          return (
+            <Link key={item.href} href={item.href} className={active(item.href)?"active":""}>
+              <Icon size={18} strokeWidth={1.8} /><small>{item.label}</small>
+            </Link>
+          );
+        })}
         <Link href="/notifications" className={active("/notifications")?"active":""}>
-          <span>◉</span><small>Alerts</small>
+          <Sparkles size={18} strokeWidth={1.8} /><small>Alerts</small>
         </Link>
       </nav>
     </>
