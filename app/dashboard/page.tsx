@@ -1,4 +1,15 @@
 import Link from "next/link";
+import {
+  ArrowUpRight,
+  Bot,
+  CalendarDays,
+  ChevronRight,
+  Inbox,
+  MessageSquareText,
+  Sparkles,
+  UserRoundCheck,
+  UsersRound
+} from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getPrimaryUserBusiness } from "@/lib/auth/access";
@@ -70,14 +81,25 @@ export default async function DashboardPage() {
   const receptionistReady = Boolean(serviceCount && hoursCount);
 
   const metrics = [
-    {label:"Conversations",value:todayConversations ?? 0,icon:"✉",href:"/conversations"},
-    {label:"Bookings",value:todayBookings ?? 0,icon:"▣",href:"/bookings"},
-    {label:"Active leads",value:activeLeads ?? 0,icon:"◎",href:"/customers"},
-    {label:"Handovers",value:handovers ?? 0,icon:"↗",href:"/conversations"}
+    {label:"Conversations",value:todayConversations ?? 0,icon:MessageSquareText,href:"/conversations"},
+    {label:"Bookings",value:todayBookings ?? 0,icon:CalendarDays,href:"/bookings"},
+    {label:"Active leads",value:activeLeads ?? 0,icon:UsersRound,href:"/customers"},
+    {label:"Handovers",value:handovers ?? 0,icon:UserRoundCheck,href:"/conversations"}
+  ];
+
+  const quickActions = [
+    {label:"Inbox",href:"/conversations",icon:Inbox},
+    {label:"Bookings",href:"/bookings",icon:CalendarDays},
+    {label:"Customers",href:"/customers",icon:UsersRound},
+    {label:"Receptionist",href:"/receptionist",icon:Bot}
   ];
 
   return (
     <AppShell>
+      <div className="ambient-orb ambient-orb-one" />
+      <div className="ambient-orb ambient-orb-two" />
+      <div className="ambient-grid" />
+
       <div className="command-page">
         <header className="command-topbar">
           <div>
@@ -89,11 +111,11 @@ export default async function DashboardPage() {
 
           <div className="command-top-actions">
             {attention > 0 && (
-              <Link href="/conversations" className="command-alert">
+              <Link href="/conversations" className="command-alert glass-chip">
                 <span>{attention}</span> need attention
               </Link>
             )}
-            <div className={`command-agent-status ${receptionistReady ? "online" : ""}`}>
+            <div className={`command-agent-status glass-chip ${receptionistReady ? "online" : ""}`}>
               <span className="status-orb" />
               AI Receptionist
               <strong>{receptionistReady ? "Online" : "Setup"}</strong>
@@ -102,20 +124,23 @@ export default async function DashboardPage() {
         </header>
 
         <section className="command-metrics" aria-label="Today">
-          {metrics.map(metric=>(
-            <Link href={metric.href} className="command-metric" key={metric.label}>
-              <div className="command-metric-icon">{metric.icon}</div>
-              <div>
-                <span>{metric.label}</span>
-                <strong>{metric.value}</strong>
-              </div>
-              <span className="command-chevron">↗</span>
-            </Link>
-          ))}
+          {metrics.map(metric=>{
+            const Icon = metric.icon;
+            return (
+              <Link href={metric.href} className="command-metric glass-surface" key={metric.label}>
+                <div className="command-metric-icon"><Icon size={19} strokeWidth={1.7} /></div>
+                <div>
+                  <span>{metric.label}</span>
+                  <strong>{metric.value}</strong>
+                </div>
+                <ArrowUpRight className="command-chevron" size={14} strokeWidth={1.7} />
+              </Link>
+            );
+          })}
         </section>
 
         <div className="command-grid">
-          <section className="command-panel activity-panel">
+          <section className="command-panel activity-panel glass-surface">
             <div className="command-panel-head">
               <div>
                 <div className="command-panel-title">
@@ -124,17 +149,17 @@ export default async function DashboardPage() {
                 </div>
                 <p>What your receptionist has been handling.</p>
               </div>
-              <Link href="/conversations" className="command-text-link">View inbox</Link>
+              <Link href="/conversations" className="command-text-link">View inbox <ArrowUpRight size={12} /></Link>
             </div>
 
             <div className="activity-list">
               {(recentConversations ?? []).length === 0 ? (
                 <div className="command-empty">
-                  <div className="command-empty-mark">✦</div>
+                  <div className="command-empty-mark"><Sparkles size={18} strokeWidth={1.6} /></div>
                   <strong>Quiet for now</strong>
                   <span>New customer activity will appear here automatically.</span>
                 </div>
-              ) : (recentConversations ?? []).map((conversation:any,index:number) => {
+              ) : (recentConversations ?? []).map((conversation:any) => {
                 const customer = Array.isArray(conversation.customers)
                   ? conversation.customers[0]
                   : conversation.customers;
@@ -142,7 +167,9 @@ export default async function DashboardPage() {
                 return (
                   <Link href={`/conversations/${conversation.id}`} className="activity-row" key={conversation.id}>
                     <div className={`activity-rail ${human ? "human" : ""}`}><span /></div>
-                    <div className="activity-icon">{human ? "↗" : "✉"}</div>
+                    <div className="activity-icon">
+                      {human ? <UserRoundCheck size={15} strokeWidth={1.7} /> : <MessageSquareText size={15} strokeWidth={1.7} />}
+                    </div>
                     <div className="activity-copy">
                       <strong>{human ? "Handover requested" : "Customer conversation"}</strong>
                       <span>{customer?.full_name || customer?.phone || "Customer"} · {human ? "Waiting for your team" : "AI handling"}</span>
@@ -151,7 +178,7 @@ export default async function DashboardPage() {
                       <span className="activity-unread">{conversation.unread_for_staff}</span>
                     )}
                     <time>{timeAgo(conversation.updated_at)}</time>
-                    <span className="activity-arrow">›</span>
+                    <ChevronRight className="activity-arrow" size={14} strokeWidth={1.6} />
                   </Link>
                 );
               })}
@@ -159,7 +186,7 @@ export default async function DashboardPage() {
           </section>
 
           <aside className="command-side">
-            <section className="command-panel glance-panel">
+            <section className="command-panel glance-panel glass-surface">
               <div className="command-panel-head compact">
                 <div>
                   <h2>Today at a glance</h2>
@@ -174,21 +201,26 @@ export default async function DashboardPage() {
               </div>
             </section>
 
-            <section className="command-panel quick-panel">
+            <section className="command-panel quick-panel glass-surface">
               <div className="command-panel-head compact">
                 <div><h2>Quick actions</h2></div>
               </div>
               <div className="quick-grid">
-                <Link href="/conversations"><span>✉</span><strong>Inbox</strong></Link>
-                <Link href="/bookings"><span>▣</span><strong>Bookings</strong></Link>
-                <Link href="/customers"><span>◎</span><strong>Customers</strong></Link>
-                <Link href="/receptionist"><span>◐</span><strong>Receptionist</strong></Link>
+                {quickActions.map(item=>{
+                  const Icon = item.icon;
+                  return (
+                    <Link href={item.href} key={item.label}>
+                      <span><Icon size={17} strokeWidth={1.7} /></span>
+                      <strong>{item.label}</strong>
+                    </Link>
+                  );
+                })}
               </div>
             </section>
 
             {(needsSetup || pendingSuggestions) && (
-              <section className="command-nudge">
-                <span>✦</span>
+              <section className="command-nudge glass-surface">
+                <span><Sparkles size={15} strokeWidth={1.7} /></span>
                 <div>
                   <strong>{needsSetup ? "Finish setup" : "Receptionist can improve"}</strong>
                   <p>
@@ -197,7 +229,7 @@ export default async function DashboardPage() {
                       : `${pendingSuggestions} suggestion${pendingSuggestions === 1 ? "" : "s"} waiting for review.`}
                   </p>
                 </div>
-                <Link href={needsSetup ? "/settings" : "/improve"}>Open →</Link>
+                <Link href={needsSetup ? "/settings" : "/improve"}>Open <ArrowUpRight size={11} /></Link>
               </section>
             )}
           </aside>
