@@ -6,17 +6,17 @@ import { useEffect, useState } from "react";
 import { NotificationBell } from "@/components/NotificationBell";
 
 const main = [
-  { href: "/dashboard", label: "Home", icon: "⌂" },
-  { href: "/receptionist", label: "Your Receptionist", icon: "✦" },
-  { href: "/conversations", label: "Inbox", icon: "◌" },
-  { href: "/calls", label: "Calls", icon: "☎" },
-  { href: "/bookings", label: "Bookings", icon: "□" },
+  { href: "/dashboard", label: "Dashboard", icon: "⌂" },
+  { href: "/conversations", label: "Inbox", icon: "✉" },
+  { href: "/calls", label: "Calls", icon: "⌕" },
+  { href: "/bookings", label: "Bookings", icon: "▣" },
   { href: "/customers", label: "Customers", icon: "◎" },
-  { href: "/automations", label: "Automations", icon: "↻" },
-  { href: "/improve", label: "Improve", icon: "＋" }
+  { href: "/receptionist", label: "Receptionist", icon: "◐" },
+  { href: "/automations", label: "Automations", icon: "⌘" }
 ];
 
 const manage = [
+  { href: "/improve", label: "Improve receptionist" },
   { href: "/settings", label: "Business profile" },
   { href: "/team", label: "Team" },
   { href: "/integrations", label: "Connections" },
@@ -30,7 +30,7 @@ const advanced = [
   { href: "/usage", label: "Usage" },
   { href: "/", label: "Agent tester" },
   { href: "/whatsapp", label: "WhatsApp tester" },
-  { href: "/onboarding", label: "Create another workspace" }
+  { href: "/onboarding", label: "Create workspace" }
 ];
 
 export function ProductNavigation() {
@@ -52,7 +52,7 @@ export function ProductNavigation() {
 
   return (
     <>
-      <nav className="product-nav">
+      <nav className="product-nav command-nav">
         {main.map(item=>(
           <Link key={item.href} href={item.href} className={active(item.href)?"active":""}>
             <span className="nav-icon">{item.icon}</span>
@@ -96,7 +96,7 @@ export function ProductNavigation() {
       </nav>
 
       <nav className="mobile-nav">
-        {main.filter(item=>["/dashboard","/receptionist","/conversations"].includes(item.href)).map(item=>(
+        {main.filter(item=>["/dashboard","/conversations","/bookings"].includes(item.href)).map(item=>(
           <Link key={item.href} href={item.href} className={active(item.href)?"active":""}>
             <span>{item.icon}</span><small>{item.label}</small>
           </Link>
