@@ -1,8 +1,10 @@
 import crypto from "crypto";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { findOrCreateCustomerByIdentity } from "@/lib/crm/identity";
+import { getOrCreateConversation } from "@/lib/crm/conversations";
 import { resolveVoiceBusiness } from "@/lib/voice/resolve-business";
 import { buildVoiceSessionPrompts } from "@/lib/voice/prompt";
+import { voiceResponseTools } from "@/lib/voice/tools";
 
 export const runtime = "nodejs";
 
@@ -115,7 +117,10 @@ async function acceptLiveSession(sessionId: string, slug: string) {
             type:"responses",
             responses:{
               model:process.env.OPENAI_LIVE_BACKEND_MODEL || "gpt-6-luna",
-              instructions:backendInstructions
+              instructions:backendInstructions,
+              tools:voiceResponseTools,
+              tool_choice:"auto",
+              parallel_tool_calls:false
             }
           }
         }
@@ -125,6 +130,28 @@ async function acceptLiveSession(sessionId: string, slug: string) {
 
   if (!response.ok) {
     throw new Error(`OpenAI Live accept failed (${response.status}): ${await response.text()}`);
+  }
+}
+
+async function attachVoiceWorker(sessionId: string) {
+  const workerUrl = process.env.VOICE_WORKER_URL;
+  const workerSecret = process.env.VOICE_WORKER_SECRET;
+
+  if (!workerUrl || !workerSecret) {
+    throw new Error("VOICE_WORKER_URL or VOICE_WORKER_SECRET is missing");
+  }
+
+  const response = await fetch(`${workerUrl.replace(/\/$/,"")}/attach`,{
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json",
+      "x-inmotion-voice-worker-secret":workerSecret
+    },
+    body:JSON.stringify({ sessionId })
+  });
+
+  if (!response.ok) {
+    throw new Error(`Voice worker attach failed (${response.status}): ${await response.text()}`);
   }
 }
 
@@ -174,6 +201,13 @@ export async function POST(request: Request) {
         })
       : null;
 
+    const conversation = await getOrCreateConversation({
+      businessId:business.id,
+      customerId:customer?.id ?? null,
+      channel:"voice",
+      externalThreadId:sessionId
+    });
+
     const supabase = createServerSupabaseClient();
 
     const { error: callError } = await supabase
@@ -181,6 +215,7 @@ export async function POST(request: Request) {
       .upsert({
         business_id:business.id,
         customer_id:customer?.id ?? null,
+        conversation_id:conversation.id,
         provider:"openai_sip",
         external_call_id:sessionId,
         direction:"inbound",
@@ -199,6 +234,7 @@ export async function POST(request: Request) {
     if (callError) throw new Error(callError.message);
 
     await acceptLiveSession(sessionId,business.slug);
+    await attachVoiceWorker(sessionId);
 
     await finishWebhook(webhookId,business.id);
     return new Response("OK", { status: 200 });
