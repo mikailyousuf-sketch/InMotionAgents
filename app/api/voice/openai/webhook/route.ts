@@ -67,16 +67,54 @@ function extractPhoneFromSip(value: string | null) {
 
 async function claimWebhook(webhookId: string) {
   const supabase = createServerSupabaseClient();
+  const now = new Date().toISOString();
+
   const { error } = await supabase.from("webhook_receipts").insert({
     provider: "openai",
     external_event_id: webhookId,
     status: "processing",
-    updated_at: new Date().toISOString()
+    updated_at: now
   });
 
   if (!error) return true;
-  if (error.code === "23505") return false;
-  throw new Error(error.message);
+  if (error.code !== "23505") throw new Error(error.message);
+
+  const { data: existing, error: readError } = await supabase
+    .from("webhook_receipts")
+    .select("id,status,updated_at")
+    .eq("provider","openai")
+    .eq("external_event_id",webhookId)
+    .maybeSingle();
+
+  if (readError) throw new Error(readError.message);
+  if (!existing || existing.status === "completed") return false;
+
+  const staleCutoff = new Date(Date.now() - 10 * 60_000).toISOString();
+  const reclaimable =
+    existing.status === "failed" ||
+    (existing.status === "processing" && existing.updated_at < staleCutoff);
+
+  if (!reclaimable) return false;
+
+  let reclaim = supabase
+    .from("webhook_receipts")
+    .update({
+      status:"processing",
+      last_error:null,
+      updated_at:now
+    })
+    .eq("id",existing.id);
+
+  reclaim = existing.status === "failed"
+    ? reclaim.eq("status","failed")
+    : reclaim.eq("status","processing").lt("updated_at",staleCutoff);
+
+  const { data: claimed, error: reclaimError } = await reclaim
+    .select("id")
+    .maybeSingle();
+
+  if (reclaimError) throw new Error(reclaimError.message);
+  return Boolean(claimed);
 }
 
 async function finishWebhook(webhookId: string, businessId: string | null, error?: string) {
