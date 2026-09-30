@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "voice-worker": "node services/voice-sideband/index.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.6.1",
@@ -15,7 +16,8 @@
     "openai": "^4.89.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "lucide-react": "^0.468.0"
+    "lucide-react": "^0.468.0",
+    "ws": "^8.18.0"
   },
   "devDependencies": {
     "@types/node": "^22.13.10",
