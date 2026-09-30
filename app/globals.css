@@ -1697,3 +1697,146 @@ h1,h2,h3,.command-business-name,.command-metric strong,.glance-list strong {
   .ambient-orb-one { width:280px;height:280px;right:-120px;top:30px; }
   .command-main { background-size:42px 42px; }
 }
+
+
+/* ===== InMotion Command — refinement pass 3 ===== */
+body {
+  font-size:16px;
+  background:
+    radial-gradient(ellipse at 84% 4%,rgba(75,111,226,.22) 0%,rgba(37,62,122,.10) 24%,transparent 48%),
+    radial-gradient(ellipse at 14% 82%,rgba(35,109,143,.14) 0%,transparent 42%),
+    radial-gradient(ellipse at 56% 106%,rgba(70,54,164,.11) 0%,transparent 42%),
+    linear-gradient(145deg,#04070c 0%,#07101a 36%,#050a12 68%,#03060a 100%);
+}
+
+.command-main {
+  background:
+    linear-gradient(rgba(255,255,255,.016) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.012) 1px,transparent 1px),
+    radial-gradient(circle at 20% 16%,rgba(255,255,255,.018) 0 1px,transparent 1.5px),
+    radial-gradient(circle at 74% 64%,rgba(255,255,255,.014) 0 1px,transparent 1.5px);
+  background-size:58px 58px,58px 58px,23px 23px,29px 29px;
+}
+.command-main:before {
+  background:
+    linear-gradient(116deg,transparent 0 36%,rgba(119,153,255,.045) 36.15%,transparent 36.5%),
+    linear-gradient(64deg,transparent 0 73%,rgba(105,142,244,.035) 73.1%,transparent 73.5%),
+    radial-gradient(circle at 87% 12%,rgba(92,126,230,.20),transparent 26rem),
+    radial-gradient(circle at 39% 95%,rgba(38,108,163,.09),transparent 28rem),
+    linear-gradient(180deg,rgba(29,51,94,.16),transparent 320px);
+}
+.command-main:after {
+  opacity:.23;
+}
+
+.ambient-orb-one {
+  width:520px;
+  height:520px;
+  right:-170px;
+  top:30px;
+  background:rgba(59,97,223,.34);
+  filter:blur(105px);
+}
+.ambient-orb-two {
+  width:390px;
+  height:390px;
+  left:6%;
+  bottom:-175px;
+  background:rgba(30,123,166,.18);
+  filter:blur(100px);
+}
+.ambient-grid:after {
+  content:"";
+  position:absolute;
+  inset:8% 4% auto auto;
+  width:38vw;
+  height:38vw;
+  max-width:580px;
+  max-height:580px;
+  border-radius:50%;
+  border:1px solid rgba(150,177,255,.035);
+  box-shadow:
+    0 0 0 65px rgba(150,177,255,.014),
+    0 0 0 130px rgba(150,177,255,.009),
+    0 0 120px rgba(80,112,210,.045);
+  transform:translate(22%,-22%);
+}
+.ambient-grid:before {
+  content:"";
+  position:absolute;
+  left:28%;
+  top:9%;
+  width:1px;
+  height:76%;
+  background:linear-gradient(180deg,transparent,rgba(135,164,246,.08),transparent);
+  transform:rotate(19deg);
+  box-shadow:185px 0 rgba(135,164,246,.028),370px 0 rgba(135,164,246,.018);
+}
+
+.glass-surface {
+  background:
+    linear-gradient(148deg,rgba(26,40,62,.58),rgba(9,17,29,.34) 50%,rgba(7,14,24,.46))!important;
+  border-color:rgba(199,216,247,.15)!important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.075),
+    inset 1px 0 0 rgba(255,255,255,.02),
+    inset 0 -1px 0 rgba(255,255,255,.018),
+    0 28px 80px rgba(0,0,0,.24),
+    0 5px 24px rgba(25,57,116,.06);
+  backdrop-filter:blur(30px) saturate(145%);
+  -webkit-backdrop-filter:blur(30px) saturate(145%);
+}
+.glass-surface:before {
+  background:
+    linear-gradient(135deg,rgba(255,255,255,.045),transparent 24%,transparent 70%,rgba(99,132,229,.028)),
+    radial-gradient(circle at 10% 0%,rgba(255,255,255,.035),transparent 30%);
+}
+.command-sidebar {
+  background:
+    linear-gradient(180deg,rgba(10,17,28,.71),rgba(5,10,17,.60)),
+    rgba(4,8,14,.6);
+  backdrop-filter:blur(36px) saturate(145%);
+  -webkit-backdrop-filter:blur(36px) saturate(145%);
+}
+
+/* Larger type rhythm */
+.command-nav > a,
+.command-sidebar .notification-link {
+  font-size:14px;
+  min-height:45px;
+}
+.command-sidebar .nav-submenu a { font-size:13px; }
+.command-sidebar .nav-group-button { font-size:13px; }
+.sidebar-status strong { font-size:12px; }
+.sidebar-status div span { font-size:10px; }
+
+.command-business-name { font-size:21px; }
+.command-date { font-size:12px; }
+.command-agent-status,
+.command-alert { font-size:11px; }
+.command-agent-status strong { font-size:10px; }
+
+.command-metric div:nth-child(2) span { font-size:12px; }
+.command-metric div:nth-child(2) strong { font-size:32px; }
+.command-panel-head h2 { font-size:17px; }
+.command-panel-head p { font-size:11px; }
+.command-text-link { font-size:11px; }
+.live-indicator { font-size:9px; }
+
+.activity-copy strong { font-size:12px; }
+.activity-copy span { font-size:10px; }
+.activity-row time { font-size:10px; }
+.glance-list span { font-size:11px; }
+.glance-list strong { font-size:19px; }
+.quick-grid a strong { font-size:10px; }
+.command-nudge strong { font-size:11px; }
+.command-nudge p { font-size:9px; }
+.command-nudge a { font-size:10px; }
+.command-empty strong { font-size:13px; }
+.command-empty span { font-size:10px; }
+
+@media (max-width:800px) {
+  body { font-size:15px; }
+  .command-main { background-size:44px 44px,44px 44px,21px 21px,27px 27px; }
+  .ambient-grid:after { opacity:.6; }
+}
