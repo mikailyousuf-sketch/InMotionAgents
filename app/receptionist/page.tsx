@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { ArrowUpRight, Check, Settings2, Sparkles, WandSparkles, X } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 
 function describeChange(change:any){
@@ -79,22 +80,36 @@ export default function ReceptionistPage(){
 
   return (
     <AppShell>
-      <div className="receptionist-control-shell">
-        <header className="receptionist-control-header">
+      <div className="ambient-orb ambient-orb-one"/>
+      <div className="ambient-orb ambient-orb-two"/>
+      <div className="ambient-grid"/>
+
+      <div className="receptionist-page command-page">
+        <header className="section-header receptionist-page-head">
           <div>
             <div className="eyebrow">Your receptionist</div>
             <h1>Tell it how your business works.</h1>
-            <p className="muted">Use plain English. InMotion will show you the exact change before anything is updated.</p>
+            <p>Describe the change in normal language. Nothing updates until you approve it.</p>
           </div>
-          <Link href="/settings" className="text-link">Manual settings →</Link>
+          <Link href="/settings" className="section-link">
+            <Settings2 size={14}/> Manual settings <ArrowUpRight size={13}/>
+          </Link>
         </header>
 
-        <section className="receptionist-command-card">
+        <section className="receptionist-editor glass-surface">
+          <div className="receptionist-editor-top">
+            <span><WandSparkles size={17} strokeWidth={1.7}/></span>
+            <div>
+              <strong>What should your receptionist know or do differently?</strong>
+              <p>Policies, tone, FAQs, guardrails and automations can all be changed here.</p>
+            </div>
+          </div>
+
           <textarea
             autoFocus
             value={instruction}
             onChange={e=>setInstruction(e.target.value)}
-            placeholder="e.g. If somebody asks for a refund, never promise one. Send it to a manager."
+            placeholder="For example: If someone asks for a refund, never promise one. Send it to a manager."
             onKeyDown={e=>{
               if(e.key==="Enter"&&(e.metaKey||e.ctrlKey)){
                 e.preventDefault();
@@ -102,17 +117,19 @@ export default function ReceptionistPage(){
               }
             }}
           />
-          <div className="command-footer">
-            <span className="muted">⌘/Ctrl + Enter to review</span>
+
+          <div className="receptionist-editor-footer">
+            <span>Ctrl / ⌘ + Enter to review</span>
             <button disabled={!instruction.trim()||working} onClick={propose}>
+              <Sparkles size={14}/>
               {working&&!proposal?"Thinking…":"Review change"}
             </button>
           </div>
         </section>
 
         {!proposal&&(
-          <section className="receptionist-examples">
-            <span className="muted">Try saying:</span>
+          <section className="receptionist-suggestions">
+            <span>Try one of these</span>
             <div>
               {examples.map(example=>(
                 <button key={example} onClick={()=>setInstruction(example)}>{example}</button>
@@ -122,59 +139,58 @@ export default function ReceptionistPage(){
         )}
 
         {proposal&&(
-          <section className="proposal-card">
-            <div className="proposal-heading">
+          <section className="receptionist-proposal glass-surface">
+            <div className="receptionist-proposal-head">
               <div>
-                <div className="eyebrow">Proposed changes</div>
+                <div className="eyebrow">Review before applying</div>
                 <h2>{proposal.summary}</h2>
               </div>
-              <span className="proposal-count">{(proposal.changes??[]).length} change{(proposal.changes??[]).length===1?"":"s"}</span>
+              <span>{(proposal.changes??[]).length} change{(proposal.changes??[]).length===1?"":"s"}</span>
             </div>
 
             {(proposal.changes??[]).length===0 ? (
-              <div className="proposal-empty">
+              <div className="receptionist-proposal-empty">
                 <strong>I need a little more detail.</strong>
-                <p className="muted">{proposal.summary}</p>
+                <p>{proposal.summary}</p>
               </div>
             ) : (
-              <div className="proposal-list">
+              <div className="receptionist-change-list">
                 {(proposal.changes??[]).map((change:any,index:number)=>(
-                  <div className="proposal-row" key={index}>
-                    <div className="proposal-number">{index+1}</div>
+                  <div className="receptionist-change" key={index}>
+                    <div className="change-number">{index+1}</div>
                     <div>
                       <strong>{describeChange(change)}</strong>
-                      <div className="muted">{change.type} · {change.operation}</div>
+                      <span>{change.type} · {change.operation}</span>
                     </div>
                   </div>
                 ))}
               </div>
             )}
 
-            <div className="proposal-actions">
-              <button className="soft-button" disabled={working} onClick={()=>decide("reject")}>Cancel</button>
+            <div className="receptionist-proposal-actions">
+              <button className="receptionist-cancel" disabled={working} onClick={()=>decide("reject")}>
+                <X size={14}/> Cancel
+              </button>
               {(proposal.changes??[]).length>0&&(
                 <button disabled={working} onClick={()=>decide("apply")}>
-                  {working?"Applying…":"Apply changes"}
+                  <Check size={14}/> {working?"Applying…":"Apply changes"}
                 </button>
               )}
             </div>
           </section>
         )}
 
-        {status&&<p className="receptionist-status">{status}</p>}
+        {status&&<div className="receptionist-feedback">{status}</div>}
 
-        <section className="receptionist-control-links">
-          <div>
-            <strong>Prefer manual control?</strong>
-            <span className="muted">Every setting is still available.</span>
-          </div>
+        <footer className="receptionist-footer-links">
+          <span>Need precise control?</span>
           <div>
             <Link href="/settings">FAQs & policies</Link>
             <Link href="/guardrails">Guardrails</Link>
             <Link href="/automations">Automations</Link>
             <Link href="/improve">Improve</Link>
           </div>
-        </section>
+        </footer>
       </div>
     </AppShell>
   );
