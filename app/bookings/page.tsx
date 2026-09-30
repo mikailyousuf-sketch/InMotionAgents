@@ -1,3 +1,4 @@
+import { CalendarDays, Clock3, History, UserRound } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getPrimaryUserBusiness } from "@/lib/auth/access";
@@ -25,56 +26,91 @@ export default async function BookingsPage(){
     const resource=Array.isArray(booking.resources)?booking.resources[0]:booking.resources;
 
     return (
-      <div className="booking-row">
-        <div className="booking-date">
-          <strong>{new Date(booking.starts_at).toLocaleDateString("en-ZA",{day:"2-digit",month:"short"})}</strong>
+      <div className="schedule-row">
+        <div className="schedule-date">
+          <strong>{new Date(booking.starts_at).toLocaleDateString("en-ZA",{day:"2-digit"})}</strong>
+          <span>{new Date(booking.starts_at).toLocaleDateString("en-ZA",{month:"short"})}</span>
+        </div>
+
+        <div className="schedule-time">
+          <Clock3 size={14} strokeWidth={1.7}/>
           <span>{new Date(booking.starts_at).toLocaleTimeString("en-ZA",{hour:"2-digit",minute:"2-digit"})}</span>
         </div>
-        <div className="booking-main">
+
+        <div className="schedule-main">
           <strong>{customer?.full_name || "Customer"}</strong>
-          <div className="muted">{service?.name || "Booking"}{resource?.name ? ` · ${resource.name}` : ""}</div>
+          <span>{service?.name || "Booking"}{resource?.name ? ` · ${resource.name}` : ""}</span>
         </div>
-        <span className="integration-status">{booking.status}</span>
+
+        <div className="schedule-status">{booking.status}</div>
       </div>
     );
   }
 
   return (
     <AppShell>
-      <div className="home-header">
-        <div>
-          <div className="eyebrow">Bookings</div>
-          <h1>Appointments</h1>
-          <p className="muted">A clean view of what your receptionist has booked and what’s coming next.</p>
+      <div className="ambient-orb ambient-orb-one"/>
+      <div className="ambient-orb ambient-orb-two"/>
+      <div className="ambient-grid"/>
+
+      <div className="section-page command-page">
+        <header className="section-header">
+          <div>
+            <div className="eyebrow">Bookings</div>
+            <h1>Appointments</h1>
+            <p>{business.name} · everything your receptionist has booked, in one clean schedule.</p>
+          </div>
+
+          <div className="section-stat glass-chip">
+            <CalendarDays size={15} strokeWidth={1.7}/>
+            <span><strong>{upcoming.length}</strong> upcoming</span>
+          </div>
+        </header>
+
+        <div className="bookings-clean-layout">
+          <section className="section-panel glass-surface">
+            <div className="section-panel-head">
+              <div>
+                <h2>Upcoming</h2>
+                <p>Your next scheduled appointments.</p>
+              </div>
+              <CalendarDays size={17} strokeWidth={1.6}/>
+            </div>
+
+            {!upcoming.length ? (
+              <div className="section-empty">
+                <span><CalendarDays size={21} strokeWidth={1.5}/></span>
+                <strong>No upcoming bookings</strong>
+                <p>New appointments will appear here automatically.</p>
+              </div>
+            ) : (
+              <div className="schedule-list">
+                {upcoming.map((booking:any)=><BookingRow key={booking.id} booking={booking}/>)}
+              </div>
+            )}
+          </section>
+
+          <section className="section-panel glass-surface">
+            <div className="section-panel-head">
+              <div>
+                <h2>Recent history</h2>
+                <p>Past and completed appointments.</p>
+              </div>
+              <History size={17} strokeWidth={1.6}/>
+            </div>
+
+            {!past.length ? (
+              <div className="section-empty compact">
+                <span><UserRound size={20} strokeWidth={1.5}/></span>
+                <strong>No booking history yet</strong>
+              </div>
+            ) : (
+              <div className="schedule-list">
+                {past.map((booking:any)=><BookingRow key={booking.id} booking={booking}/>)}
+              </div>
+            )}
+          </section>
         </div>
-      </div>
-
-      <div className="bookings-layout">
-        <section className="card home-panel">
-          <div className="panel-heading">
-            <div>
-              <h2>Upcoming</h2>
-              <p className="muted">{upcoming.length} appointment{upcoming.length===1?"":"s"}</p>
-            </div>
-          </div>
-          {!upcoming.length
-            ? <div className="empty-state"><strong>No upcoming bookings</strong><p className="muted">New appointments will appear here.</p></div>
-            : upcoming.map((booking:any)=><BookingRow key={booking.id} booking={booking}/>)
-          }
-        </section>
-
-        <section className="card home-panel">
-          <div className="panel-heading">
-            <div>
-              <h2>Recent history</h2>
-              <p className="muted">Completed and past bookings.</p>
-            </div>
-          </div>
-          {!past.length
-            ? <div className="empty-state"><strong>No booking history yet</strong></div>
-            : past.map((booking:any)=><BookingRow key={booking.id} booking={booking}/>)
-          }
-        </section>
       </div>
     </AppShell>
   );
