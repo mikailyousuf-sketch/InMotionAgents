@@ -3404,3 +3404,400 @@ body {
   .automation-status-chip { grid-column:1; }
   .automation-secondary-button { grid-column:2;grid-row:1/3; }
 }
+
+
+/* ===== Visual QA, accessibility + scrollbar pass ===== */
+:root {
+  --muted:#b0bac9;
+  --muted-2:#8996a9;
+  --im-muted:#aab6c8;
+  --im-muted-strong:#c3ccda;
+}
+
+/* Higher contrast text across the product */
+.muted,
+.command-date,
+.command-panel-head p,
+.activity-copy span,
+.glance-list span,
+.command-nudge p,
+.inbox-header p,
+.inbox-person span,
+.inbox-channel,
+.inbox-queue-head p,
+.conversation-identity span,
+.conversation-thread-head p,
+.context-empty,
+.context-details span,
+.context-booking-card span,
+.customer-primary span,
+.customer-contacted span,
+.section-header p,
+.section-panel-head p,
+.schedule-main span,
+.schedule-time,
+.receptionist-editor-top p,
+.receptionist-suggestions > span,
+.receptionist-feedback,
+.automation-card-head p,
+.automation-helper,
+.automation-job time,
+.automation-job > span,
+.clean-call-main span,
+.clean-call-meta time,
+.usage-clean-card small,
+.usage-plan-body span,
+.usage-note,
+.clean-notification-row p,
+.clean-notification-row time,
+.customer-profile-head p,
+.profile-list-row span,
+.nav-section-copy small,
+.nav-section-links a,
+.sidebar-status div span {
+  color:#aeb9c9!important;
+}
+
+/* Stop tiny text from disappearing into the UI */
+.command-date,
+.command-panel-head p,
+.activity-copy span,
+.activity-row time,
+.glance-list span,
+.command-nudge p,
+.command-nudge a,
+.command-empty span,
+.inbox-queue-head p,
+.inbox-person span,
+.inbox-updated strong,
+.inbox-updated span,
+.conversation-identity span,
+.conversation-status,
+.conversation-assignee,
+.conversation-action,
+.conversation-thread-head p,
+.conversation-message-meta strong,
+.conversation-message-meta span,
+.conversation-composer-footer > span,
+.context-details span,
+.context-booking-card span,
+.context-empty,
+.context-note span,
+.schedule-time,
+.schedule-main span,
+.schedule-status,
+.customer-primary span,
+.customer-lead-pill,
+.customer-contacted span,
+.customer-contacted strong,
+.receptionist-editor-top p,
+.receptionist-editor-footer > span,
+.receptionist-suggestions > span,
+.receptionist-suggestions button,
+.receptionist-change span,
+.receptionist-footer-links > span,
+.receptionist-footer-links a,
+.automation-card-head p,
+.automation-helper,
+.automation-trigger,
+.automation-status-chip,
+.automation-secondary-button,
+.automation-job time,
+.automation-job > span,
+.clean-call-main span,
+.clean-call-meta time,
+.usage-clean-card small,
+.usage-plan-body span,
+.usage-note,
+.clean-notification-row p,
+.clean-notification-row time,
+.customer-profile-head p,
+.profile-list-row span,
+.nav-section-copy small,
+.nav-section-links a {
+  font-size:11px!important;
+  line-height:1.45;
+}
+
+.activity-copy strong,
+.inbox-person strong,
+.conversation-identity strong,
+.conversation-message-body,
+.context-details strong,
+.context-booking-card strong,
+.schedule-main strong,
+.customer-primary strong,
+.receptionist-editor-top strong,
+.automation-row strong,
+.clean-call-main strong,
+.profile-list-row strong {
+  font-size:13px!important;
+}
+
+.eyebrow {
+  color:#98a7bb!important;
+  font-size:11px!important;
+}
+.field-label > span,
+.onboarding-fields label > span,
+.agent-name-field > span {
+  color:#c2cbd8!important;
+}
+::placeholder {
+  color:#7f8da2!important;
+  opacity:1;
+}
+input:disabled,
+textarea:disabled,
+select:disabled {
+  opacity:.58;
+}
+
+/* Scrollbars */
+* {
+  scrollbar-width:thin;
+  scrollbar-color:#526986 rgba(8,14,23,.35);
+}
+*::-webkit-scrollbar {
+  width:10px;
+  height:10px;
+}
+*::-webkit-scrollbar-track {
+  background:rgba(6,11,18,.38);
+  border-radius:999px;
+}
+*::-webkit-scrollbar-thumb {
+  background:linear-gradient(180deg,rgba(111,143,214,.72),rgba(66,91,139,.72));
+  border:2px solid rgba(6,11,18,.62);
+  border-radius:999px;
+  min-height:36px;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background:linear-gradient(180deg,rgba(135,164,231,.92),rgba(80,108,163,.88));
+}
+*::-webkit-scrollbar-corner {
+  background:transparent;
+}
+.command-sidebar::-webkit-scrollbar { width:7px; }
+.command-sidebar::-webkit-scrollbar-track { background:transparent; }
+.command-sidebar::-webkit-scrollbar-thumb {
+  border-width:1px;
+  background:rgba(105,132,190,.44);
+}
+.conversation-thread::-webkit-scrollbar,
+.thread::-webkit-scrollbar,
+.messages::-webkit-scrollbar {
+  width:8px;
+}
+
+/* Better keyboard / click feedback */
+a,
+button,
+input,
+textarea,
+select {
+  -webkit-tap-highlight-color:transparent;
+}
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline:2px solid rgba(137,169,255,.72)!important;
+  outline-offset:2px;
+}
+button,
+a,
+input,
+textarea,
+select {
+  transition:
+    border-color .16s ease,
+    background-color .16s ease,
+    color .16s ease,
+    box-shadow .16s ease,
+    transform .16s ease;
+}
+button:not(:disabled):active,
+.primary-link:active,
+.section-link:active {
+  transform:translateY(1px);
+}
+::selection {
+  background:rgba(110,143,255,.32);
+  color:#fff;
+}
+
+/* Inputs and selects should never look like old browser UI */
+select {
+  color-scheme:dark;
+}
+select option {
+  background:#0d1522;
+  color:#edf2f8;
+}
+.command-main input,
+.command-main textarea,
+.command-main select,
+.auth-page input,
+.auth-page textarea,
+.auth-page select,
+.onboarding-page input,
+.onboarding-page textarea,
+.onboarding-page select {
+  caret-color:#a9bcff;
+}
+.command-main input:hover,
+.command-main textarea:hover,
+.command-main select:hover {
+  border-color:rgba(172,194,241,.18)!important;
+}
+
+/* Refine legacy pills/chips still used in admin pages */
+.command-main .integration-status,
+.command-main .attention-pill,
+.command-main .severity-pill,
+.command-main .notification-state,
+.command-main .review-chips span,
+.command-main .auth-proof span {
+  border-color:rgba(199,216,247,.12)!important;
+  background:rgba(255,255,255,.035)!important;
+  color:#bdc7d6!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.025);
+}
+.command-main .attention-pill.human,
+.command-main .severity-pill.error {
+  background:rgba(255,100,117,.08)!important;
+  color:#ffb0ba!important;
+  border-color:rgba(255,100,117,.16)!important;
+}
+.command-main .attention-pill.ai,
+.command-main .severity-pill.info {
+  background:rgba(90,128,228,.08)!important;
+  color:#b7c7ff!important;
+  border-color:rgba(110,143,255,.15)!important;
+}
+.command-main .severity-pill.warning {
+  background:rgba(240,179,93,.08)!important;
+  color:#f2cc91!important;
+  border-color:rgba(240,179,93,.16)!important;
+}
+
+/* Sidebar final cleanup */
+.command-nav > a,
+.command-sidebar .notification-link {
+  color:#aeb9c9!important;
+}
+.command-nav > a:hover,
+.command-nav > a.active,
+.command-sidebar .notification-link:hover {
+  color:#fff!important;
+  background:linear-gradient(90deg,rgba(88,119,204,.10),rgba(255,255,255,.018))!important;
+}
+.command-nav > a.active {
+  box-shadow:inset 2px 0 0 #86a2ff;
+}
+.command-nav .nav-icon {
+  color:#8493aa!important;
+}
+.command-nav a.active .nav-icon {
+  color:#a8bbff!important;
+}
+.nav-section-copy strong {
+  font-size:12px!important;
+}
+.nav-section-copy small {
+  font-size:10px!important;
+  color:#93a1b5!important;
+}
+.nav-section-links a {
+  min-height:38px;
+  font-size:11px!important;
+  color:#9ba9bd!important;
+}
+.nav-section-links a.active {
+  color:#f5f7fb!important;
+}
+.sidebar-status strong {
+  color:#edf2f8;
+}
+.sidebar-logout-button {
+  color:#9eabba!important;
+}
+.sidebar-logout-button:hover {
+  color:#fff!important;
+  background:rgba(255,255,255,.035)!important;
+}
+
+/* Cards and rows: consistent hover depth without overdoing glow */
+.inbox-row:hover,
+.customer-clean-row:hover,
+.clean-notification-row:hover,
+.profile-list-row:hover,
+.automation-row:hover,
+.clean-call-row:hover,
+.ops-row:hover {
+  background:rgba(91,121,190,.055)!important;
+}
+.glass-surface,
+.section-panel,
+.automation-card,
+.context-glass {
+  border-color:rgba(205,221,250,.15)!important;
+}
+
+/* Prevent text clipping in compact layouts */
+.command-main,
+.command-page,
+.section-page,
+.receptionist-page,
+.automation-page,
+.inbox-page,
+.conversation-page {
+  min-width:0;
+}
+.command-main strong,
+.command-main p,
+.command-main span,
+.command-main a,
+.command-main button {
+  text-rendering:optimizeLegibility;
+}
+
+/* Slightly stronger desktop body copy */
+@media (min-width:801px) {
+  .command-main {
+    font-size:16px;
+  }
+  .section-header p,
+  .inbox-header p,
+  .command-main > h1 + p.muted,
+  .home-header p {
+    font-size:15px!important;
+  }
+}
+
+/* Keep mobile readable instead of shrinking labels */
+@media (max-width:800px) {
+  .command-date,
+  .command-panel-head p,
+  .activity-copy span,
+  .inbox-person span,
+  .conversation-message-body,
+  .customer-primary span,
+  .schedule-main span,
+  .clean-notification-row p {
+    font-size:12px!important;
+  }
+}
+
+@media (prefers-reduced-motion:reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior:auto!important;
+    transition-duration:.01ms!important;
+    animation-duration:.01ms!important;
+    animation-iteration-count:1!important;
+  }
+}
