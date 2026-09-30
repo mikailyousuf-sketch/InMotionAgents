@@ -38,9 +38,21 @@ export async function POST(request:Request){
   const body=await request.json();
   const businessId=String(body?.businessId||"");
   const provider=String(body?.provider||"");
+  const allowedProviders=[
+    "whatsapp",
+    "voice",
+    "inmotion_booking",
+    "google_calendar",
+    "outlook",
+    "playtomic",
+    "custom_api"
+  ];
   const status=["connected","setup_required","disconnected"].includes(body?.status)?body.status:"setup_required";
 
   if(!businessId||!provider) return Response.json({error:"businessId and provider are required"},{status:400});
+  if(!allowedProviders.includes(provider)){
+    return Response.json({error:"Unsupported integration provider"},{status:400});
+  }
 
   const membership=await getMembership(user.id,businessId);
   if(!membership||!["owner","admin"].includes(membership.role)){
