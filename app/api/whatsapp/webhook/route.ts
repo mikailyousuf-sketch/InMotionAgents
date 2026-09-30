@@ -3,7 +3,9 @@ import { runAgentTurn } from "@/lib/agent/run-agent-turn";
 import { sendWhatsAppText } from "@/lib/whatsapp/client";
 import { resolveWhatsAppBusiness } from "@/lib/whatsapp/resolve-business";
 import {
-  whatsappMessageAlreadyProcessed,
+  claimWhatsAppMessage,
+  completeWhatsAppMessageReceipt,
+  failWhatsAppMessageReceipt,
   setExternalMessageId,
   recordWhatsAppDeliveryEvent
 } from "@/lib/whatsapp/messages";
@@ -15,7 +17,7 @@ export const runtime = "nodejs";
 
 function verifySignature(rawBody: string, signature: string | null) {
   const secret = process.env.META_APP_SECRET;
-  if (!secret) return true;
+  if (!secret) return false;
   if (!signature?.startsWith("sha256=")) return false;
 
   const expected = "sha256=" + crypto
@@ -132,15 +134,19 @@ export async function POST(request: Request) {
           const externalMessageId = String(message?.id ?? "");
           if (!externalMessageId) continue;
 
-          if (await whatsappMessageAlreadyProcessed(externalMessageId)) {
-            continue;
-          }
+          const claimed = await claimWhatsAppMessage(externalMessageId);
+          if (!claimed) continue;
 
-          if (message?.type !== "text" || !message?.text?.body) {
-            continue;
-          }
+          try {
+            if (!business) business = await resolveWhatsAppBusiness(phoneNumberId);
 
-          if (!business) business = await resolveWhatsAppBusiness(phoneNumberId);
+            if (message?.type !== "text" || !message?.text?.body) {
+              await completeWhatsAppMessageReceipt({
+                externalMessageId,
+                businessId: business.id
+              });
+              continue;
+            }
 
           const whatsappId = String(message.from ?? "").replace(/\D/g, "");
           const phone = whatsappId ? `+${whatsappId}` : null;
@@ -192,6 +198,11 @@ export async function POST(request: Request) {
                 : "You’ve been opted back in to automated WhatsApp messages."
             });
 
+            await completeWhatsAppMessageReceipt({
+              externalMessageId,
+              businessId: business.id
+            });
+
             continue;
           }
 
@@ -219,6 +230,23 @@ export async function POST(request: Request) {
               to: whatsappId,
               body: result.message
             });
+          }
+
+          await completeWhatsAppMessageReceipt({
+            externalMessageId,
+            businessId: business.id
+          });
+          } catch (messageError) {
+            const messageErrorText =
+              messageError instanceof Error ? messageError.message : String(messageError);
+
+            await failWhatsAppMessageReceipt({
+              externalMessageId,
+              businessId: business?.id ?? null,
+              error: messageErrorText
+            });
+
+            console.error("WhatsApp message processing error", messageError);
           }
         }
       }
