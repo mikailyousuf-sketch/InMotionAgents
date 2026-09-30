@@ -1,11 +1,31 @@
 import { createAuthServerClient } from "@/lib/supabase/auth-server";
+import { getPrimaryUserBusiness } from "@/lib/auth/access";
 import { processEscalationJobs } from "@/lib/notifications/worker";
+import { isInternalWorkerRequest } from "@/lib/security/internal-worker";
 
-export async function POST() {
+export async function POST(request: Request) {
+  if (isInternalWorkerRequest(request)) {
+    const results = await processEscalationJobs({ limit: 100 });
+    return Response.json({ processed: results.length, results, scope: "global" });
+  }
+
   const auth = await createAuthServerClient();
   const { data: { user } } = await auth.auth.getUser();
-  if (!user) return Response.json({ error: "Unauthorized" }, { status: 401 });
 
-  const results = await processEscalationJobs();
-  return Response.json({ processed: results.length, results });
+  if (!user) {
+    return Response.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const current = await getPrimaryUserBusiness();
+
+  if (!["owner", "admin"].includes(current.role)) {
+    return Response.json({ error: "Owner or admin access required" }, { status: 403 });
+  }
+
+  const results = await processEscalationJobs({
+    businessId: current.business.id,
+    limit: 25
+  });
+
+  return Response.json({ processed: results.length, results, scope: current.business.id });
 }
