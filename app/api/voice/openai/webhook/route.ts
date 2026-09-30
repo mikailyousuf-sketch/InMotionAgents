@@ -213,6 +213,7 @@ export async function POST(request: Request) {
     const event = JSON.parse(rawBody);
     const supported =
       event?.type === "live.transport.incoming" ||
+      event?.type === "live.call.incoming" ||
       event?.type === "realtime.call.incoming";
 
     if (!supported) {
