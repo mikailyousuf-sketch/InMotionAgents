@@ -1,3 +1,4 @@
+import { ArrowDownLeft, ArrowUpRight, Phone, PhoneCall } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getPrimaryUserBusiness } from "@/lib/auth/access";
@@ -17,55 +18,63 @@ export default async function CallsPage(){
 
   return (
     <AppShell>
-      <div className="home-header">
-        <div>
-          <div className="eyebrow">Calls</div>
-          <h1>Phone conversations</h1>
-          <p className="muted">Call history, AI summaries and outcomes stay separate from your WhatsApp inbox.</p>
-        </div>
-        <div className="receptionist-health setup">
-          <span className="health-dot" />
-          Voice connection coming next
-        </div>
-      </div>
+      <div className="ambient-orb ambient-orb-one"/>
+      <div className="ambient-orb ambient-orb-two"/>
+      <div className="ambient-grid"/>
 
-      <div className="card home-panel">
-        <div className="panel-heading">
+      <div className="section-page command-page">
+        <header className="section-header">
           <div>
-            <h2>Recent calls</h2>
-            <p className="muted">Once voice is connected, every call will appear here automatically.</p>
+            <div className="eyebrow">Calls</div>
+            <h1>Phone conversations</h1>
+            <p>Call history, summaries and outcomes from the same receptionist.</p>
           </div>
-        </div>
-
-        {!calls?.length ? (
-          <div className="empty-state">
-            <div className="empty-icon">☎</div>
-            <strong>No calls yet</strong>
-            <p className="muted">We’ve prepared the call workspace. Telephony provider connection is part of the production integration phase.</p>
+          <div className="section-stat glass-chip">
+            <PhoneCall size={15} strokeWidth={1.7}/>
+            <span>Voice connection coming next</span>
           </div>
-        ) : calls.map((call:any)=>{
-          const customer=Array.isArray(call.customers)?call.customers[0]:call.customers;
-          const minutes=call.duration_seconds ? Math.floor(call.duration_seconds/60) : 0;
-          const seconds=call.duration_seconds ? call.duration_seconds%60 : 0;
+        </header>
 
-          return (
-            <div className="call-row" key={call.id}>
-              <div className="call-icon">{call.direction==="outbound"?"↗":"↙"}</div>
-              <div className="call-main">
-                <strong>{customer?.full_name || call.from_number || "Unknown caller"}</strong>
-                <div className="muted">
-                  {call.handled_by ? `${call.handled_by.toUpperCase()} handled` : call.status}
-                  {call.duration_seconds ? ` · ${minutes}m ${seconds}s` : ""}
-                </div>
-                {call.summary && <p>{call.summary}</p>}
-              </div>
-              <div className="call-meta">
-                <span className={`attention-pill ${call.status==="completed"?"ai":"human"}`}>{call.status}</span>
-                <span className="muted">{new Date(call.started_at).toLocaleString("en-ZA")}</span>
-              </div>
+        <section className="section-panel glass-surface">
+          <div className="section-panel-head">
+            <div>
+              <h2>Recent calls</h2>
+              <p>Once voice is connected, every call will appear here automatically.</p>
             </div>
-          );
-        })}
+            <Phone size={17} strokeWidth={1.6}/>
+          </div>
+
+          {!calls?.length ? (
+            <div className="section-empty">
+              <span><Phone size={21} strokeWidth={1.5}/></span>
+              <strong>No calls yet</strong>
+              <p>The call workspace is ready for the production voice connection.</p>
+            </div>
+          ) : calls.map((call:any)=>{
+            const customer=Array.isArray(call.customers)?call.customers[0]:call.customers;
+            const minutes=call.duration_seconds ? Math.floor(call.duration_seconds/60) : 0;
+            const seconds=call.duration_seconds ? call.duration_seconds%60 : 0;
+            const DirectionIcon=call.direction==="outbound"?ArrowUpRight:ArrowDownLeft;
+
+            return (
+              <div className="clean-call-row" key={call.id}>
+                <div className="clean-call-icon"><DirectionIcon size={16} strokeWidth={1.7}/></div>
+                <div className="clean-call-main">
+                  <strong>{customer?.full_name || call.from_number || "Unknown caller"}</strong>
+                  <span>
+                    {call.handled_by ? `${call.handled_by.toUpperCase()} handled` : call.status}
+                    {call.duration_seconds ? ` · ${minutes}m ${seconds}s` : ""}
+                  </span>
+                  {call.summary && <p>{call.summary}</p>}
+                </div>
+                <div className="clean-call-meta">
+                  <span className="schedule-status">{call.status}</span>
+                  <time>{new Date(call.started_at).toLocaleString("en-ZA")}</time>
+                </div>
+              </div>
+            );
+          })}
+        </section>
       </div>
     </AppShell>
   );
