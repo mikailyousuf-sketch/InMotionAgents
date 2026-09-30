@@ -1,3 +1,4 @@
+import { Activity, CalendarCheck2, MessageSquareText, Send } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getPrimaryUserBusiness } from "@/lib/auth/access";
@@ -12,16 +13,8 @@ export default async function UsagePage() {
   const start = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString();
 
   const [{ data: events }, { data: subscription }] = await Promise.all([
-    supabase
-      .from("usage_events")
-      .select("event_type,quantity,created_at")
-      .eq("business_id", business.id)
-      .gte("created_at", start),
-    supabase
-      .from("business_subscriptions")
-      .select("status,plans(name,code,limits)")
-      .eq("business_id", business.id)
-      .maybeSingle()
+    supabase.from("usage_events").select("event_type,quantity,created_at").eq("business_id", business.id).gte("created_at", start),
+    supabase.from("business_subscriptions").select("status,plans(name,code,limits)").eq("business_id", business.id).maybeSingle()
   ]);
 
   const totals = (events ?? []).reduce<Record<string, number>>((acc, event: any) => {
@@ -30,36 +23,61 @@ export default async function UsagePage() {
   }, {});
 
   const cards = [
-    ["Agent turns", totals.agent_turn ?? 0],
-    ["Inbound messages", totals.message_inbound ?? 0],
-    ["Outbound messages", totals.message_outbound ?? 0],
-    ["Bookings created", totals.booking_created ?? 0]
+    {label:"Agent turns",value:totals.agent_turn ?? 0,icon:Activity},
+    {label:"Inbound messages",value:totals.message_inbound ?? 0,icon:MessageSquareText},
+    {label:"Outbound messages",value:totals.message_outbound ?? 0,icon:Send},
+    {label:"Bookings created",value:totals.booking_created ?? 0,icon:CalendarCheck2}
   ];
 
-  const plan: any = Array.isArray((subscription as any)?.plans)
-    ? (subscription as any)?.plans?.[0]
-    : (subscription as any)?.plans;
+  const plan:any=Array.isArray((subscription as any)?.plans)?(subscription as any)?.plans?.[0]:(subscription as any)?.plans;
 
   return (
     <AppShell>
-      <h1>Usage</h1>
-      <p className="muted">{business.name} · current month</p>
+      <div className="ambient-orb ambient-orb-one"/>
+      <div className="ambient-orb ambient-orb-two"/>
+      <div className="ambient-grid"/>
 
-      <div className="grid cols-4" style={{ marginTop: 24 }}>
-        {cards.map(([label, value]) => (
-          <div className="card" key={String(label)}>
-            <div className="muted">{label}</div>
-            <div className="kpi">{value}</div>
+      <div className="section-page command-page">
+        <header className="section-header">
+          <div>
+            <div className="eyebrow">Usage</div>
+            <h1>This month</h1>
+            <p>{business.name} · usage across conversations, messaging and bookings.</p>
           </div>
-        ))}
-      </div>
+          <div className="section-stat glass-chip">
+            <Activity size={15}/>
+            <span><strong>{plan?.name ?? "Development"}</strong> plan</span>
+          </div>
+        </header>
 
-      <div className="card" style={{ marginTop: 16 }}>
-        <h3 style={{ marginTop: 0 }}>Subscription foundation</h3>
-        <p><strong>{plan?.name ?? "Development"}</strong> · {subscription?.status ?? "trial"}</p>
-        <p className="muted">
-          Billing is not active yet. This page is already tracking the usage units we can later attach to plan limits and overages.
-        </p>
+        <section className="usage-clean-grid">
+          {cards.map(item=>{
+            const Icon=item.icon;
+            return (
+              <div className="usage-clean-card glass-surface" key={item.label}>
+                <span><Icon size={17} strokeWidth={1.7}/></span>
+                <div>
+                  <small>{item.label}</small>
+                  <strong>{item.value}</strong>
+                </div>
+              </div>
+            );
+          })}
+        </section>
+
+        <section className="section-panel glass-surface usage-plan-card">
+          <div className="section-panel-head">
+            <div>
+              <h2>Subscription</h2>
+              <p>Billing foundation and usage tracking.</p>
+            </div>
+          </div>
+          <div className="usage-plan-body">
+            <div><span>Plan</span><strong>{plan?.name ?? "Development"}</strong></div>
+            <div><span>Status</span><strong>{subscription?.status ?? "trial"}</strong></div>
+          </div>
+          <p className="usage-note">Billing is not active yet. Usage is already being tracked so plan limits and overages can be attached later.</p>
+        </section>
       </div>
     </AppShell>
   );
