@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Bell, CheckCheck, ChevronRight } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 
 export default function NotificationsPage(){
@@ -18,58 +19,77 @@ export default function NotificationsPage(){
 
   async function markRead(id:string,conversationId?:string|null){
     await fetch("/api/notifications",{
-      method:"PATCH",
-      headers:{"Content-Type":"application/json"},
+      method:"PATCH",headers:{"Content-Type":"application/json"},
       body:JSON.stringify({notificationId:id})
     });
-    if(conversationId){
-      router.push(`/conversations/${conversationId}`);
-    }else{
-      load();
-    }
+    if(conversationId) router.push(`/conversations/${conversationId}`);
+    else load();
   }
 
   async function markAll(){
     setStatus("Marking all read...");
     await fetch("/api/notifications",{
-      method:"PATCH",
-      headers:{"Content-Type":"application/json"},
+      method:"PATCH",headers:{"Content-Type":"application/json"},
       body:JSON.stringify({markAll:true})
     });
     setStatus("");
     load();
   }
 
+  const unread=items.filter((item:any)=>item.status==="unread").length;
+
   return (
     <AppShell>
-      <div style={{display:"flex",justifyContent:"space-between",gap:12,alignItems:"center"}}>
-        <div>
-          <h1>Notifications</h1>
-          <p className="muted">Human handovers and operational alerts that need staff attention.</p>
-        </div>
-        <button onClick={markAll}>Mark all read</button>
-      </div>
+      <div className="ambient-orb ambient-orb-one"/>
+      <div className="ambient-orb ambient-orb-two"/>
+      <div className="ambient-grid"/>
 
-      <div className="card" style={{marginTop:24,padding:0,overflow:"hidden"}}>
-        {items.length===0?<p className="muted" style={{padding:18}}>No notifications yet.</p>:items.map((n:any)=>(
-          <button
-            key={n.id}
-            onClick={()=>markRead(n.id,n.conversation_id)}
-            className="notification-row"
-          >
-            <div>
-              <strong>{n.title}</strong>
-              <div style={{marginTop:4}}>{n.body}</div>
-              <div className="muted" style={{fontSize:12,marginTop:6}}>
-                {new Date(n.created_at).toLocaleString("en-ZA")}
-              </div>
-            </div>
-            <span className={`notification-state ${n.status}`}>{n.status}</span>
+      <div className="section-page command-page">
+        <header className="section-header">
+          <div>
+            <div className="eyebrow">Alerts</div>
+            <h1>Notifications</h1>
+            <p>Human handovers and operational alerts that need staff attention.</p>
+          </div>
+          <button className="section-action-button" onClick={markAll}>
+            <CheckCheck size={14}/> Mark all read
           </button>
-        ))}
-      </div>
+        </header>
 
-      {status&&<p className="muted" style={{marginTop:12}}>{status}</p>}
+        <section className="section-panel glass-surface">
+          <div className="section-panel-head">
+            <div>
+              <h2>Recent alerts</h2>
+              <p>{unread} unread notification{unread===1?"":"s"}.</p>
+            </div>
+            <Bell size={17} strokeWidth={1.6}/>
+          </div>
+
+          {items.length===0 ? (
+            <div className="section-empty">
+              <span><Bell size={21} strokeWidth={1.5}/></span>
+              <strong>Nothing needs your attention</strong>
+              <p>Operational alerts and handovers will appear here.</p>
+            </div>
+          ) : (
+            <div className="clean-notification-list">
+              {items.map((n:any)=>(
+                <button key={n.id} onClick={()=>markRead(n.id,n.conversation_id)} className={`clean-notification-row ${n.status}`}>
+                  <span className="clean-notification-dot"/>
+                  <div>
+                    <strong>{n.title}</strong>
+                    <p>{n.body}</p>
+                    <time>{new Date(n.created_at).toLocaleString("en-ZA")}</time>
+                  </div>
+                  <ChevronRight size={15} strokeWidth={1.6}/>
+                </button>
+              ))}
+            </div>
+          )}
+        </section>
+
+        {status&&<div className="receptionist-feedback">{status}</div>}
+      </div>
     </AppShell>
   );
 }
