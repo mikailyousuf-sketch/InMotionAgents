@@ -134,7 +134,7 @@ function attachSession(sessionId){
     const event=envelope.event;
 
     if(event.type==="response.output_item.added" && event.item?.type==="function_call"){
-      pendingCalls.set(event.output_index,{
+      pendingCalls.set(event.item.id || event.output_index,{
         callId:event.item.call_id || event.item.id,
         name:event.item.name,
         arguments:event.item.arguments || ""
@@ -143,24 +143,27 @@ function attachSession(sessionId){
     }
 
     if(event.type==="response.function_call_arguments.delta"){
-      const current=pendingCalls.get(event.output_index);
+      const key=event.item_id || event.output_index;
+      const current=pendingCalls.get(key);
       if(current){
         current.arguments += event.delta || "";
-        pendingCalls.set(event.output_index,current);
+        pendingCalls.set(key,current);
       }
       return;
     }
 
-    if(event.type!=="response.function_call_arguments.done") return;
+    if(event.type!=="response.output_item.done" || event.item?.type!=="function_call") return;
 
-    const item=event.item || {};
-    const pending=pendingCalls.get(event.output_index) || {};
-    const callId=item.call_id || pending.callId || item.id || event.item_id;
+    const item=event.item;
+    const key=item.id || event.output_index;
+    const pending=pendingCalls.get(key) || {};
+    const callId=item.call_id || pending.callId || item.id;
     const name=item.name || pending.name;
-    const rawArgs=event.arguments || item.arguments || pending.arguments || "{}";
+    const rawArgs=item.arguments || pending.arguments || "{}";
 
     if(!callId || !name || executed.has(callId)) return;
     executed.add(callId);
+    pendingCalls.delete(key);
 
     let args={};
     try{
