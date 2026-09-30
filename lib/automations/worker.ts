@@ -12,6 +12,25 @@ export async function processDueOutboundJobs(options: ProcessOptions = {}) {
   const supabase = createServerSupabaseClient();
   const limit = options.limit ?? 25;
   const now = new Date().toISOString();
+  const staleCutoff = new Date(Date.now() - 15 * 60_000).toISOString();
+
+  let staleProcessingQuery = supabase
+    .from("outbound_jobs")
+    .update({
+      status: "failed",
+      last_error: "Worker claim expired before completion",
+      next_attempt_at: now,
+      updated_at: now
+    })
+    .eq("status", "processing")
+    .lt("updated_at", staleCutoff);
+
+  if (options.businessId) {
+    staleProcessingQuery = staleProcessingQuery.eq("business_id", options.businessId);
+  }
+
+  const { error: staleError } = await staleProcessingQuery;
+  if (staleError) throw new Error(staleError.message);
 
   let pendingQuery = supabase
     .from("outbound_jobs")
