@@ -13,6 +13,7 @@ import {
   Phone,
   RefreshCw,
   Settings2,
+  SlidersHorizontal,
   Sparkles,
   UsersRound
 } from "lucide-react";
@@ -59,6 +60,11 @@ export function ProductNavigation() {
       .catch(()=>{});
   },[]);
 
+  useEffect(()=>{
+    if(manage.some(item=>pathname.startsWith(item.href))) setManageOpen(true);
+    if(advanced.some(item=>item.href === "/" ? pathname === "/" : pathname.startsWith(item.href))) setAdvancedOpen(true);
+  },[pathname]);
+
   function active(href:string){
     return href === "/" ? pathname === "/" : pathname.startsWith(href);
   }
@@ -79,16 +85,22 @@ export function ProductNavigation() {
         <NotificationBell />
 
         {["owner","admin"].includes(role) && (
-          <div className="nav-group">
-            <button className="nav-group-button" onClick={()=>setManageOpen(v=>!v)}>
-              <span className="nav-group-label"><Settings2 size={13} /> Manage</span>
-              {manageOpen ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
+          <div className={`nav-section-card ${manageOpen ? "open" : ""}`}>
+            <button className="nav-section-toggle" onClick={()=>setManageOpen(v=>!v)}>
+              <span className="nav-section-icon"><Settings2 size={14}/></span>
+              <span className="nav-section-copy">
+                <strong>Manage</strong>
+                <small>Business setup</small>
+              </span>
+              {manageOpen ? <ChevronDown size={14}/> : <ChevronRight size={14}/>}
             </button>
+
             {manageOpen && (
-              <div className="nav-submenu">
+              <div className="nav-section-links">
                 {manage.map(item=>(
                   <Link key={item.href} href={item.href} className={active(item.href)?"active":""}>
-                    {item.label}
+                    <span className="nav-link-dot"/>
+                    <span>{item.label}</span>
                   </Link>
                 ))}
               </div>
@@ -96,16 +108,22 @@ export function ProductNavigation() {
           </div>
         )}
 
-        <div className="nav-group">
-          <button className="nav-group-button muted-nav" onClick={()=>setAdvancedOpen(v=>!v)}>
-            <span className="nav-group-label"><Sparkles size={13} /> Advanced</span>
-            {advancedOpen ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
+        <div className={`nav-section-card advanced ${advancedOpen ? "open" : ""}`}>
+          <button className="nav-section-toggle" onClick={()=>setAdvancedOpen(v=>!v)}>
+            <span className="nav-section-icon"><SlidersHorizontal size={14}/></span>
+            <span className="nav-section-copy">
+              <strong>Advanced</strong>
+              <small>Tools & controls</small>
+            </span>
+            {advancedOpen ? <ChevronDown size={14}/> : <ChevronRight size={14}/>}
           </button>
+
           {advancedOpen && (
-            <div className="nav-submenu">
+            <div className="nav-section-links">
               {advanced.map(item=>(
                 <Link key={item.href} href={item.href} className={active(item.href)?"active":""}>
-                  {item.label}
+                  <span className="nav-link-dot"/>
+                  <span>{item.label}</span>
                 </Link>
               ))}
             </div>
