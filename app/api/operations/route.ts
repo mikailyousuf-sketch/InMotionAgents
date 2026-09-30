@@ -44,12 +44,14 @@ export async function GET() {
       .eq("status", "human")
       .order("updated_at", { ascending: false })
       .limit(25),
-    admin
-      .from("audit_logs")
-      .select("*")
-      .eq("business_id", businessId)
-      .order("created_at", { ascending: false })
-      .limit(50),
+    ["owner","admin"].includes(current.role)
+      ? admin
+          .from("audit_logs")
+          .select("*")
+          .eq("business_id", businessId)
+          .order("created_at", { ascending: false })
+          .limit(50)
+      : Promise.resolve({ data: [] as any[] }),
     admin
       .from("conversations")
       .select("*", { count: "exact", head: true })
