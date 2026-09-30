@@ -41,9 +41,7 @@ begin
     'locations',
     'services',
     'resources',
-    'resource_services',
     'business_hours',
-    'resource_availability',
     'blocked_periods',
     'customers',
     'bookings',
@@ -89,9 +87,7 @@ begin
     'locations',
     'services',
     'resources',
-    'resource_services',
     'business_hours',
-    'resource_availability',
     'blocked_periods',
     'integration_connections',
     'integration_mappings',
@@ -154,6 +150,108 @@ begin
     );
   end loop;
 end $$;
+
+
+
+-- Join/resource tables derive tenancy through resources.
+drop policy if exists "workspace members read" on public.resource_services;
+create policy "workspace members read"
+on public.resource_services for select
+using (
+  exists (
+    select 1
+    from public.resources r
+    where r.id = resource_services.resource_id
+      and public.is_business_member(r.business_id)
+  )
+);
+
+drop policy if exists "workspace admins insert" on public.resource_services;
+create policy "workspace admins insert"
+on public.resource_services for insert
+with check (
+  exists (
+    select 1
+    from public.resources r
+    where r.id = resource_services.resource_id
+      and public.is_business_admin(r.business_id)
+  )
+  and exists (
+    select 1
+    from public.services s
+    join public.resources r on r.id = resource_services.resource_id
+    where s.id = resource_services.service_id
+      and s.business_id = r.business_id
+  )
+);
+
+drop policy if exists "workspace admins delete" on public.resource_services;
+create policy "workspace admins delete"
+on public.resource_services for delete
+using (
+  exists (
+    select 1
+    from public.resources r
+    where r.id = resource_services.resource_id
+      and public.is_business_admin(r.business_id)
+  )
+);
+
+drop policy if exists "workspace members read" on public.resource_availability;
+create policy "workspace members read"
+on public.resource_availability for select
+using (
+  exists (
+    select 1
+    from public.resources r
+    where r.id = resource_availability.resource_id
+      and public.is_business_member(r.business_id)
+  )
+);
+
+drop policy if exists "workspace admins insert" on public.resource_availability;
+create policy "workspace admins insert"
+on public.resource_availability for insert
+with check (
+  exists (
+    select 1
+    from public.resources r
+    where r.id = resource_availability.resource_id
+      and public.is_business_admin(r.business_id)
+  )
+);
+
+drop policy if exists "workspace admins update" on public.resource_availability;
+create policy "workspace admins update"
+on public.resource_availability for update
+using (
+  exists (
+    select 1
+    from public.resources r
+    where r.id = resource_availability.resource_id
+      and public.is_business_admin(r.business_id)
+  )
+)
+with check (
+  exists (
+    select 1
+    from public.resources r
+    where r.id = resource_availability.resource_id
+      and public.is_business_admin(r.business_id)
+  )
+);
+
+drop policy if exists "workspace admins delete" on public.resource_availability;
+create policy "workspace admins delete"
+on public.resource_availability for delete
+using (
+  exists (
+    select 1
+    from public.resources r
+    where r.id = resource_availability.resource_id
+      and public.is_business_admin(r.business_id)
+  )
+);
 
 -- Notifications are private to their recipient, while service-role workers create them.
 drop policy if exists "users read own notifications" on public.notifications;
