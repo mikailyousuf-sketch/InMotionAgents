@@ -27,7 +27,14 @@ export async function GET(request:Request){
 
   if(error) return Response.json({error:error.message},{status:500});
 
-  return Response.json({integrations:data??[],role:membership.role});
+  const integrations=(data??[]).map((integration:any)=>({
+    ...integration,
+    config: integration.provider==="whatsapp"
+      ? { ...(integration.config??{}), credential: undefined }
+      : integration.config
+  }));
+
+  return Response.json({integrations,role:membership.role});
 }
 
 export async function POST(request:Request){
