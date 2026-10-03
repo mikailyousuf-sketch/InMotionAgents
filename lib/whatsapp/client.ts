@@ -1,9 +1,36 @@
+import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { decryptCredential } from "@/lib/integrations/credentials";
+
+async function resolveAccessToken(phoneNumberId: string) {
+  const supabase = createServerSupabaseClient();
+  const { data } = await supabase
+    .from("integration_connections")
+    .select("config")
+    .eq("provider", "whatsapp")
+    .eq("status", "connected");
+
+  const connection = (data || []).find(
+    (row: any) => String(row?.config?.phone_number_id || "") === phoneNumberId
+  );
+
+  const credential = connection?.config?.credential;
+  if (credential?.ciphertext && credential?.iv && credential?.tag) {
+    return decryptCredential({
+      ciphertext: String(credential.ciphertext),
+      iv: String(credential.iv),
+      tag: String(credential.tag)
+    });
+  }
+
+  return process.env.META_WHATSAPP_ACCESS_TOKEN || "";
+}
+
 export async function sendWhatsAppText(input: {
   phoneNumberId: string;
   to: string;
   body: string;
 }) {
-  const token = process.env.META_WHATSAPP_ACCESS_TOKEN;
+  const token = await resolveAccessToken(input.phoneNumberId);
   const graphVersion = process.env.META_GRAPH_VERSION;
 
   if (!token || !graphVersion) {
