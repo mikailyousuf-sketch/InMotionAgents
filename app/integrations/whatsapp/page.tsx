@@ -37,7 +37,16 @@ export default function WhatsAppConnectPage() {
         const integrations = await fetch(`/api/integrations?businessId=${current.business.id}`).then((r) => r.json());
         setRole(integrations.role || "");
         const existing = (integrations.integrations || []).find((item: any) => item.provider === "whatsapp");
-        if (existing?.status === "connected") setConnected(existing);
+        const isEmbeddedSignupConnection =
+          existing?.status === "connected" &&
+          ["coexistence", "cloud_api"].includes(existing?.config?.connection_mode) &&
+          Boolean(existing?.config?.phone_number_id);
+
+        if (isEmbeddedSignupConnection) {
+          setConnected(existing);
+        } else if (existing?.status === "connected") {
+          setStatus("Legacy WhatsApp setup detected. Reconnect with Meta to finish the new coexistence setup.");
+        }
       })
       .catch(() => {});
   }, []);
