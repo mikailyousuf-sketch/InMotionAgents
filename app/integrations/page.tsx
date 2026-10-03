@@ -163,9 +163,14 @@ export default function IntegrationsPage() {
                 {status[item.provider] && <p className="muted">{status[item.provider]}</p>}
 
                 {item.provider === "whatsapp" && (
-                  <p className="muted" style={{ fontSize: 12 }}>
-                    Access tokens and app secrets stay server-side. This screen only stores non-secret Meta identifiers.
-                  </p>
+                  <div style={{ marginTop: 8 }}>
+                    <a href="/integrations/whatsapp" className="link-button">
+                      Connect existing WhatsApp Business number →
+                    </a>
+                    <p className="muted" style={{ fontSize: 12, marginTop: 10 }}>
+                      Recommended: use Meta Embedded Signup to keep the WhatsApp Business app and connect InMotion through the official coexistence flow.
+                    </p>
+                  </div>
                 )}
 
                 {item.provider === "voice" && (
