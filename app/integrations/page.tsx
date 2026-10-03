@@ -8,10 +8,7 @@ const catalog = [
     provider: "whatsapp",
     name: "WhatsApp Business",
     description: "Connect Meta WhatsApp Business Platform for real inbound and outbound customer messages.",
-    fields: [
-      { key: "phone_number_id", label: "Phone number ID" },
-      { key: "whatsapp_business_account_id", label: "WhatsApp Business Account ID" }
-    ]
+    fields: []
   },
   {
     provider: "voice",
@@ -152,12 +149,18 @@ export default function IntegrationsPage() {
                   />
                 ))}
 
-                {editable && (
+                {editable && item.provider !== "whatsapp" && (
                   <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                     <button onClick={() => save(item.provider, "setup_required")}>Save setup</button>
                     <button onClick={() => save(item.provider, "connected")}>Mark connected</button>
                     {existing && <button className="link-button" onClick={() => save(item.provider, "disconnected")}>Disconnect</button>}
                   </div>
+                )}
+
+                {editable && item.provider === "whatsapp" && existing && (
+                  <button className="link-button" onClick={() => save(item.provider, "disconnected")}>
+                    Disconnect
+                  </button>
                 )}
 
                 {status[item.provider] && <p className="muted">{status[item.provider]}</p>}
