@@ -7112,3 +7112,112 @@ body {
 .sidebar-collapsed .inmotion-brand-logo {
   display:none !important;
 }
+
+
+/* ===== Aceternity-inspired background gradient animation ===== */
+@keyframes moveHorizontal {
+  0% { transform: translateX(-50%) translateY(-10%); }
+  50% { transform: translateX(50%) translateY(10%); }
+  100% { transform: translateX(-50%) translateY(-10%); }
+}
+
+@keyframes moveInCircle {
+  0% { transform: rotate(0deg); }
+  50% { transform: rotate(180deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes moveVertical {
+  0% { transform: translateY(-50%); }
+  50% { transform: translateY(50%); }
+  100% { transform: translateY(-50%); }
+}
+
+.command-main {
+  position: relative;
+  isolation: isolate;
+}
+
+.command-main > .route-page {
+  position: relative;
+  z-index: 1;
+}
+
+.aceternity-gradient-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: .72;
+  filter: saturate(.92);
+}
+
+.aceternity-gradient-orb {
+  position: absolute;
+  width: min(48vw, 680px);
+  aspect-ratio: 1;
+  border-radius: 999px;
+  filter: blur(72px);
+  mix-blend-mode: screen;
+  will-change: transform;
+}
+
+.aceternity-gradient-first {
+  top: -18%;
+  right: -8%;
+  background: radial-gradient(circle, rgba(82, 103, 255, .18) 0%, rgba(82, 103, 255, 0) 68%);
+  animation: moveVertical 30s ease infinite;
+}
+
+.aceternity-gradient-second {
+  top: 26%;
+  left: 42%;
+  width: min(36vw, 520px);
+  background: radial-gradient(circle, rgba(103, 75, 190, .14) 0%, rgba(103, 75, 190, 0) 70%);
+  transform-origin: calc(50% - 220px);
+  animation: moveInCircle 20s reverse infinite;
+}
+
+.aceternity-gradient-third {
+  bottom: -24%;
+  right: 14%;
+  width: min(42vw, 600px);
+  background: radial-gradient(circle, rgba(53, 108, 189, .12) 0%, rgba(53, 108, 189, 0) 70%);
+  transform-origin: calc(50% + 180px);
+  animation: moveInCircle 40s linear infinite;
+}
+
+.aceternity-gradient-fourth {
+  top: 42%;
+  left: -18%;
+  width: min(44vw, 620px);
+  background: radial-gradient(circle, rgba(109, 76, 185, .10) 0%, rgba(109, 76, 185, 0) 72%);
+  animation: moveHorizontal 40s ease infinite;
+}
+
+.aceternity-gradient-fifth {
+  top: 8%;
+  left: 18%;
+  width: min(30vw, 440px);
+  background: radial-gradient(circle, rgba(67, 118, 208, .10) 0%, rgba(67, 118, 208, 0) 72%);
+  transform-origin: calc(50% - 130px) calc(50% + 100px);
+  animation: moveInCircle 20s ease infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aceternity-gradient-orb {
+    animation: none !important;
+  }
+}
+
+@media (max-width: 800px) {
+  .aceternity-gradient-bg {
+    opacity: .52;
+  }
+
+  .aceternity-gradient-orb {
+    width: 90vw;
+    filter: blur(64px);
+  }
+}
