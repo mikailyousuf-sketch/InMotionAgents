@@ -10,7 +10,7 @@ import {
   UserRoundCheck,
   UsersRound
 } from "lucide-react";
-import { AppShell } from "@/components/AppShell";
+import { AppShell } from "@/components/AppShell";\nimport { GlowingEffect } from "@/components/GlowingEffect";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getPrimaryUserBusiness } from "@/lib/auth/access";
 
@@ -127,20 +127,23 @@ export default async function DashboardPage() {
           {metrics.map(metric=>{
             const Icon = metric.icon;
             return (
-              <Link href={metric.href} className="command-metric glass-surface" key={metric.label}>
-                <div className="command-metric-icon"><Icon size={19} strokeWidth={1.7} /></div>
-                <div>
-                  <span>{metric.label}</span>
-                  <strong>{metric.value}</strong>
-                </div>
-                <ArrowUpRight className="command-chevron" size={14} strokeWidth={1.7} />
-              </Link>
+              <GlowingEffect key={metric.label}>
+                <Link href={metric.href} className="command-metric glass-surface">
+                  <div className="command-metric-icon"><Icon size={19} strokeWidth={1.7} /></div>
+                  <div>
+                    <span>{metric.label}</span>
+                    <strong>{metric.value}</strong>
+                  </div>
+                  <ArrowUpRight className="command-chevron" size={14} strokeWidth={1.7} />
+                </Link>
+              </GlowingEffect>
             );
           })}
         </section>
 
         <div className="command-grid">
-          <section className="command-panel activity-panel glass-surface">
+          <GlowingEffect className="activity-panel-glow">
+            <section className="command-panel activity-panel glass-surface">
             <div className="command-panel-head">
               <div>
                 <div className="command-panel-title">
@@ -183,10 +186,12 @@ export default async function DashboardPage() {
                 );
               })}
             </div>
-          </section>
+            </section>
+          </GlowingEffect>
 
           <aside className="command-side">
-            <section className="command-panel glance-panel glass-surface">
+            <GlowingEffect>
+              <section className="command-panel glance-panel glass-surface">
               <div className="command-panel-head compact">
                 <div>
                   <h2>Today at a glance</h2>
@@ -199,9 +204,11 @@ export default async function DashboardPage() {
                 <div><span>Active leads</span><strong>{activeLeads ?? 0}</strong></div>
                 <div><span>Handovers</span><strong>{handovers ?? 0}</strong></div>
               </div>
-            </section>
+              </section>
+            </GlowingEffect>
 
-            <section className="command-panel quick-panel glass-surface">
+            <GlowingEffect>
+              <section className="command-panel quick-panel glass-surface">
               <div className="command-panel-head compact">
                 <div><h2>Quick actions</h2></div>
               </div>
@@ -216,7 +223,8 @@ export default async function DashboardPage() {
                   );
                 })}
               </div>
-            </section>
+              </section>
+            </GlowingEffect>
 
             {(needsSetup || pendingSuggestions) && (
               <section className="command-nudge glass-surface">
