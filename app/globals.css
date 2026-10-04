@@ -7933,3 +7933,38 @@ body {
     height:54px !important;
   }
 }
+
+
+/* ===== Auth mode switch placement ===== */
+.auth-mode-footer {
+  margin-top:26px;
+  padding-top:20px;
+  border-top:1px solid rgba(147,164,197,.10);
+}
+
+.auth-mode-footer-label {
+  display:block;
+  margin-bottom:10px;
+  color:#7f8aa0;
+  font-size:12px;
+  text-align:center;
+}
+
+.auth-mode-footer .auth-mode-tabs {
+  margin:0;
+}
+
+.auth-switch {
+  display:none !important;
+}
+
+@media (max-width:800px) {
+  .auth-mode-footer {
+    margin-top:22px;
+    padding-top:18px;
+  }
+
+  .auth-mode-footer-label {
+    margin-bottom:9px;
+  }
+}
