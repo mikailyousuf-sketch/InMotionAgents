@@ -7478,3 +7478,115 @@ body {
     transition: none;
   }
 }
+
+
+/* ===== Uiverse-inspired InMotion form treatment ===== */
+.auth-card .form-grid {
+  gap: 14px;
+}
+
+.auth-card .field-label {
+  display: grid;
+  gap: 7px;
+}
+
+.auth-card .field-label > span {
+  color: #eef3fb;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.auth-card .field-label input {
+  height: 50px !important;
+  border-radius: 12px !important;
+  border: 1px solid rgba(142,160,194,.18) !important;
+  background: linear-gradient(180deg,rgba(20,28,42,.88),rgba(13,20,31,.88)) !important;
+  color: #f6f8fc !important;
+  padding: 0 14px !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.035),
+    0 8px 20px rgba(0,0,0,.08);
+  transition:
+    border-color .2s ease,
+    box-shadow .2s ease,
+    background .2s ease,
+    transform .2s ease;
+}
+
+.auth-card .field-label input::placeholder {
+  color: #6f7c91;
+}
+
+.auth-card .field-label input:focus {
+  outline: none !important;
+  border-color: rgba(116,145,255,.72) !important;
+  background: linear-gradient(180deg,rgba(24,34,51,.96),rgba(14,22,35,.96)) !important;
+  box-shadow:
+    0 0 0 3px rgba(91,116,230,.10),
+    0 10px 28px rgba(16,30,68,.16);
+  transform: translateY(-1px);
+}
+
+.auth-submit {
+  min-height: 50px !important;
+  border-radius: 12px !important;
+  background: linear-gradient(135deg,#7993ff 0%,#6578ee 52%,#5669d6 100%) !important;
+  color: #fff !important;
+  font-size: 14px !important;
+  font-weight: 750 !important;
+  letter-spacing: -.01em;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.22),
+    0 14px 30px rgba(69,86,190,.24);
+  transition: transform .2s ease, box-shadow .2s ease, filter .2s ease;
+}
+
+.auth-submit:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.04);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.25),
+    0 18px 34px rgba(69,86,190,.3);
+}
+
+.auth-switch {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(147,164,197,.10);
+}
+
+/* Reusable content card derived from the Uiverse card interaction pattern */
+.inmotion-feature-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 22px;
+  background:
+    linear-gradient(155deg,rgba(24,35,54,.72),rgba(9,16,27,.68));
+  border: 1px solid rgba(173,192,229,.12);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.045),
+    0 20px 48px rgba(0,0,0,.14);
+  transition:
+    transform .22s ease,
+    border-color .22s ease,
+    box-shadow .22s ease;
+}
+
+.inmotion-feature-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(139,161,240,.24);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.055),
+    0 26px 58px rgba(0,0,0,.2);
+}
+
+.inmotion-feature-card-media {
+  min-height: 132px;
+  background:
+    radial-gradient(circle at 80% 20%,rgba(124,145,255,.28),transparent 38%),
+    linear-gradient(135deg,rgba(91,111,224,.34),rgba(73,49,145,.22));
+}
+
+.inmotion-feature-card-body {
+  padding: 18px;
+}
