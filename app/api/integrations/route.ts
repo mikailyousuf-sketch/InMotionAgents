@@ -30,7 +30,15 @@ export async function GET(request:Request){
   const integrations=(data??[]).map((integration:any)=>({
     ...integration,
     config: integration.provider==="whatsapp"
-      ? { ...(integration.config??{}), credential: undefined }
+      ? {
+          ...(integration.config??{}),
+          credential: undefined,
+          has_embedded_credential: Boolean(
+            integration.config?.credential?.ciphertext &&
+            integration.config?.credential?.iv &&
+            integration.config?.credential?.tag
+          )
+        }
       : integration.config
   }));
 
