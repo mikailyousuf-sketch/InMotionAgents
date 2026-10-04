@@ -99,7 +99,6 @@ export default async function DashboardPage() {
     <AppShell>
       <div className="ambient-orb ambient-orb-one" />
       <div className="ambient-orb ambient-orb-two" />
-      <div className="ambient-grid" />
 
       <div className="command-page">
         <header className="command-topbar">
