@@ -1,21 +1,52 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { WorkspaceSwitcher } from "@/components/WorkspaceSwitcher";
 import { ProductNavigation } from "@/components/ProductNavigation";
 import { PageSurface } from "@/components/PageSurface";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
+  const [collapsed, setCollapsed] = useState(false);
+
+  useEffect(() => {
+    const saved = window.localStorage.getItem("inmotion.sidebar.collapsed");
+    if (saved === "true") setCollapsed(true);
+  }, []);
+
+  function toggleSidebar() {
+    setCollapsed(current => {
+      const next = !current;
+      window.localStorage.setItem("inmotion.sidebar.collapsed", String(next));
+      return next;
+    });
+  }
+
   return (
-    <div className="shell command-shell">
+    <div className={`shell command-shell ${collapsed ? "sidebar-collapsed" : ""}`}>
       <aside className="sidebar command-sidebar">
-        <div className="brand-lockup command-brand">
-          <div className="brand-signature">InMotion</div>
-          <div className="brand-sub">AGENTS</div>
+        <div className="sidebar-brand-row">
+          <div className="brand-lockup command-brand">
+            <div className="brand-signature">InMotion</div>
+            <div className="brand-sub">AGENTS</div>
+          </div>
+
+          <button
+            type="button"
+            className="sidebar-collapse-button"
+            onClick={toggleSidebar}
+            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          >
+            {collapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}
+          </button>
         </div>
 
         <div className="workspace-wrap">
           <WorkspaceSwitcher />
         </div>
 
-        <ProductNavigation />
+        <ProductNavigation collapsed={collapsed} />
 
         <div className="sidebar-footer">
           <div className="sidebar-status">
