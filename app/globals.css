@@ -6865,11 +6865,7 @@ body {
 }
 
 .sidebar-collapsed .inmotion-brand-logo {
-  width:42px;
-  height:42px;
-  object-fit:cover;
-  object-position:left center;
-  border-radius:10px;
+  display:none;
 }
 
 .route-loading-brand {
