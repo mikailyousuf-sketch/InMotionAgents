@@ -142,12 +142,32 @@ export default function HomePage() {
           </button>
         </section>
 
+        <section className="agent-lab-flow" aria-label="Simulation flow">
+          <div className="flow-node active">
+            <span>01</span>
+            <div><strong>Customer input</strong><small>Scenario or live test prompt</small></div>
+          </div>
+          <i />
+          <div className={`flow-node ${loading ? "active thinking" : "active"}`}>
+            <span>02</span>
+            <div><strong>Agent reasoning</strong><small>{loading ? "Processing current turn" : "Ready for next turn"}</small></div>
+          </div>
+          <i />
+          <div className={`flow-node ${conversationId ? "active" : ""}`}>
+            <span>03</span>
+            <div><strong>Business action</strong><small>Reply, booking, handover or policy</small></div>
+          </div>
+        </section>
+
         <div className="agent-lab-layout">
           <section className="agent-lab-console glass-surface">
             <div className="agent-lab-console-head">
-              <div>
-                <span>Scenario runner</span>
-                <h2>{businessName}</h2>
+              <div className="agent-lab-console-title">
+                <div className="agent-lab-mark"><Bot size={18} strokeWidth={1.55}/></div>
+                <div>
+                  <span>Live simulation</span>
+                  <h2>{businessName}</h2>
+                </div>
               </div>
               <div className={`agent-lab-state ${loading ? "thinking" : ""}`}>
                 <CircleDot size={12} />
@@ -215,10 +235,11 @@ export default function HomePage() {
           </section>
 
           <aside className="agent-lab-inspector">
-            <section className="agent-inspector-card glass-surface">
+            <section className="agent-inspector-card glass-surface run-health-card">
               <div className="agent-inspector-head">
                 <Activity size={15} />
                 <strong>Run health</strong>
+                <span className="inspector-live-dot"/>
               </div>
 
               <div className="agent-inspector-health">
