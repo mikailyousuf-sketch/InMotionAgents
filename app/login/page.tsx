@@ -56,7 +56,7 @@ export default function LoginPage() {
     <main className="auth-page auth-redesign">
       <div className="auth-brand">
         <div className="brand-lockup auth-logo-lockup">
-          <img className="auth-brand-logo" src="/inmotion-logo.webp" alt="InMotion" />
+          <img className="auth-brand-logo" src="/inmotion-logo-floating.webp" alt="InMotion" />
         </div>
 
         <div className="auth-value">
