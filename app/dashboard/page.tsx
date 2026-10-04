@@ -10,7 +10,8 @@ import {
   UserRoundCheck,
   UsersRound
 } from "lucide-react";
-import { AppShell } from "@/components/AppShell";\nimport { GlowingEffect } from "@/components/GlowingEffect";
+import { AppShell } from "@/components/AppShell";
+import { GlowingEffect } from "@/components/GlowingEffect";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getPrimaryUserBusiness } from "@/lib/auth/access";
 
