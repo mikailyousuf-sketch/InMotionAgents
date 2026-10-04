@@ -109,6 +109,7 @@ export async function POST(request: Request) {
       code_verification_status: phone.code_verification_status || null,
       platform_type: phone.platform_type || null,
       connection_mode: mode,
+      embedded_signup_completed_at: new Date().toISOString(),
       credential: {
         ciphertext: encrypted.ciphertext,
         iv: encrypted.iv,
