@@ -6140,3 +6140,363 @@ body {
     grid-column:auto;
   }
 }
+
+
+/* ===== Premium visual refinement ===== */
+:root {
+  --im-bg:#070b12;
+  --im-surface:rgba(255,255,255,.018);
+  --im-surface-2:rgba(255,255,255,.03);
+  --im-hairline:rgba(177,194,222,.09);
+  --im-hairline-strong:rgba(177,194,222,.17);
+  --im-soft-blue:rgba(91,124,255,.12);
+}
+
+body {
+  background:
+    radial-gradient(circle at 76% -8%, rgba(78,112,227,.10), transparent 30rem),
+    radial-gradient(circle at 14% 105%, rgba(41,74,145,.06), transparent 28rem),
+    var(--im-bg);
+}
+
+.route-page {
+  width:min(100%,1320px);
+}
+
+h1 {
+  font-size:clamp(32px,3.4vw,48px);
+  line-height:1.02;
+  letter-spacing:-.045em;
+}
+
+h2 {
+  letter-spacing:-.035em;
+}
+
+.eyebrow {
+  font-size:9px;
+  letter-spacing:.16em;
+  color:#71809a;
+}
+
+.muted,
+.command-date,
+.command-panel-head p,
+.connections-hub-header p,
+.whatsapp-connect-header p,
+.agent-lab-head p,
+.agent-control-head p {
+  color:#8491a6;
+}
+
+.glass-surface {
+  border-radius:18px;
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.024),rgba(255,255,255,.010)) !important;
+  border:1px solid var(--im-hairline) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.018),
+    0 26px 70px rgba(0,0,0,.06) !important;
+}
+
+.glass-surface:hover {
+  border-color:var(--im-hairline-strong) !important;
+}
+
+.command-main:before {
+  background:
+    linear-gradient(180deg,rgba(38,58,102,.13),transparent 260px),
+    radial-gradient(circle at 88% 10%,rgba(78,112,227,.09),transparent 23rem);
+}
+
+/* Agent Lab composition */
+.agent-lab-head {
+  margin-bottom:22px;
+}
+
+.agent-lab-head h1 {
+  max-width:780px;
+}
+
+.agent-lab-flow {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 44px minmax(0,1fr) 44px minmax(0,1fr);
+  gap:8px;
+  align-items:center;
+  margin:0 0 16px;
+  padding:0 4px;
+}
+
+.flow-node {
+  min-height:66px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:12px 13px;
+  border:1px solid rgba(177,194,222,.055);
+  border-radius:14px;
+  background:rgba(255,255,255,.008);
+  opacity:.48;
+}
+
+.flow-node.active {
+  opacity:1;
+  border-color:rgba(111,142,255,.13);
+  background:
+    linear-gradient(180deg,rgba(95,126,255,.045),rgba(255,255,255,.01));
+}
+
+.flow-node.thinking {
+  box-shadow:0 0 34px rgba(79,111,227,.06);
+}
+
+.flow-node > span {
+  width:30px;
+  height:30px;
+  display:grid;
+  place-items:center;
+  flex:0 0 auto;
+  border-radius:9px;
+  background:rgba(255,255,255,.025);
+  border:1px solid rgba(177,194,222,.07);
+  color:#77859c;
+  font-size:9px;
+  font-weight:800;
+}
+
+.flow-node.active > span {
+  color:#b9c7ff;
+  border-color:rgba(111,142,255,.18);
+  background:rgba(91,124,255,.07);
+}
+
+.flow-node strong,
+.flow-node small {
+  display:block;
+}
+
+.flow-node strong {
+  color:#d6deea;
+  font-size:10px;
+  margin-bottom:3px;
+}
+
+.flow-node small {
+  color:#667389;
+  font-size:8px;
+  line-height:1.4;
+}
+
+.agent-lab-flow > i {
+  height:1px;
+  background:linear-gradient(90deg,rgba(110,143,255,.1),rgba(110,143,255,.28),rgba(110,143,255,.1));
+}
+
+.agent-lab-layout {
+  grid-template-columns:minmax(0,1.72fr) minmax(290px,.5fr);
+  gap:14px;
+}
+
+.agent-lab-console {
+  position:relative;
+  overflow:hidden;
+}
+
+.agent-lab-console::before {
+  content:"";
+  position:absolute;
+  inset:0 auto auto 0;
+  width:100%;
+  height:120px;
+  pointer-events:none;
+  background:linear-gradient(180deg,rgba(85,113,213,.05),transparent);
+}
+
+.agent-lab-console-head {
+  position:relative;
+  z-index:2;
+  min-height:86px;
+  padding:20px 22px;
+}
+
+.agent-lab-console-title {
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.agent-lab-mark {
+  width:38px;
+  height:38px;
+  display:grid;
+  place-items:center;
+  border-radius:13px;
+  border:1px solid rgba(110,143,255,.17);
+  color:#a9b9ff;
+  background:
+    radial-gradient(circle at 35% 25%,rgba(123,151,255,.14),transparent 60%),
+    rgba(91,124,255,.045);
+  box-shadow:0 0 30px rgba(76,106,220,.07);
+}
+
+.agent-lab-console-title > div:last-child > span {
+  display:block;
+  color:#6e7b90;
+  text-transform:uppercase;
+  letter-spacing:.1em;
+  font-size:8px;
+  font-weight:800;
+}
+
+.agent-lab-console-title h2 {
+  margin:5px 0 0;
+  font-size:20px;
+}
+
+.agent-run-timeline {
+  min-height:460px;
+  padding:28px 24px 14px;
+}
+
+.agent-run-event {
+  grid-template-columns:38px minmax(0,1fr);
+  gap:14px;
+}
+
+.agent-run-rail > span {
+  width:30px;
+  height:30px;
+  border-radius:10px;
+}
+
+.agent-run-content p {
+  font-size:13px;
+  line-height:1.7;
+}
+
+.agent-run-meta strong {
+  font-size:11px;
+}
+
+.agent-lab-composer {
+  padding:15px;
+  background:rgba(255,255,255,.006);
+}
+
+.agent-lab-input-wrap {
+  min-height:46px;
+  border-radius:13px;
+}
+
+.agent-lab-input-wrap input {
+  min-height:44px;
+  font-size:12px;
+}
+
+.agent-lab-composer > button {
+  min-height:46px;
+  border-radius:12px !important;
+}
+
+.agent-lab-inspector {
+  gap:10px;
+}
+
+.agent-inspector-card {
+  position:relative;
+  overflow:hidden;
+  padding:17px;
+  border-radius:16px;
+}
+
+.run-health-card::after {
+  content:"";
+  position:absolute;
+  inset:auto -30px -40px auto;
+  width:110px;
+  height:110px;
+  border-radius:50%;
+  background:rgba(77,224,165,.035);
+  filter:blur(10px);
+}
+
+.agent-inspector-head {
+  margin-bottom:14px;
+}
+
+.inspector-live-dot {
+  width:6px;
+  height:6px;
+  margin-left:auto;
+  border-radius:999px;
+  background:var(--im-green);
+  box-shadow:0 0 0 4px rgba(77,224,165,.05);
+}
+
+.agent-inspector-health > div {
+  min-height:42px;
+}
+
+.agent-scenario-list button {
+  min-height:40px;
+  font-size:10px !important;
+}
+
+/* Dashboard becomes calmer and more editorial */
+.command-topbar {
+  min-height:82px;
+}
+
+.command-business-name {
+  font-size:22px;
+}
+
+.command-metrics {
+  gap:10px;
+  border:0 !important;
+}
+
+.command-metric {
+  min-height:102px;
+  padding:18px !important;
+  border-radius:16px !important;
+}
+
+.command-metric strong {
+  font-size:30px;
+}
+
+.command-grid {
+  gap:14px;
+}
+
+.command-panel {
+  border-radius:18px;
+}
+
+.command-panel-head {
+  padding:20px 20px 16px;
+}
+
+.command-panel-head h2 {
+  font-size:18px;
+}
+
+.activity-row {
+  min-height:64px;
+}
+
+.quick-grid a {
+  border-radius:12px;
+}
+
+@media(max-width:900px){
+  .agent-lab-flow {
+    grid-template-columns:1fr;
+  }
+  .agent-lab-flow > i {
+    width:1px;
+    height:20px;
+    margin-left:18px;
+  }
+}
