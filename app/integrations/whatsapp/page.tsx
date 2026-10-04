@@ -34,20 +34,27 @@ export default function WhatsAppConnectPage() {
         if (!current.business?.id) return;
         setBusinessId(current.business.id);
 
-        const integrations = await fetch(`/api/integrations?businessId=${current.business.id}`).then((r) => r.json());
-        setRole(integrations.role || "");
-        const existing = (integrations.integrations || []).find((item: any) => item.provider === "whatsapp");
-        const isEmbeddedSignupConnection =
-          existing?.status === "connected" &&
-          ["coexistence", "cloud_api"].includes(existing?.config?.connection_mode) &&
-          Boolean(existing?.config?.phone_number_id) &&
-          existing?.config?.has_embedded_credential === true &&
-          Boolean(existing?.config?.embedded_signup_completed_at);
+        const live = await fetch(`/api/integrations/whatsapp/status?businessId=${current.business.id}`, {
+          cache: "no-store"
+        }).then((r) => r.json());
 
-        if (isEmbeddedSignupConnection) {
-          setConnected(existing);
-        } else if (existing?.status === "connected") {
-          setStatus("Legacy WhatsApp setup detected. Reconnect with Meta to finish the new coexistence setup.");
+        setRole(live.role || "");
+
+        if (live.state === "connected") {
+          setConnected({
+            status: "connected",
+            config: {
+              ...live.meta,
+              connection_mode: "coexistence"
+            }
+          });
+          setStatus("");
+        } else {
+          setConnected(null);
+          setStatus(
+            live.reason ||
+            "WhatsApp needs to be connected through Meta Embedded Signup."
+          );
         }
       })
       .catch(() => {});
@@ -138,8 +145,23 @@ export default function WhatsAppConnectPage() {
       return;
     }
 
-    setConnected(data.integration);
-    setStatus("WhatsApp is connected to InMotion.");
+    const live = await fetch(`/api/integrations/whatsapp/status?businessId=${businessId}`, {
+      cache: "no-store"
+    }).then((r) => r.json());
+
+    if (live.state === "connected") {
+      setConnected({
+        status: "connected",
+        config: {
+          ...live.meta,
+          connection_mode: "coexistence"
+        }
+      });
+      setStatus("WhatsApp is connected to InMotion.");
+    } else {
+      setConnected(null);
+      setStatus(live.reason || "Meta onboarding completed, but the phone is not usable yet.");
+    }
   }
 
   function connect() {
