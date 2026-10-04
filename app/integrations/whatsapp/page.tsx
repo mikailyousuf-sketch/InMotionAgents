@@ -1,6 +1,16 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import {
+  ArrowLeft,
+  Check,
+  CheckCircle2,
+  Link2,
+  MessageCircle,
+  ShieldCheck,
+  Smartphone,
+  Sparkles
+} from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 
 declare global {
@@ -19,8 +29,9 @@ export default function WhatsAppConnectPage() {
   const [businessId, setBusinessId] = useState("");
   const [role, setRole] = useState("");
   const [sdkReady, setSdkReady] = useState(false);
-  const [status, setStatus] = useState("");
+  const [status, setStatus] = useState("Checking connection…");
   const [connected, setConnected] = useState<any>(null);
+  const [checking, setChecking] = useState(true);
   const sessionRef = useRef<SessionData>({});
 
   const appId = process.env.NEXT_PUBLIC_META_APP_ID || "";
@@ -48,16 +59,17 @@ export default function WhatsAppConnectPage() {
               connection_mode: "coexistence"
             }
           });
-          setStatus("");
+          setStatus("WhatsApp is connected and ready.");
         } else {
           setConnected(null);
           setStatus(
             live.reason ||
-            "WhatsApp needs to be connected through Meta Embedded Signup."
+            "Connect WhatsApp through Meta to activate this channel."
           );
         }
       })
-      .catch(() => {});
+      .catch(() => setStatus("Could not check the WhatsApp connection."))
+      .finally(() => setChecking(false));
   }, []);
 
   useEffect(() => {
@@ -85,7 +97,7 @@ export default function WhatsAppConnectPage() {
           waba_id: data.data?.waba_id,
           phone_number_id: data.data?.phone_number_id
         };
-        setStatus("Meta approved the WhatsApp selection. Finishing the secure connection…");
+        setStatus("Meta approved the WhatsApp selection. Finishing your connection…");
       }
 
       if (data.event === "CANCEL") {
@@ -157,7 +169,7 @@ export default function WhatsAppConnectPage() {
           connection_mode: "coexistence"
         }
       });
-      setStatus("WhatsApp is connected to InMotion.");
+      setStatus("WhatsApp is connected and ready.");
     } else {
       setConnected(null);
       setStatus(live.reason || "Meta onboarding completed, but the phone is not usable yet.");
@@ -219,66 +231,118 @@ export default function WhatsAppConnectPage() {
 
   return (
     <AppShell>
-      <div style={{ maxWidth: 900 }}>
-        <div className="eyebrow">Channel connection</div>
-        <h1 style={{ marginBottom: 8 }}>Connect WhatsApp</h1>
-        <p className="muted" style={{ maxWidth: 680 }}>
-          Keep your existing WhatsApp Business app number and connect it to InMotion through Meta&apos;s official Embedded Signup flow.
-        </p>
+      <div className="whatsapp-connect-page">
+        <a href="/integrations" className="whatsapp-back">
+          <ArrowLeft size={14} /> Connections
+        </a>
 
-        <div className="card" style={{ marginTop: 24, padding: 28 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", gap: 18, alignItems: "flex-start", flexWrap: "wrap" }}>
-            <div style={{ maxWidth: 620 }}>
-              <h2 style={{ marginTop: 0 }}>WhatsApp Business App + InMotion</h2>
-              <p className="muted">
-                Meta handles the account selection, phone verification and coexistence approval. You keep using the WhatsApp Business app while InMotion receives API events and can automate customer conversations.
+        <header className="whatsapp-connect-header">
+          <div>
+            <div className="eyebrow">Messaging channel</div>
+            <h1>WhatsApp Business</h1>
+            <p>Connect the number your customers already know. Keep using the WhatsApp Business app while InMotion handles API conversations in the background.</p>
+          </div>
+
+          <div className={`whatsapp-status-pill ${connected ? "connected" : ""}`}>
+            <span />
+            {checking ? "Checking" : connected ? "Connected" : "Not connected"}
+          </div>
+        </header>
+
+        <div className="whatsapp-connect-layout">
+          <section className="whatsapp-primary-panel glass-surface">
+            <div className="whatsapp-panel-icon">
+              <MessageCircle size={22} strokeWidth={1.7} />
+            </div>
+
+            <div className="whatsapp-primary-copy">
+              <span>Meta Embedded Signup</span>
+              <h2>{connected ? "Your WhatsApp channel is live" : "Connect your existing number"}</h2>
+              <p>
+                {connected
+                  ? "InMotion can now use this WhatsApp Business connection for customer conversations."
+                  : "Meta securely handles account selection and authorization. InMotion never asks you to paste an access token into the browser."}
               </p>
-
-              <div style={{ display: "grid", gap: 10, marginTop: 20 }}>
-                <div>✓ Keep your existing business number</div>
-                <div>✓ Keep using the WhatsApp Business mobile app</div>
-                <div>✓ Connect Meta webhooks to the InMotion agent</div>
-                <div>✓ Store business credentials encrypted server-side</div>
-              </div>
             </div>
 
-            <span className="integration-status">
-              {connected ? "connected" : "not connected"}
-            </span>
-          </div>
-
-          {connected?.config && (
-            <div className="card" style={{ marginTop: 22, padding: 18 }}>
-              <strong>{connected.config.display_phone_number || "WhatsApp connected"}</strong>
-              <div className="muted" style={{ marginTop: 6 }}>
-                {connected.config.verified_name || "Business"} · {connected.config.connection_mode || "coexistence"}
+            {connected?.config ? (
+              <div className="whatsapp-connected-details">
+                <div>
+                  <span>Business</span>
+                  <strong>{connected.config.verified_name || "WhatsApp Business"}</strong>
+                </div>
+                <div>
+                  <span>Number</span>
+                  <strong>{connected.config.display_phone_number || "Connected number"}</strong>
+                </div>
+                <div>
+                  <span>Mode</span>
+                  <strong>Business App + API</strong>
+                </div>
+                <div>
+                  <span>Verification</span>
+                  <strong><CheckCircle2 size={13} /> Verified</strong>
+                </div>
               </div>
+            ) : (
+              <div className="whatsapp-steps">
+                <div>
+                  <span>1</span>
+                  <div><strong>Authorize Meta</strong><small>Sign in to the business that owns the number.</small></div>
+                </div>
+                <div>
+                  <span>2</span>
+                  <div><strong>Select WhatsApp</strong><small>Choose the existing business account and phone number.</small></div>
+                </div>
+                <div>
+                  <span>3</span>
+                  <div><strong>Go live</strong><small>InMotion verifies the connection before marking it active.</small></div>
+                </div>
+              </div>
+            )}
+
+            <div className="whatsapp-action-row">
+              <button
+                className="whatsapp-connect-button"
+                onClick={connect}
+                disabled={!editable || !sdkReady || Boolean(connected)}
+              >
+                {connected ? (
+                  <><Check size={15} /> WhatsApp connected</>
+                ) : (
+                  <><Link2 size={15} /> Connect with Meta</>
+                )}
+              </button>
+
+              {!sdkReady && !connected && (
+                <span className="whatsapp-sdk-state">Preparing Meta login…</span>
+              )}
             </div>
-          )}
 
-          <div style={{ marginTop: 26, display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
-            <button
-              onClick={connect}
-              disabled={!editable || !sdkReady || Boolean(connected)}
-              style={{ minWidth: 220 }}
-            >
-              {connected ? "WhatsApp connected" : "Connect with Meta"}
-            </button>
-            <a className="link-button" href="/integrations">Back to integrations</a>
-          </div>
+            {status && (
+              <div className={`whatsapp-status-message ${connected ? "success" : ""}`}>
+                <Sparkles size={13} />
+                <span>{status}</span>
+              </div>
+            )}
+          </section>
 
-          {!editable && role && (
-            <p className="muted" style={{ marginTop: 16 }}>Owner or admin access is required to connect WhatsApp.</p>
-          )}
+          <aside className="whatsapp-side-stack">
+            <section className="whatsapp-side-panel glass-surface">
+              <div className="whatsapp-side-heading"><Smartphone size={16} /><strong>Keep your app</strong></div>
+              <p>Your WhatsApp Business app stays installed and signed in. Coexistence lets the mobile app and InMotion work with the same business number.</p>
+            </section>
 
-          {status && <p className="muted" style={{ marginTop: 16 }}>{status}</p>}
-        </div>
+            <section className="whatsapp-side-panel glass-surface">
+              <div className="whatsapp-side-heading"><ShieldCheck size={16} /><strong>Secure by default</strong></div>
+              <p>Meta authorization happens in Meta&apos;s own signup window. Business credentials are encrypted and kept server-side.</p>
+            </section>
 
-        <div className="card" style={{ marginTop: 18, padding: 22 }}>
-          <strong>Before connecting</strong>
-          <p className="muted" style={{ marginBottom: 0 }}>
-            Keep the WhatsApp Business app installed and signed in on the phone. Meta may ask you to confirm the existing number or scan a QR code during coexistence onboarding.
-          </p>
+            <section className="whatsapp-side-panel quiet">
+              <span>Before you connect</span>
+              <p>Keep the WhatsApp Business app signed in on the phone. Meta may ask you to confirm the existing number during onboarding.</p>
+            </section>
+          </aside>
         </div>
       </div>
     </AppShell>
