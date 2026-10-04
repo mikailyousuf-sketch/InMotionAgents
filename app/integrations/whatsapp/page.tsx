@@ -41,7 +41,8 @@ export default function WhatsAppConnectPage() {
           existing?.status === "connected" &&
           ["coexistence", "cloud_api"].includes(existing?.config?.connection_mode) &&
           Boolean(existing?.config?.phone_number_id) &&
-          existing?.config?.has_embedded_credential === true;
+          existing?.config?.has_embedded_credential === true &&
+          Boolean(existing?.config?.embedded_signup_completed_at);
 
         if (isEmbeddedSignupConnection) {
           setConnected(existing);
