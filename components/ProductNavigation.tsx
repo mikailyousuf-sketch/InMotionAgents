@@ -15,7 +15,8 @@ import {
   Settings2,
   SlidersHorizontal,
   Sparkles,
-  UsersRound
+  UsersRound,
+  MoreHorizontal
 } from "lucide-react";
 import { NotificationBell } from "@/components/NotificationBell";
 
@@ -131,17 +132,29 @@ export function ProductNavigation({ collapsed = false }: { collapsed?: boolean }
         </div>}
       </nav>
 
-      <nav className="mobile-nav">
-        {main.filter(item=>["/dashboard","/conversations","/bookings"].includes(item.href)).map(item=>{
-          const Icon = item.icon;
-          return (
-            <Link key={item.href} href={item.href} className={active(item.href)?"active":""}>
-              <Icon size={18} strokeWidth={1.8} /><small>{item.label}</small>
-            </Link>
-          );
-        })}
-        <Link href="/notifications" className={active("/notifications")?"active":""}>
-          <Sparkles size={18} strokeWidth={1.8} /><small>Alerts</small>
+      <nav className="mobile-nav" aria-label="Primary mobile navigation">
+        <Link href="/dashboard" className={active("/dashboard")?"active":""}>
+          <Gauge size={19} strokeWidth={1.8} />
+          <small>Home</small>
+        </Link>
+        <Link href="/conversations" className={active("/conversations")?"active":""}>
+          <Inbox size={19} strokeWidth={1.8} />
+          <small>Inbox</small>
+        </Link>
+        <Link href="/receptionist" className={active("/receptionist")?"active":""}>
+          <Bot size={19} strokeWidth={1.8} />
+          <small>Receptionist</small>
+        </Link>
+        <Link
+          href="/settings"
+          className={
+            ["/settings","/integrations","/team","/notifications","/notification-settings","/usage","/operations","/guardrails","/custom-work","/improve"].some(href=>active(href))
+              ? "active"
+              : ""
+          }
+        >
+          <MoreHorizontal size={20} strokeWidth={1.8} />
+          <small>More</small>
         </Link>
       </nav>
     </>
