@@ -12,6 +12,8 @@ import {
 } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { GlowingEffect } from "@/components/GlowingEffect";
+import { InteractiveHoverButton } from "@/components/InteractiveHoverButton";
+import { PulsatingButton } from "@/components/PulsatingButton";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getPrimaryUserBusiness } from "@/lib/auth/access";
 
@@ -152,7 +154,7 @@ export default async function DashboardPage() {
                 </div>
                 <p>What your receptionist has been handling.</p>
               </div>
-              <Link href="/conversations" className="command-text-link">View inbox <ArrowUpRight size={12} /></Link>
+              <InteractiveHoverButton href="/conversations" className="dashboard-hover-cta">View inbox</InteractiveHoverButton>
             </div>
 
             <div className="activity-list">
@@ -237,7 +239,7 @@ export default async function DashboardPage() {
                       : `${pendingSuggestions} suggestion${pendingSuggestions === 1 ? "" : "s"} waiting for review.`}
                   </p>
                 </div>
-                <Link href={needsSetup ? "/settings" : "/improve"}>Open <ArrowUpRight size={11} /></Link>
+                <PulsatingButton href={needsSetup ? "/settings" : "/improve"} className="dashboard-pulse-cta">Open</PulsatingButton>
               </section>
             )}
           </aside>
