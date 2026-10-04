@@ -7051,3 +7051,64 @@ body {
     width:142px !important;
   }
 }
+
+
+/* ===== Floating logo correction ===== */
+.brand-lockup,
+.command-brand,
+.auth-logo-lockup,
+.onboarding-logo-lockup,
+.route-loading-brand {
+  overflow:visible !important;
+  background:transparent !important;
+  border:0 !important;
+  box-shadow:none !important;
+}
+
+.inmotion-brand-logo,
+.auth-brand-logo,
+.onboarding-brand-logo,
+.route-loading-brand-logo {
+  display:block !important;
+  width:auto !important;
+  max-width:100% !important;
+  height:auto !important;
+  object-fit:contain !important;
+  object-position:center !important;
+  background:transparent !important;
+  border:0 !important;
+  box-shadow:none !important;
+}
+
+.inmotion-brand-logo {
+  width:168px !important;
+  max-height:none !important;
+  margin:0 !important;
+  object-position:left center !important;
+}
+
+.auth-brand-logo {
+  width:min(280px,72vw) !important;
+  margin:0 !important;
+}
+
+.onboarding-brand-logo {
+  width:205px !important;
+  margin:0 !important;
+}
+
+.route-loading-brand-logo {
+  width:min(250px,72vw) !important;
+}
+
+.sidebar-brand-row {
+  overflow:visible !important;
+}
+
+.command-sidebar {
+  overflow-x:visible !important;
+}
+
+.sidebar-collapsed .inmotion-brand-logo {
+  display:none !important;
+}
