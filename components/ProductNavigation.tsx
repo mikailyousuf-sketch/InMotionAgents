@@ -47,7 +47,7 @@ const advanced = [
   { href: "/onboarding", label: "Create workspace" }
 ];
 
-export function ProductNavigation() {
+export function ProductNavigation({ collapsed = false }: { collapsed?: boolean }) {
   const pathname = usePathname();
   const [manageOpen,setManageOpen]=useState(false);
   const [advancedOpen,setAdvancedOpen]=useState(false);
@@ -75,16 +75,16 @@ export function ProductNavigation() {
         {main.map(item=>{
           const Icon = item.icon;
           return (
-            <Link key={item.href} href={item.href} className={active(item.href)?"active":""}>
+            <Link key={item.href} href={item.href} className={active(item.href)?"active":""} title={collapsed ? item.label : undefined}>
               <span className="nav-icon"><Icon size={16} strokeWidth={1.8} /></span>
-              <span>{item.label}</span>
+              <span className="nav-label">{item.label}</span>
             </Link>
           );
         })}
 
-        <NotificationBell />
+        <NotificationBell collapsed={collapsed} />
 
-        {["owner","admin"].includes(role) && (
+        {!collapsed && ["owner","admin"].includes(role) && (
           <div className={`nav-section-card ${manageOpen ? "open" : ""}`}>
             <button className="nav-section-toggle" onClick={()=>setManageOpen(v=>!v)}>
               <span className="nav-section-icon"><Settings2 size={14}/></span>
@@ -108,7 +108,7 @@ export function ProductNavigation() {
           </div>
         )}
 
-        <div className={`nav-section-card advanced ${advancedOpen ? "open" : ""}`}>
+        {!collapsed && <div className={`nav-section-card advanced ${advancedOpen ? "open" : ""}`}>
           <button className="nav-section-toggle" onClick={()=>setAdvancedOpen(v=>!v)}>
             <span className="nav-section-icon"><SlidersHorizontal size={14}/></span>
             <span className="nav-section-copy">
@@ -128,7 +128,7 @@ export function ProductNavigation() {
               ))}
             </div>
           )}
-        </div>
+        </div>}
       </nav>
 
       <nav className="mobile-nav">
