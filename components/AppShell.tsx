@@ -1,5 +1,6 @@
 import { WorkspaceSwitcher } from "@/components/WorkspaceSwitcher";
 import { ProductNavigation } from "@/components/ProductNavigation";
+import { PageSurface } from "@/components/PageSurface";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   return (
@@ -31,7 +32,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </aside>
 
-      <main className="main command-main">{children}</main>
+      <main className="main command-main">
+        <PageSurface>{children}</PageSurface>
+      </main>
     </div>
   );
 }
