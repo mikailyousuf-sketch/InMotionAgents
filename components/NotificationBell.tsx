@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-export function NotificationBell() {
+export function NotificationBell({ collapsed = false }: { collapsed?: boolean }) {
   const [count,setCount]=useState(0);
 
   async function load(){
@@ -20,8 +20,8 @@ export function NotificationBell() {
   },[]);
 
   return (
-    <Link href="/notifications" className="notification-link">
-      Notifications
+    <Link href="/notifications" className="notification-link" title={collapsed ? "Notifications" : undefined}>
+      <span className="notification-label">Notifications</span>
       {count>0&&<span className="notification-badge">{count>99?"99+":count}</span>}
     </Link>
   );
