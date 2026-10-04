@@ -27,8 +27,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <aside className="sidebar command-sidebar">
         <div className="sidebar-brand-row">
           <div className="brand-lockup command-brand">
-            <div className="brand-signature">InMotion</div>
-            <div className="brand-sub">AGENTS</div>
+            <img className="inmotion-brand-logo" src="/inmotion-logo.webp" alt="InMotion" />
           </div>
 
           <button
