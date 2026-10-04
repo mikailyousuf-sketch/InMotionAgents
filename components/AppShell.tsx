@@ -63,6 +63,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </aside>
 
+      <header className="mobile-app-header">
+        <div className="mobile-app-brand">
+          <img src="/inmotion-logo-floating.webp" alt="InMotion" />
+        </div>
+        <div className="mobile-app-status" aria-label="AI Receptionist online">
+          <span className="status-orb" />
+          <span>AI online</span>
+        </div>
+      </header>
+
       <main className="main command-main">
         <PageSurface>{children}</PageSurface>
       </main>
