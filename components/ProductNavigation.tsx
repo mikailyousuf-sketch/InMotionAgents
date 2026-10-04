@@ -42,7 +42,7 @@ const advanced = [
   { href: "/notification-settings", label: "Notification rules" },
   { href: "/operations", label: "Operations" },
   { href: "/usage", label: "Usage" },
-  { href: "/", label: "Agent tester" },
+  { href: "/", label: "Agent Lab" },
   { href: "/whatsapp", label: "WhatsApp tester" },
   { href: "/onboarding", label: "Create workspace" }
 ];
