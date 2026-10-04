@@ -104,7 +104,7 @@ export default function OnboardingPage() {
     <main className="onboarding-page">
       <header className="onboarding-topbar">
         <div className="brand-lockup onboarding-logo-lockup">
-          <img className="onboarding-brand-logo" src="/inmotion-logo.webp" alt="InMotion" />
+          <img className="onboarding-brand-logo" src="/inmotion-logo-floating.webp" alt="InMotion" />
         </div>
 
         <div className="onboarding-progress">
