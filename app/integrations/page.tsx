@@ -21,6 +21,7 @@ const catalog = [
     provider: "whatsapp",
     name: "WhatsApp Business",
     short: "WA",
+    logo: "https://cdn.simpleicons.org/whatsapp/25D366",
     category: "Messaging",
     description: "Connect the WhatsApp number your customers already use.",
     icon: MessageCircle,
@@ -52,6 +53,7 @@ const catalog = [
     provider: "google_calendar",
     name: "Google Calendar",
     short: "G",
+    logo: "https://cdn.simpleicons.org/googlecalendar/4285F4",
     category: "Calendar",
     description: "Sync business availability with Google Calendar.",
     icon: CalendarDays,
@@ -61,6 +63,7 @@ const catalog = [
     provider: "outlook",
     name: "Outlook Calendar",
     short: "O",
+    logo: "https://cdn.simpleicons.org/microsoftoutlook/0078D4",
     category: "Calendar",
     description: "Connect Microsoft Outlook scheduling.",
     icon: CalendarDays,
@@ -70,6 +73,7 @@ const catalog = [
     provider: "playtomic",
     name: "Playtomic",
     short: "P",
+    logo: "https://www.google.com/s2/favicons?domain=playtomic.io&sz=128",
     category: "Sports",
     description: "Court availability and booking integration.",
     icon: RadioTower,
@@ -225,7 +229,7 @@ export default function IntegrationsPage() {
                     className="health-card"
                     onClick={() => setExpanded(item.provider)}
                   >
-                    <div className="app-logo compact">{item.short}</div>
+                    <div className="app-logo compact">{item.logo ? <img src={item.logo} alt="" /> : item.short}</div>
                     <div className="health-card-copy">
                       <strong>{item.name}</strong>
                       <span>{item.category}</span>
@@ -262,7 +266,7 @@ export default function IntegrationsPage() {
                   onClick={() => setExpanded(isOpen ? null : item.provider)}
                   aria-expanded={isOpen}
                 >
-                  <div className="app-logo">{item.short}</div>
+                  <div className="app-logo">{item.logo ? <img src={item.logo} alt="" /> : item.short}</div>
                   <strong>{item.name}</strong>
                   <span>{item.category}</span>
                   <div className={`app-mini-health ${health.kind}`}><i /></div>
@@ -284,7 +288,7 @@ export default function IntegrationsPage() {
               <div className="app-expand-panel glass-surface">
                 <div className="app-expand-head">
                   <div className="app-expand-identity">
-                    <div className="app-logo large">{item.short}</div>
+                    <div className="app-logo large">{item.logo ? <img src={item.logo} alt="" /> : item.short}</div>
                     <div>
                       <span>{item.category}</span>
                       <h2>{item.name}</h2>
