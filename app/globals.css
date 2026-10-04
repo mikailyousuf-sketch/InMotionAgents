@@ -7285,3 +7285,91 @@ body {
     display: none;
   }
 }
+
+
+/* ===== Grid removal + smooth cursor ===== */
+.command-main {
+  background: transparent !important;
+  background-image: none !important;
+  background-size: auto !important;
+}
+
+.ambient-grid,
+.ambient-grid::before,
+.ambient-grid::after {
+  display: none !important;
+  content: none !important;
+  background: none !important;
+  box-shadow: none !important;
+}
+
+.command-main::before {
+  background-image:
+    radial-gradient(circle at 87% 12%,rgba(92,126,230,.14),transparent 26rem),
+    radial-gradient(circle at 39% 95%,rgba(38,108,163,.07),transparent 28rem) !important;
+}
+
+.command-main::after {
+  background-image: none !important;
+  opacity: 0 !important;
+}
+
+.smooth-cursor {
+  display: none;
+}
+
+@media (pointer: fine) {
+  html,
+  body,
+  a,
+  button,
+  [role="button"],
+  input[type="checkbox"],
+  input[type="radio"],
+  summary {
+    cursor: none !important;
+  }
+
+  input,
+  textarea,
+  select,
+  [contenteditable="true"] {
+    cursor: text !important;
+  }
+
+  .smooth-cursor {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 2147483647;
+    display: block;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+    will-change: transform;
+  }
+
+  .smooth-cursor-core,
+  .smooth-cursor-ring {
+    position: absolute;
+    left: 0;
+    top: 0;
+    border-radius: 999px;
+    transform: translate(-50%,-50%);
+  }
+
+  .smooth-cursor-core {
+    width: 5px;
+    height: 5px;
+    background: rgba(241,245,255,.96);
+    box-shadow: 0 0 12px rgba(123,149,255,.72);
+  }
+
+  .smooth-cursor-ring {
+    width: 22px;
+    height: 22px;
+    border: 1px solid rgba(145,165,255,.42);
+    background: rgba(112,132,255,.035);
+    box-shadow: 0 0 18px rgba(92,112,220,.12);
+  }
+}
