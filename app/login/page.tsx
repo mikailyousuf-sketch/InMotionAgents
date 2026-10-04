@@ -84,23 +84,6 @@ export default function LoginPage() {
         <div className="auth-card">
           <div className="auth-card-brand">InMotion Agents</div>
 
-          <div className="auth-mode-tabs" aria-label="Authentication mode">
-            <button
-              type="button"
-              className={mode === "login" ? "active" : ""}
-              onClick={() => changeMode("login")}
-            >
-              Sign in
-            </button>
-            <button
-              type="button"
-              className={mode === "signup" ? "active" : ""}
-              onClick={() => changeMode("signup")}
-            >
-              Create account
-            </button>
-          </div>
-
           <div className="auth-card-copy">
             <div className="eyebrow">
               {mode === "login" ? "Welcome back" : "Start with InMotion"}
@@ -167,14 +150,27 @@ export default function LoginPage() {
 
           {status && <p className="auth-status">{status}</p>}
 
-          <div className="auth-switch">
-            <span>{mode === "login" ? "New to InMotion?" : "Already have an account?"}</span>
-            <button
-              type="button"
-              onClick={() => changeMode(mode === "login" ? "signup" : "login")}
-            >
-              {mode === "login" ? "Create account" : "Sign in"}
-            </button>
+          <div className="auth-mode-footer">
+            <span className="auth-mode-footer-label">
+              {mode === "login" ? "New to InMotion?" : "Already have an account?"}
+            </span>
+
+            <div className="auth-mode-tabs" aria-label="Authentication mode">
+              <button
+                type="button"
+                className={mode === "login" ? "active" : ""}
+                onClick={() => changeMode("login")}
+              >
+                Sign in
+              </button>
+              <button
+                type="button"
+                className={mode === "signup" ? "active" : ""}
+                onClick={() => changeMode("signup")}
+              >
+                Create account
+              </button>
+            </div>
           </div>
         </div>
       </div>
