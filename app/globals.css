@@ -6846,3 +6846,78 @@ body {
     opacity:.7;
   }
 }
+
+
+/* ===== Official InMotion branding ===== */
+.inmotion-brand-logo,
+.auth-brand-logo,
+.onboarding-brand-logo,
+.route-loading-brand-logo {
+  display:block;
+  object-fit:contain;
+  object-position:center;
+}
+
+.inmotion-brand-logo {
+  width:146px;
+  height:48px;
+  margin-left:-8px;
+}
+
+.sidebar-collapsed .inmotion-brand-logo {
+  width:42px;
+  height:42px;
+  object-fit:cover;
+  object-position:left center;
+  border-radius:10px;
+}
+
+.route-loading-brand {
+  display:grid;
+  justify-items:center;
+  gap:10px;
+  text-align:center;
+}
+
+.route-loading-brand-logo {
+  width:min(260px,72vw);
+  height:auto;
+}
+
+.route-loading-brand > span {
+  color:#7f8ca1;
+  font-size:11px;
+}
+
+.auth-logo-lockup,
+.onboarding-logo-lockup {
+  display:block;
+}
+
+.auth-brand-logo {
+  width:min(320px,72vw);
+  height:auto;
+  margin-left:-18px;
+}
+
+.onboarding-brand-logo {
+  width:210px;
+  height:auto;
+  margin-left:-10px;
+}
+
+@media(max-width:800px){
+  .inmotion-brand-logo {
+    width:136px;
+    height:42px;
+    margin-left:-6px;
+  }
+
+  .auth-brand-logo {
+    width:240px;
+  }
+
+  .onboarding-brand-logo {
+    width:170px;
+  }
+}
