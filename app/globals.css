@@ -6500,3 +6500,273 @@ h2 {
     margin-left:18px;
   }
 }
+
+
+/* ===== Opaque premium surface correction ===== */
+:root {
+  --im-bg:#080b11;
+  --im-panel:#0d121a;
+  --im-panel-2:#111823;
+  --im-panel-3:#151d29;
+  --im-border:#1b2634;
+  --im-border-strong:#263548;
+  --im-text:#f4f7fb;
+  --im-muted:#8794a8;
+  --im-blue:#6f8cff;
+  --im-green:#4de0a5;
+  --im-red:#ff6475;
+}
+
+html,
+body {
+  background:#080b11 !important;
+}
+
+body {
+  background-image:none !important;
+}
+
+.command-main:before,
+.ambient-grid,
+.ambient-orb,
+.agent-core-zone::before,
+.agent-lab-console::before {
+  display:none !important;
+}
+
+.glass-surface,
+.glass-chip,
+.card,
+.command-panel,
+.connection-tile,
+.app-expand-panel,
+.whatsapp-primary-panel,
+.whatsapp-side-panel,
+.agent-directive-panel,
+.agent-proposal,
+.agent-lab-console,
+.agent-inspector-card,
+.agent-lab-toolbar,
+.inbox-queue,
+.conversation-toolbar,
+.conversation-thread-panel,
+.context-glass,
+.handover-glass {
+  background:#0d121a !important;
+  border:1px solid #1b2634 !important;
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.015) inset,
+    0 14px 34px rgba(0,0,0,.14) !important;
+}
+
+.glass-surface:hover,
+.connection-tile:hover,
+.agent-capability:hover,
+.health-card:hover,
+.app-launcher:hover,
+.app-launcher.open {
+  border-color:#263548 !important;
+}
+
+.command-sidebar {
+  background:#0a0f16 !important;
+  backdrop-filter:none !important;
+  border-right:1px solid #182231 !important;
+}
+
+.workspace-switcher,
+.form-grid input,
+.form-grid textarea,
+.form-grid select,
+.repeat-row input,
+.repeat-row textarea,
+.repeat-row select,
+.auth-card input,
+.auth-card select,
+.learning-card textarea,
+.history-input,
+.receptionist-sidebar textarea,
+.staff-composer textarea,
+.connection-fields input,
+.app-expand-fields input,
+.agent-lab-business select,
+.agent-lab-input-wrap {
+  background:#111823 !important;
+  border-color:#1d2938 !important;
+  color:#f4f7fb !important;
+}
+
+.workspace-switcher:focus,
+.form-grid input:focus,
+.form-grid textarea:focus,
+.form-grid select:focus,
+.repeat-row input:focus,
+.repeat-row textarea:focus,
+.repeat-row select:focus,
+.learning-card textarea:focus,
+.history-input:focus,
+.connection-fields input:focus,
+.app-expand-fields input:focus,
+.agent-lab-business select:focus,
+.agent-lab-input-wrap:focus-within {
+  border-color:#33445b !important;
+  background:#131c28 !important;
+}
+
+.command-nav > a:hover,
+.command-nav > a.active,
+.command-sidebar .notification-link:hover,
+.mobile-nav a.active {
+  background:#111823 !important;
+}
+
+.command-nav > a.active {
+  box-shadow:inset 2px 0 0 #6f8cff !important;
+}
+
+.sidebar-status,
+.app-logo,
+.connection-icon,
+.whatsapp-panel-icon,
+.agent-capability > span,
+.agent-run-rail > span,
+.flow-node > span {
+  background:#111823 !important;
+  border-color:#1d2938 !important;
+}
+
+.agent-core-zone {
+  background:#0d121a !important;
+  border-color:#1b2634 !important;
+}
+
+.agent-core {
+  background:#141d2a !important;
+  border-color:#2b3d54 !important;
+  box-shadow:0 0 28px rgba(79,111,227,.10) !important;
+}
+
+.agent-node {
+  background:#111823 !important;
+  border-color:#1d2938 !important;
+  box-shadow:none !important;
+}
+
+.flow-node {
+  background:#0d121a !important;
+  border-color:#1b2634 !important;
+}
+
+.flow-node.active {
+  background:#111823 !important;
+  border-color:#263548 !important;
+}
+
+.agent-lab-mark {
+  background:#121a26 !important;
+  border-color:#2a3a4f !important;
+  box-shadow:none !important;
+}
+
+.agent-lab-input-wrap {
+  box-shadow:none !important;
+}
+
+.agent-lab-composer {
+  background:#0a0f16 !important;
+  border-top:1px solid #1b2634 !important;
+}
+
+.connection-state,
+.whatsapp-status-pill,
+.connected-count,
+.agent-settings-link,
+.agent-lab-live,
+.agent-lab-reset,
+.agent-quick-directives button,
+.connection-secondary,
+.agent-reject,
+.app-collapse {
+  background:#0f1620 !important;
+  border-color:#1d2938 !important;
+}
+
+.health-card,
+.app-launcher,
+.agent-capability,
+.connected-empty {
+  background:#0b1017 !important;
+  border-color:#182231 !important;
+}
+
+.app-launcher:hover,
+.app-launcher.open,
+.agent-capability:hover,
+.health-card:hover {
+  background:#111823 !important;
+}
+
+.agent-run-event.agent .agent-run-rail > span {
+  background:#141d2a !important;
+  border-color:#2b3d54 !important;
+}
+
+.context-booking-card,
+.context-note,
+.handover-grid > div,
+.source-question,
+.service-builder,
+.knowledge-card,
+.settings-toggle,
+.resource-service-options label {
+  background:#101720 !important;
+  border-color:#1b2634 !important;
+}
+
+.conversation-message.incoming {
+  background:#111823 !important;
+  border-color:#1d2938 !important;
+}
+
+.conversation-message.outgoing {
+  background:#f3f6fb !important;
+  color:#0d121a !important;
+}
+
+.mobile-nav {
+  background:#0c1119 !important;
+  backdrop-filter:none !important;
+  border-color:#1b2634 !important;
+  box-shadow:0 14px 32px rgba(0,0,0,.22) !important;
+}
+
+/* remove over-soft transparency from miscellaneous legacy blocks */
+.onboarding-card,
+.receptionist-command-card,
+.proposal-card,
+.handover-summary-card,
+.repeat-row,
+.setup-card,
+.quick-card,
+.auth-card {
+  background:#0d121a !important;
+  border-color:#1b2634 !important;
+}
+
+.primary-link,
+.connection-primary,
+.agent-directive-footer button,
+.agent-lab-composer > button {
+  background:#edf2f8 !important;
+  color:#0d121a !important;
+  border-color:#edf2f8 !important;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  * {
+    backdrop-filter:none !important;
+    -webkit-backdrop-filter:none !important;
+  }
+}
