@@ -40,7 +40,8 @@ export default function WhatsAppConnectPage() {
         const isEmbeddedSignupConnection =
           existing?.status === "connected" &&
           ["coexistence", "cloud_api"].includes(existing?.config?.connection_mode) &&
-          Boolean(existing?.config?.phone_number_id);
+          Boolean(existing?.config?.phone_number_id) &&
+          existing?.config?.has_embedded_credential === true;
 
         if (isEmbeddedSignupConnection) {
           setConnected(existing);
