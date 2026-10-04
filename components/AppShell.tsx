@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { WorkspaceSwitcher } from "@/components/WorkspaceSwitcher";
 import { ProductNavigation } from "@/components/ProductNavigation";
-import { PageSurface } from "@/components/PageSurface";
+import { PageSurface } from "@/components/PageSurface";\nimport { BackgroundGradientAnimation } from "@/components/BackgroundGradientAnimation";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
