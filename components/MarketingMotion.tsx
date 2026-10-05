@@ -28,26 +28,40 @@ export function MarketingMotion({ children }: Props) {
 
       const hero = gsap.timeline({ defaults: { ease: "power3.out" } });
       hero
-        .from(".marketing-kicker", { y: 14, autoAlpha: 0, duration: 0.55 })
-        .from(".marketing-hero h1", { y: 30, autoAlpha: 0, duration: 0.85 }, "-=0.25")
-        .from(".marketing-hero-copy > p", { y: 18, autoAlpha: 0, duration: 0.65 }, "-=0.5")
+        .from(".marketing-hero-kicker", { y: 14, autoAlpha: 0, duration: 0.55 })
+        .from(".marketing-hero h1", { y: 34, autoAlpha: 0, duration: 0.9 }, "-=0.25")
+        .from(".marketing-hero-rotator", { y: 16, autoAlpha: 0, duration: 0.55 }, "-=0.5")
+        .from(".marketing-hero-copy > p", { y: 18, autoAlpha: 0, duration: 0.65 }, "-=0.45")
         .from(".marketing-hero-actions", { y: 14, autoAlpha: 0, duration: 0.55 }, "-=0.45")
         .from(".marketing-proof-strip", { y: 10, autoAlpha: 0, duration: 0.5 }, "-=0.4")
-        .from(".marketing-phone", {
-          x: 58,
-          y: 24,
-          rotateY: -18,
+        .from(".marketing-phone-shell", {
+          x: 72,
+          y: 30,
+          rotateY: -20,
+          scale: .94,
           autoAlpha: 0,
-          duration: 1.05
+          duration: 1.15
         }, "-=0.9")
-        .from(".marketing-stage-card", {
-          scale: 0.92,
+        .from(".marketing-chat-step", {
+          y: 14,
           autoAlpha: 0,
-          stagger: 0.12,
-          duration: 0.6
-        }, "-=0.5");
+          stagger: 0.11,
+          duration: 0.45
+        }, "-=0.55")
+        .from(".marketing-stage-card", {
+          scale: 0.9,
+          y: 12,
+          autoAlpha: 0,
+          stagger: 0.11,
+          duration: 0.58
+        }, "-=0.45")
+        .from(".marketing-live-rail", {
+          x: 26,
+          autoAlpha: 0,
+          duration: 0.65
+        }, "-=0.45");
 
-      gsap.to(".marketing-phone", {
+      gsap.to(".marketing-phone-shell", {
         yPercent: -4,
         rotateY: -4,
         ease: "none",
@@ -72,12 +86,35 @@ export function MarketingMotion({ children }: Props) {
       });
 
       gsap.to(".stage-card-two", {
-        y: 42,
-        x: 16,
+        y: 48,
+        x: 20,
         ease: "none",
         scrollTrigger: {
           trigger: ".marketing-hero",
           start: "top center",
+          end: "bottom top",
+          scrub: true
+        }
+      });
+
+      gsap.to(".marketing-live-rail", {
+        y: -30,
+        ease: "none",
+        scrollTrigger: {
+          trigger: ".marketing-hero",
+          start: "top center",
+          end: "bottom top",
+          scrub: true
+        }
+      });
+
+      gsap.to(".marketing-hero-orbit-one", {
+        rotate: 90,
+        scale: 1.06,
+        ease: "none",
+        scrollTrigger: {
+          trigger: ".marketing-hero",
+          start: "top top",
           end: "bottom top",
           scrub: true
         }
