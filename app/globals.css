@@ -12695,3 +12695,195 @@ p {
     height:330px;
   }
 }
+
+
+/* ===== Animated InMotion background atmosphere ===== */
+.im-animated-gradient {
+  position:relative;
+  overflow:hidden;
+  isolation:isolate;
+}
+
+.im-animated-gradient-layer,
+.im-animated-gradient-vignette {
+  position:absolute;
+  inset:-18%;
+  pointer-events:none;
+}
+
+.im-animated-gradient-layer {
+  opacity:var(--im-gradient-opacity,.8);
+  filter:blur(58px);
+  will-change:transform;
+  mix-blend-mode:screen;
+}
+
+.im-gradient-layer-a {
+  background:
+    radial-gradient(circle at 22% 30%,rgba(54,91,255,.34),transparent 28%),
+    radial-gradient(circle at 72% 20%,rgba(102,70,255,.22),transparent 25%),
+    radial-gradient(circle at 58% 78%,rgba(33,135,255,.16),transparent 24%);
+  animation:imGradientDriftA var(--im-gradient-duration,40s) ease-in-out infinite alternate;
+}
+
+.im-gradient-layer-b {
+  background:
+    radial-gradient(circle at 80% 34%,rgba(44,214,255,.13),transparent 24%),
+    radial-gradient(circle at 36% 68%,rgba(118,76,255,.18),transparent 28%),
+    radial-gradient(circle at 50% 18%,rgba(255,255,255,.035),transparent 18%);
+  animation:imGradientDriftB calc(var(--im-gradient-duration,40s) * 1.18) ease-in-out infinite alternate-reverse;
+}
+
+.im-gradient-layer-c {
+  inset:-8%;
+  opacity:calc(var(--im-gradient-opacity,.8) * .6);
+  filter:blur(86px);
+  background:
+    conic-gradient(from 180deg at 50% 50%,
+      transparent 0deg,
+      rgba(51,77,255,.13) 72deg,
+      transparent 128deg,
+      rgba(122,68,255,.09) 228deg,
+      transparent 310deg);
+  animation:imGradientSpin calc(var(--im-gradient-duration,40s) * 1.8) linear infinite;
+}
+
+.im-animated-gradient-vignette {
+  inset:0;
+  z-index:2;
+  background:
+    radial-gradient(circle at 50% 28%,transparent 0%,transparent 32%,rgba(4,7,12,.18) 64%,rgba(4,7,12,.78) 100%),
+    linear-gradient(180deg,rgba(5,8,13,.08),rgba(5,8,13,.62));
+}
+
+.im-animated-gradient-content {
+  position:relative;
+  z-index:3;
+}
+
+.marketing-background {
+  position:fixed;
+  inset:0;
+  width:100%;
+  height:100vh;
+  z-index:0;
+  pointer-events:none;
+}
+
+.marketing-page > *:not(.marketing-background) {
+  position:relative;
+  z-index:1;
+}
+
+.marketing-page {
+  background:
+    linear-gradient(180deg,rgba(5,8,13,.82),rgba(5,8,13,.94)),
+    #05080d;
+}
+
+.marketing-hero {
+  isolation:isolate;
+}
+
+.marketing-hero::before {
+  content:"";
+  position:absolute;
+  inset:6% -3% 4%;
+  z-index:-1;
+  border-radius:46px;
+  background:
+    radial-gradient(circle at 68% 42%,rgba(64,91,255,.10),transparent 28%),
+    linear-gradient(135deg,rgba(255,255,255,.018),transparent 46%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.02),
+    0 44px 120px rgba(0,0,0,.24);
+  pointer-events:none;
+}
+
+.marketing-product,
+.marketing-flow-section,
+.marketing-handover,
+.marketing-industries,
+.marketing-trial {
+  position:relative;
+}
+
+.marketing-product::before,
+.marketing-handover::before,
+.marketing-trial::before {
+  content:"";
+  position:absolute;
+  pointer-events:none;
+  z-index:-1;
+  width:520px;
+  height:520px;
+  border-radius:50%;
+  filter:blur(70px);
+  opacity:.22;
+}
+
+.marketing-product::before {
+  left:-240px;
+  top:80px;
+  background:rgba(55,91,255,.22);
+}
+
+.marketing-handover::before {
+  right:-260px;
+  top:80px;
+  background:rgba(145,82,255,.17);
+}
+
+.marketing-trial::before {
+  left:50%;
+  top:40px;
+  background:rgba(66,112,255,.16);
+  transform:translateX(-50%);
+}
+
+@keyframes imGradientDriftA {
+  0% { transform:translate3d(-3%,-2%,0) scale(1.02) rotate(-2deg); }
+  50% { transform:translate3d(4%,3%,0) scale(1.08) rotate(3deg); }
+  100% { transform:translate3d(1%,-4%,0) scale(1.04) rotate(1deg); }
+}
+
+@keyframes imGradientDriftB {
+  0% { transform:translate3d(3%,1%,0) scale(1.04); }
+  50% { transform:translate3d(-4%,4%,0) scale(1.10); }
+  100% { transform:translate3d(2%,-3%,0) scale(1.05); }
+}
+
+@keyframes imGradientSpin {
+  from { transform:rotate(0deg) scale(1.04); }
+  to { transform:rotate(360deg) scale(1.08); }
+}
+
+@media(max-width:800px){
+  .im-animated-gradient-layer {
+    filter:blur(72px);
+    opacity:calc(var(--im-gradient-opacity,.8) * .78);
+  }
+
+  .im-gradient-layer-c {
+    display:none;
+  }
+
+  .marketing-hero::before {
+    inset:0 -16px 2%;
+    border-radius:28px;
+  }
+
+  .marketing-product::before,
+  .marketing-handover::before,
+  .marketing-trial::before {
+    width:320px;
+    height:320px;
+    opacity:.16;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  .im-animated-gradient-layer {
+    animation:none !important;
+  }
+}
