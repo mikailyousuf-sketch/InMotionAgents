@@ -86,8 +86,7 @@ export default async function DashboardPage() {
   const metrics = [
     {label:"Conversations",value:todayConversations ?? 0,icon:MessageSquareText,href:"/conversations"},
     {label:"Bookings",value:todayBookings ?? 0,icon:CalendarDays,href:"/bookings"},
-    {label:"Active leads",value:activeLeads ?? 0,icon:UsersRound,href:"/customers"},
-    {label:"Handovers",value:handovers ?? 0,icon:UserRoundCheck,href:"/conversations"}
+    {label:"Active leads",value:activeLeads ?? 0,icon:UsersRound,href:"/customers"}
   ];
 
   const quickActions = [
@@ -125,7 +124,23 @@ export default async function DashboardPage() {
           </div>
         </header>
 
-        <section className="command-metrics" aria-label="Today">
+        <section className={`home-attention-card ${attention > 0 ? "needs-attention" : "all-clear"}`}>
+          <div className="home-attention-led"><span className="status-orb"/></div>
+          <div className="home-attention-copy">
+            <strong>{attention > 0 ? `${attention} conversation${attention === 1 ? "" : "s"} need you` : "Everything is handled"}</strong>
+            <span>
+              {attention > 0
+                ? "Jump into the inbox and pick up where your receptionist handed over."
+                : "Your receptionist is handling customer conversations. Nothing needs your attention right now."}
+            </span>
+          </div>
+          <Link href="/conversations" className="home-attention-action">
+            {attention > 0 ? "Open inbox" : "View activity"} <ChevronRight size={14}/>
+          </Link>
+        </section>
+
+        <div className="home-section-label">Today</div>
+        <section className="command-metrics home-metrics-three" aria-label="Today">
           {metrics.map(metric=>{
             const Icon = metric.icon;
             return (
