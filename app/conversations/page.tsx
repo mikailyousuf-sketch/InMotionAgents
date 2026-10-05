@@ -1,5 +1,11 @@
 import Link from "next/link";
-import { ArrowUpRight, Inbox, MessageSquareText, UserRoundCheck } from "lucide-react";
+import {
+  ArrowRight,
+  Bot,
+  Inbox,
+  MessageSquareText,
+  UserRoundCheck
+} from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getPrimaryUserBusiness } from "@/lib/auth/access";
@@ -10,10 +16,54 @@ function relativeTime(value:string) {
   const diff = Math.max(0, Date.now() - new Date(value).getTime());
   const minutes = Math.floor(diff / 60000);
   if (minutes < 1) return "Now";
-  if (minutes < 60) return `${minutes}m ago`;
+  if (minutes < 60) return `${minutes}m`;
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
-  return `${Math.floor(hours / 24)}d ago`;
+  if (hours < 24) return `${hours}h`;
+  return `${Math.floor(hours / 24)}d`;
+}
+
+function ConversationRow({ conversation }:{ conversation:any }) {
+  const customer = Array.isArray(conversation.customers)
+    ? conversation.customers[0]
+    : conversation.customers;
+
+  const human = conversation.status === "human";
+  const unread = Number(conversation.unread_for_staff ?? 0);
+
+  return (
+    <Link
+      href={`/conversations/${conversation.id}`}
+      className={`mobile-conversation-row ${human ? "needs-human" : ""}`}
+    >
+      <div className={`conversation-avatar ${human ? "human" : ""}`}>
+        {human
+          ? <UserRoundCheck size={18} strokeWidth={1.8}/>
+          : <MessageSquareText size={18} strokeWidth={1.8}/>
+        }
+      </div>
+
+      <div className="conversation-row-main">
+        <div className="conversation-row-top">
+          <strong>{customer?.full_name || "Unknown customer"}</strong>
+          <time>{relativeTime(conversation.updated_at)}</time>
+        </div>
+
+        <div className="conversation-row-bottom">
+          <span>
+            {human
+              ? "Waiting for you"
+              : conversation.status === "ai"
+                ? "AI is handling this"
+                : conversation.status
+            }
+          </span>
+          {unread > 0 && <b>{unread}</b>}
+        </div>
+      </div>
+
+      <ArrowRight className="conversation-row-arrow" size={15} strokeWidth={1.8}/>
+    </Link>
+  );
 }
 
 export default async function ConversationsPage() {
@@ -24,94 +74,82 @@ export default async function ConversationsPage() {
     .from("conversations")
     .select("id,status,channel,started_at,updated_at,assigned_user_id,unread_for_staff,customers(full_name,phone)")
     .eq("business_id", business.id)
-    .order("status", { ascending: false })
-    .order("unread_for_staff", { ascending: false })
     .order("updated_at", { ascending: false })
     .limit(50);
 
   if (error) throw new Error(error.message);
 
   const items = conversations ?? [];
-  const humanCount = items.filter((item:any)=>item.status === "human").length;
-  const unreadCount = items.reduce((sum:number,item:any)=>sum + Number(item.unread_for_staff ?? 0),0);
+  const attention = items.filter((item:any) =>
+    item.status === "human" || Number(item.unread_for_staff ?? 0) > 0
+  );
+  const active = items.filter((item:any) =>
+    !attention.some((priority:any) => priority.id === item.id)
+  );
   const aiCount = items.filter((item:any)=>item.status === "ai").length;
 
   return (
     <AppShell>
-      <div className="ambient-orb ambient-orb-one" />
-      <div className="ambient-orb ambient-orb-two" />
-      <div className="ambient-grid" />
-
-      <div className="inbox-page command-page">
-        <header className="inbox-header">
+      <div className="inbox-app-page command-page">
+        <header className="inbox-app-head">
           <div>
-            <div className="eyebrow">Customer conversations</div>
-            <h1>Inbox</h1>
-            <p>{business.name} · one place for AI and human-handled conversations.</p>
+            <div className="eyebrow">Inbox</div>
+            <h1>Customer conversations</h1>
+            <p>{business.name} · reply only when your receptionist needs you.</p>
           </div>
-          <div className="inbox-summary glass-chip">
-            <span><strong>{humanCount}</strong> need attention</span>
-            <i />
-            <span><strong>{unreadCount}</strong> unread</span>
-            <i />
-            <span><strong>{aiCount}</strong> AI handling</span>
+
+          <div className="inbox-app-status">
+            <span className="status-orb"/>
+            <span><strong>{aiCount}</strong> handled by AI</span>
           </div>
         </header>
 
-        <section className="inbox-queue glass-surface">
-          <div className="inbox-queue-head">
-            <div>
-              <h2>Conversation queue</h2>
-              <p>Waiting customers first, then the latest activity.</p>
+        {attention.length > 0 && (
+          <section className="inbox-priority">
+            <div className="inbox-section-title">
+              <div>
+                <span className="priority-dot"/>
+                <strong>Needs you</strong>
+              </div>
+              <small>{attention.length} conversation{attention.length === 1 ? "" : "s"}</small>
             </div>
-            <span>{items.length} total</span>
+
+            <div className="conversation-stack priority-stack">
+              {attention.map((conversation:any) => (
+                <ConversationRow key={conversation.id} conversation={conversation}/>
+              ))}
+            </div>
+          </section>
+        )}
+
+        <section className="inbox-recent">
+          <div className="inbox-section-title">
+            <div>
+              <Bot size={14} strokeWidth={1.7}/>
+              <strong>{attention.length ? "Other conversations" : "Conversations"}</strong>
+            </div>
+            <small>{items.length} total</small>
           </div>
 
           {items.length === 0 ? (
-            <div className="inbox-empty">
-              <span><Inbox size={20} strokeWidth={1.6} /></span>
-              <strong>Your inbox is quiet</strong>
-              <p>New conversations will show here as soon as customers start messaging.</p>
+            <div className="inbox-app-empty">
+              <span><Inbox size={22} strokeWidth={1.6}/></span>
+              <strong>No conversations yet</strong>
+              <p>When customers message your business, they’ll appear here.</p>
+            </div>
+          ) : active.length === 0 ? (
+            <div className="inbox-all-caught-up">
+              <span><Bot size={18}/></span>
+              <div>
+                <strong>Everything else is handled</strong>
+                <p>Your receptionist is looking after the remaining conversations.</p>
+              </div>
             </div>
           ) : (
-            <div className="inbox-list">
-              {items.map((conversation:any) => {
-                const customer = Array.isArray(conversation.customers)
-                  ? conversation.customers[0]
-                  : conversation.customers;
-                const human = conversation.status === "human";
-                const unread = Number(conversation.unread_for_staff ?? 0);
-
-                return (
-                  <Link href={`/conversations/${conversation.id}`} key={conversation.id} className={`inbox-row ${human ? "needs-human" : ""}`}>
-                    <div className="inbox-avatar">
-                      {human ? <UserRoundCheck size={17} strokeWidth={1.7} /> : <MessageSquareText size={17} strokeWidth={1.7} />}
-                    </div>
-
-                    <div className="inbox-person">
-                      <strong>{customer?.full_name || "Unknown customer"}</strong>
-                      <span>{customer?.phone || conversation.channel || "Customer"}</span>
-                    </div>
-
-                    <div className={`inbox-state ${human ? "human" : "ai"}`}>
-                      <span className="state-dot" />
-                      {human ? "Needs attention" : conversation.status === "ai" ? "AI handling" : conversation.status}
-                    </div>
-
-                    <div className="inbox-channel">{conversation.channel || "—"}</div>
-
-                    <div className="inbox-updated">
-                      <strong>{relativeTime(conversation.updated_at)}</strong>
-                      <span>{new Date(conversation.updated_at).toLocaleTimeString("en-ZA",{hour:"2-digit",minute:"2-digit"})}</span>
-                    </div>
-
-                    <div className="inbox-row-end">
-                      {unread > 0 && <span className="inbox-unread">{unread}</span>}
-                      <ArrowUpRight size={14} strokeWidth={1.6} />
-                    </div>
-                  </Link>
-                );
-              })}
+            <div className="conversation-stack">
+              {active.map((conversation:any) => (
+                <ConversationRow key={conversation.id} conversation={conversation}/>
+              ))}
             </div>
           )}
         </section>
