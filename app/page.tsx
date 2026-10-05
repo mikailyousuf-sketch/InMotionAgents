@@ -1,292 +1,248 @@
-"use client";
-
-import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import {
-  Activity,
   ArrowRight,
   Bot,
-  Building2,
-  CheckCircle2,
-  CircleDot,
-  Eraser,
-  FlaskConical,
+  CalendarDays,
+  Check,
   MessageSquareText,
-  Play,
-  RotateCcw,
+  ShieldCheck,
   Sparkles,
-  UserRound
+  UserRoundCheck,
+  UsersRound
 } from "lucide-react";
-import { AppShell } from "@/components/AppShell";
 
-type Message = { role: "user" | "assistant"; content: string };
+const capabilities = [
+  { icon: MessageSquareText, title: "Answers enquiries", copy: "Fast, on-brand replies from your real business knowledge." },
+  { icon: CalendarDays, title: "Books appointments", copy: "Checks availability and confirms bookings inside the conversation." },
+  { icon: UsersRound, title: "Qualifies leads", copy: "Captures intent and keeps the useful context attached to the customer." },
+  { icon: UserRoundCheck, title: "Hands over cleanly", copy: "Moves complex conversations to your team with the context intact." }
+];
+
+const industries = ["Dental", "Padel", "Salons", "Restaurants", "Home services"];
 
 export default function HomePage() {
-  const [messages, setMessages] = useState<Message[]>([
-    { role: "assistant", content: "Hi 👋 I’m the Northstar Dental receptionist. How can I help?" }
-  ]);
-  const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [conversationId, setConversationId] = useState<string | null>(null);
-  const [businesses, setBusinesses] = useState<{ name: string; slug: string }[]>([]);
-  const [businessSlug, setBusinessSlug] = useState("northstar-dental");
-
-  useEffect(() => {
-    fetch("/api/businesses")
-      .then((response) => response.json())
-      .then((data) => setBusinesses(data.businesses ?? []))
-      .catch(() => {});
-  }, []);
-
-  const businessName = useMemo(
-    () => businesses.find((business) => business.slug === businessSlug)?.name || "Northstar Dental",
-    [businesses, businessSlug]
-  );
-
-  async function sendMessage(valueOverride?: string) {
-    const value = (valueOverride ?? input).trim();
-    if (!value || loading) return;
-
-    const next = [...messages, { role: "user" as const, content: value }];
-    setMessages(next);
-    setInput("");
-    setLoading(true);
-
-    try {
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: next, conversationId, businessSlug })
-      });
-      const data = await response.json();
-      if (data.conversationId) setConversationId(data.conversationId);
-      setMessages((current) => [
-        ...current,
-        { role: "assistant", content: data.message ?? "Something went wrong." }
-      ]);
-    } catch {
-      setMessages((current) => [
-        ...current,
-        { role: "assistant", content: "I could not reach the agent service." }
-      ]);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  function resetRun() {
-    setConversationId(null);
-    setInput("");
-    setMessages([{ role: "assistant", content: "Hi 👋 How can I help?" }]);
-  }
-
-  const scenarios = [
-    "What time do you close on Friday?",
-    "I need to move my booking to tomorrow.",
-    "Can I get a refund?",
-    "I want to book the earliest available appointment."
-  ];
-
-  const userTurns = messages.filter((message) => message.role === "user").length;
-  const agentTurns = messages.filter((message) => message.role === "assistant").length;
-
   return (
-    <AppShell>
-      <div className="agent-lab-page">
-        <header className="agent-lab-head">
-          <div>
-            <div className="eyebrow">Agent Lab</div>
-            <h1>Test behaviour, not just replies.</h1>
-            <p>Run realistic customer scenarios and watch how the agent responds turn by turn.</p>
-          </div>
+    <main className="marketing-page">
+      <header className="marketing-nav">
+        <Link href="/" className="marketing-brand" aria-label="InMotion home">
+          <img src="/inmotion-logo-floating.webp" alt="InMotion" />
+        </Link>
 
-          <div className="agent-lab-live">
-            <span className="status-orb" />
-            Simulation ready
-          </div>
-        </header>
+        <nav className="marketing-nav-links" aria-label="Primary">
+          <a href="#product">Product</a>
+          <a href="#how-it-works">How it works</a>
+          <a href="#industries">Industries</a>
+        </nav>
 
-        <section className="agent-lab-toolbar glass-surface">
-          <div className="agent-lab-business">
-            <span><Building2 size={14} /> Business</span>
-            <select
-              value={businessSlug}
-              onChange={(e) => {
-                setBusinessSlug(e.target.value);
-                setConversationId(null);
-                setMessages([{ role: "assistant", content: "Hi 👋 How can I help?" }]);
-              }}
-            >
-              {businesses.map((business) => (
-                <option key={business.slug} value={business.slug}>{business.name}</option>
-              ))}
-            </select>
-          </div>
-
-          <div className="agent-lab-session">
-            <div>
-              <span>Session</span>
-              <strong>{conversationId ? conversationId.slice(0, 8) : "New run"}</strong>
-            </div>
-            <div>
-              <span>Turns</span>
-              <strong>{userTurns + agentTurns}</strong>
-            </div>
-            <div>
-              <span>State</span>
-              <strong>{loading ? "Thinking" : "Ready"}</strong>
-            </div>
-          </div>
-
-          <button className="agent-lab-reset" onClick={resetRun}>
-            <RotateCcw size={13} /> Reset run
-          </button>
-        </section>
-
-        <section className="agent-lab-flow" aria-label="Simulation flow">
-          <div className="flow-node active">
-            <span>01</span>
-            <div><strong>Customer input</strong><small>Scenario or live test prompt</small></div>
-          </div>
-          <i />
-          <div className={`flow-node ${loading ? "active thinking" : "active"}`}>
-            <span>02</span>
-            <div><strong>Agent reasoning</strong><small>{loading ? "Processing current turn" : "Ready for next turn"}</small></div>
-          </div>
-          <i />
-          <div className={`flow-node ${conversationId ? "active" : ""}`}>
-            <span>03</span>
-            <div><strong>Business action</strong><small>Reply, booking, handover or policy</small></div>
-          </div>
-        </section>
-
-        <div className="agent-lab-layout">
-          <section className="agent-lab-console glass-surface">
-            <div className="agent-lab-console-head">
-              <div className="agent-lab-console-title">
-                <div className="agent-lab-mark"><Bot size={18} strokeWidth={1.55}/></div>
-                <div>
-                  <span>Live simulation</span>
-                  <h2>{businessName}</h2>
-                </div>
-              </div>
-              <div className={`agent-lab-state ${loading ? "thinking" : ""}`}>
-                <CircleDot size={12} />
-                {loading ? "Agent processing" : "Awaiting customer"}
-              </div>
-            </div>
-
-            <div className="agent-run-timeline">
-              {messages.map((message, index) => (
-                <article
-                  className={`agent-run-event ${message.role === "user" ? "customer" : "agent"}`}
-                  key={index}
-                >
-                  <div className="agent-run-rail">
-                    <span>
-                      {message.role === "user"
-                        ? <UserRound size={14} />
-                        : <Bot size={14} />}
-                    </span>
-                    {index < messages.length - 1 && <i />}
-                  </div>
-
-                  <div className="agent-run-content">
-                    <div className="agent-run-meta">
-                      <strong>{message.role === "user" ? "Customer" : "InMotion Agent"}</strong>
-                      <span>Turn {index + 1}</span>
-                    </div>
-                    <p>{message.content}</p>
-                  </div>
-                </article>
-              ))}
-
-              {loading && (
-                <article className="agent-run-event agent thinking-event">
-                  <div className="agent-run-rail">
-                    <span><Sparkles size={14} /></span>
-                  </div>
-                  <div className="agent-run-content">
-                    <div className="agent-run-meta">
-                      <strong>InMotion Agent</strong>
-                      <span>Processing</span>
-                    </div>
-                    <div className="agent-thinking-bars"><i/><i/><i/></div>
-                  </div>
-                </article>
-              )}
-            </div>
-
-            <div className="agent-lab-composer">
-              <div className="agent-lab-input-wrap">
-                <MessageSquareText size={16} />
-                <input
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) sendMessage();
-                  }}
-                  placeholder="Type the next customer message…"
-                />
-              </div>
-              <button onClick={() => sendMessage()} disabled={!input.trim() || loading}>
-                <Play size={14} /> Run turn
-              </button>
-            </div>
-          </section>
-
-          <aside className="agent-lab-inspector">
-            <section className="agent-inspector-card glass-surface run-health-card">
-              <div className="agent-inspector-head">
-                <Activity size={15} />
-                <strong>Run health</strong>
-                <span className="inspector-live-dot"/>
-              </div>
-
-              <div className="agent-inspector-health">
-                <div>
-                  <span>Agent service</span>
-                  <strong><CheckCircle2 size={12}/> Online</strong>
-                </div>
-                <div>
-                  <span>Conversation</span>
-                  <strong>{conversationId ? "Active" : "Not started"}</strong>
-                </div>
-                <div>
-                  <span>Customer turns</span>
-                  <strong>{userTurns}</strong>
-                </div>
-                <div>
-                  <span>Agent turns</span>
-                  <strong>{agentTurns}</strong>
-                </div>
-              </div>
-            </section>
-
-            <section className="agent-inspector-card glass-surface">
-              <div className="agent-inspector-head">
-                <FlaskConical size={15} />
-                <strong>Scenario presets</strong>
-              </div>
-              <div className="agent-scenario-list">
-                {scenarios.map((scenario) => (
-                  <button key={scenario} onClick={() => sendMessage(scenario)} disabled={loading}>
-                    <span>{scenario}</span>
-                    <ArrowRight size={12} />
-                  </button>
-                ))}
-              </div>
-            </section>
-
-            <section className="agent-inspector-card quiet">
-              <div className="agent-inspector-head">
-                <Eraser size={14} />
-                <strong>Testing note</strong>
-              </div>
-              <p>This is an internal simulation channel. It runs the real agent logic without sending anything to WhatsApp.</p>
-            </section>
-          </aside>
+        <div className="marketing-nav-actions">
+          <Link href="/login" className="marketing-login">Log in</Link>
+          <Link href="/login" className="marketing-primary-button">
+            Start Now <ArrowRight size={15} />
+          </Link>
         </div>
-      </div>
-    </AppShell>
+      </header>
+
+      <section className="marketing-hero">
+        <div className="marketing-hero-glow marketing-hero-glow-one" />
+        <div className="marketing-hero-glow marketing-hero-glow-two" />
+
+        <div className="marketing-hero-copy">
+          <div className="marketing-kicker">
+            <span className="status-orb" />
+            AI receptionist for WhatsApp
+          </div>
+
+          <h1>
+            Your business is already talking.
+            <span>InMotion keeps it moving.</span>
+          </h1>
+
+          <p>
+            Answer enquiries, book appointments, qualify leads and hand over to your team —
+            without turning customer service into another full-time job.
+          </p>
+
+          <div className="marketing-hero-actions">
+            <Link href="/login" className="marketing-primary-button large">
+              Start Now <ArrowRight size={16} />
+            </Link>
+            <a href="#product" className="marketing-secondary-button">See how it works</a>
+          </div>
+
+          <div className="marketing-proof-strip">
+            <span><Check size={13} /> WhatsApp-first</span>
+            <span><Check size={13} /> Human handover</span>
+            <span><Check size={13} /> Bookings + CRM memory</span>
+          </div>
+        </div>
+
+        <div className="marketing-phone-stage" aria-label="InMotion product preview">
+          <div className="marketing-stage-card stage-card-one">
+            <span>New enquiry</span>
+            <strong>“Do you have anything available tomorrow?”</strong>
+          </div>
+
+          <div className="marketing-phone">
+            <div className="marketing-phone-top">
+              <div>
+                <span className="marketing-avatar"><Bot size={14} /></span>
+                <div>
+                  <strong>InMotion</strong>
+                  <small><i className="status-orb" /> AI receptionist online</small>
+                </div>
+              </div>
+            </div>
+
+            <div className="marketing-chat">
+              <div className="marketing-message incoming">
+                Hi, do you have anything available tomorrow afternoon?
+              </div>
+              <div className="marketing-message outgoing">
+                Yes — I have 15:30 and 16:15 available. Which works better?
+              </div>
+              <div className="marketing-message incoming small">
+                15:30 please.
+              </div>
+
+              <div className="marketing-booking-card">
+                <div className="marketing-booking-icon"><CalendarDays size={18} /></div>
+                <div>
+                  <span>Booking confirmed</span>
+                  <strong>Tomorrow · 15:30</strong>
+                  <small>Customer and booking saved automatically.</small>
+                </div>
+              </div>
+            </div>
+
+            <div className="marketing-phone-composer">
+              <span>Message…</span>
+              <Sparkles size={14} />
+            </div>
+          </div>
+
+          <div className="marketing-stage-card stage-card-two">
+            <span>Booking confirmed</span>
+            <strong>Tomorrow · 15:30</strong>
+          </div>
+
+          <div className="marketing-stage-card stage-card-three">
+            <span>Customer remembered</span>
+            <strong>Returning client · Warm lead</strong>
+          </div>
+        </div>
+      </section>
+
+      <section className="marketing-trust-band">
+        <p>Built for businesses where conversations turn into bookings, leads and revenue.</p>
+      </section>
+
+      <section className="marketing-product" id="product">
+        <div className="marketing-section-copy">
+          <div className="marketing-kicker">More than replies</div>
+          <h2>Your receptionist actually does the work.</h2>
+          <p>InMotion sits between the customer conversation and the systems your team uses every day.</p>
+        </div>
+
+        <div className="marketing-capability-grid">
+          {capabilities.map(({ icon: Icon, title, copy }) => (
+            <article key={title} className="marketing-capability-card">
+              <span><Icon size={19} strokeWidth={1.7} /></span>
+              <h3>{title}</h3>
+              <p>{copy}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="marketing-flow-section" id="how-it-works">
+        <div className="marketing-flow-visual">
+          <div className="marketing-flow-step active">
+            <span>01</span>
+            <div><strong>Connect</strong><small>Bring your WhatsApp business number into InMotion.</small></div>
+          </div>
+          <i />
+          <div className="marketing-flow-step">
+            <span>02</span>
+            <div><strong>Teach</strong><small>Add your services, hours, FAQs and business rules.</small></div>
+          </div>
+          <i />
+          <div className="marketing-flow-step">
+            <span>03</span>
+            <div><strong>Go live</strong><small>Let the receptionist handle routine conversations and bookings.</small></div>
+          </div>
+        </div>
+
+        <div className="marketing-flow-copy">
+          <div className="marketing-kicker">Simple by design</div>
+          <h2>Set it up once. Then let it work.</h2>
+          <p>
+            Your team keeps control of the important decisions. InMotion handles the repetitive front-desk work around them.
+          </p>
+        </div>
+      </section>
+
+      <section className="marketing-handover">
+        <div className="marketing-handover-copy">
+          <div className="marketing-kicker">Human when it matters</div>
+          <h2>Automation should know when to stop.</h2>
+          <p>
+            When a customer needs judgement, approval or a sensitive answer, InMotion hands the conversation to your team with the context already prepared.
+          </p>
+          <div className="marketing-handover-proof">
+            <span><ShieldCheck size={16} /> Policies and guardrails</span>
+            <span><UserRoundCheck size={16} /> Staff takeover</span>
+          </div>
+        </div>
+
+        <div className="marketing-handover-card">
+          <div className="marketing-handover-head">
+            <span className="marketing-amber-led" />
+            <strong>Handover ready</strong>
+          </div>
+          <p>Customer is asking for a refund. Policy requires staff approval.</p>
+          <div className="marketing-handover-actions">
+            <button type="button">Take over</button>
+            <span>AI pauses automatically</span>
+          </div>
+        </div>
+      </section>
+
+      <section className="marketing-industries" id="industries">
+        <div>
+          <div className="marketing-kicker">Flexible by industry</div>
+          <h2>One receptionist. Different businesses.</h2>
+        </div>
+
+        <div className="marketing-industry-list">
+          {industries.map((industry) => <span key={industry}>{industry}</span>)}
+        </div>
+      </section>
+
+      <section className="marketing-trial">
+        <div className="marketing-trial-content">
+          <img src="/inmotion-logo-floating.webp" alt="" aria-hidden="true" />
+          <div className="marketing-kicker">Start with InMotion</div>
+          <h2>Give your front desk room to breathe.</h2>
+          <p>Set up your business, teach your receptionist and start handling customer conversations from one workspace.</p>
+          <Link href="/login" className="marketing-primary-button large">
+            Start Now <ArrowRight size={16} />
+          </Link>
+        </div>
+      </section>
+
+      <footer className="marketing-footer">
+        <Link href="/" className="marketing-footer-brand">
+          <img src="/inmotion-logo-floating.webp" alt="InMotion" />
+        </Link>
+
+        <div className="marketing-footer-links">
+          <Link href="/login">Log in</Link>
+          <Link href="/privacy">Privacy</Link>
+          <Link href="/terms">Terms</Link>
+        </div>
+
+        <span>© {new Date().getFullYear()} InMotion Agents</span>
+      </footer>
+    </main>
   );
 }
