@@ -125,3 +125,31 @@ export async function POST(request: Request) {
     },{ status:422 });
   }
 }
+
+
+export async function PATCH(request: Request) {
+  const access = await requireAuthenticatedWorkspace();
+  if (!access) return Response.json({ error:"Unauthorized" },{ status:401 });
+
+  const body = await request.json();
+  const action = String(body?.action || "");
+  const bookingId = String(body?.bookingId || "");
+  if (!bookingId) return Response.json({ error:"bookingId is required" },{ status:400 });
+
+  try {
+    if (action === "cancel") {
+      const booking = await provider.cancelBooking({
+        businessId:access.current.business.id,
+        bookingId,
+        reason:body?.reason ? String(body.reason).slice(0,1000) : undefined
+      });
+      return Response.json({ booking });
+    }
+
+    return Response.json({ error:"Unsupported booking action" },{ status:400 });
+  } catch (error) {
+    return Response.json({
+      error:error instanceof Error ? error.message : "Could not update booking"
+    },{ status:422 });
+  }
+}
