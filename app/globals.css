@@ -9664,3 +9664,344 @@ body {
     display:none;
   }
 }
+
+
+/* ===== 2026 visual system refresh: typography, pills, LEDs ===== */
+:root {
+  --im-font-display:var(--font-space-grotesk),system-ui,sans-serif;
+  --im-font-ui:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --im-text-strong:#f4f7fb;
+  --im-text:#d7dfeb;
+  --im-text-soft:#98a5b8;
+  --im-text-faint:#637086;
+  --im-pill-bg:#0c131c;
+  --im-pill-border:#1b2736;
+  --im-led-green:#50e3a4;
+  --im-led-amber:#ffb46d;
+  --im-led-blue:#7b96ff;
+  --im-led-red:#ff6f7f;
+}
+
+body {
+  font-family:var(--im-font-ui);
+  font-feature-settings:"ss01" 1,"cv02" 1,"cv03" 1;
+  text-rendering:optimizeLegibility;
+}
+
+h1,h2,h3,
+.command-business-name,
+.command-metric strong,
+.section-stat strong,
+.schedule-date strong {
+  font-family:var(--im-font-display);
+}
+
+h1 {
+  color:var(--im-text-strong);
+  font-weight:650;
+  letter-spacing:-.045em;
+}
+
+h2 {
+  color:var(--im-text-strong);
+  font-weight:620;
+  letter-spacing:-.035em;
+}
+
+h3 {
+  color:var(--im-text-strong);
+  font-weight:610;
+  letter-spacing:-.025em;
+}
+
+p {
+  color:var(--im-text-soft);
+}
+
+.eyebrow {
+  margin-bottom:7px;
+  color:#6f7f95;
+  font-family:var(--im-font-ui);
+  font-size:9px;
+  font-weight:750;
+  letter-spacing:.14em;
+}
+
+.command-business-name {
+  color:var(--im-text-strong);
+  font-size:20px;
+  font-weight:640;
+  letter-spacing:-.04em;
+}
+
+.command-date {
+  color:var(--im-text-faint);
+  font-size:10px;
+  letter-spacing:.015em;
+}
+
+/* Universal premium chip language */
+.glass-chip,
+.command-agent-status,
+.command-alert,
+.section-stat,
+.inbox-app-status,
+.conversation-status,
+.inbox-state,
+.schedule-status,
+.customer-lead-pill,
+.confidence,
+.live-indicator,
+.context-value-pill,
+.review-chips span {
+  border-radius:8px !important;
+  box-shadow:none !important;
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+}
+
+.glass-chip {
+  border-color:var(--im-pill-border) !important;
+  background:var(--im-pill-bg) !important;
+}
+
+.command-agent-status,
+.command-alert,
+.section-stat,
+.inbox-app-status {
+  min-height:32px;
+  padding:0 10px;
+  gap:7px;
+  border:1px solid var(--im-pill-border);
+  background:var(--im-pill-bg);
+  color:#94a2b5;
+  font-size:9px;
+  font-weight:650;
+}
+
+.section-stat {
+  min-height:34px;
+}
+
+.command-alert {
+  border-color:rgba(255,111,127,.18);
+  background:rgba(255,111,127,.055);
+  color:#d999a2;
+}
+
+.command-alert span {
+  width:auto;
+  height:auto;
+  min-width:0;
+  padding:0;
+  border-radius:0;
+  background:none;
+  color:#ff8795;
+  font-size:10px;
+}
+
+.command-agent-status strong {
+  margin-left:0;
+  color:#8ee9bd;
+  font-size:9px;
+  font-weight:700;
+}
+
+.schedule-status,
+.customer-lead-pill,
+.conversation-status,
+.inbox-state,
+.confidence,
+.context-value-pill {
+  min-height:24px;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:0 8px;
+  border:1px solid #1a2736;
+  background:#0c131c;
+  color:#8e9db1;
+  font-size:9px;
+  font-weight:650;
+  line-height:1;
+}
+
+.customer-lead-pill,
+.schedule-status {
+  text-transform:capitalize;
+}
+
+.review-chips span {
+  padding:6px 8px;
+  border:1px solid #1a2736;
+  background:#0c131c;
+  color:#8190a4;
+  font-size:9px;
+}
+
+/* LED indicators */
+.status-orb,
+.state-dot,
+.health-dot,
+.live-indicator i,
+.priority-dot {
+  position:relative;
+  width:6px;
+  height:6px;
+  flex:0 0 6px;
+  border-radius:50%;
+  background:var(--im-led-green);
+  box-shadow:
+    0 0 0 2px rgba(80,227,164,.08),
+    0 0 8px rgba(80,227,164,.42);
+}
+
+.status-orb::after,
+.state-dot::after,
+.health-dot::after,
+.live-indicator i::after,
+.priority-dot::after {
+  content:"";
+  position:absolute;
+  inset:1px;
+  border-radius:50%;
+  background:rgba(255,255,255,.55);
+  opacity:.38;
+}
+
+.command-alert .status-orb,
+.inbox-state.human .state-dot,
+.conversation-status.human .state-dot,
+.needs-human .state-dot {
+  background:var(--im-led-amber);
+  box-shadow:
+    0 0 0 2px rgba(255,180,109,.08),
+    0 0 9px rgba(255,180,109,.38);
+}
+
+.priority-dot {
+  background:var(--im-led-amber);
+  box-shadow:
+    0 0 0 2px rgba(255,180,109,.08),
+    0 0 9px rgba(255,180,109,.38);
+}
+
+.inbox-state.ai .state-dot,
+.conversation-status.ai .state-dot,
+.sidebar-status .status-orb,
+.mobile-app-status .status-orb,
+.command-agent-status .status-orb {
+  background:var(--im-led-green);
+  box-shadow:
+    0 0 0 2px rgba(80,227,164,.08),
+    0 0 9px rgba(80,227,164,.38);
+}
+
+.context-value-pill {
+  color:#9bb0d3;
+}
+
+.live-indicator {
+  min-height:22px;
+  padding:0 7px;
+  gap:6px;
+  border:1px solid #172638;
+  background:#0b131c;
+  color:#749785;
+  font-size:8px;
+  font-weight:700;
+}
+
+/* Cleaner hierarchy for primary content */
+.command-metric div:nth-child(2) span,
+.schedule-main span,
+.customer-primary span,
+.conversation-row-bottom > span,
+.more-row-copy small {
+  color:#718095;
+  font-size:10px;
+}
+
+.command-metric div:nth-child(2) strong {
+  color:#f6f8fb;
+  font-size:30px;
+  font-weight:620;
+  letter-spacing:-.055em;
+}
+
+.section-header h1 {
+  font-size:40px;
+  font-weight:640;
+  letter-spacing:-.045em;
+}
+
+.section-header p {
+  color:#8795a8;
+  font-size:13px;
+}
+
+.customer-primary strong,
+.schedule-main strong,
+.conversation-row-top strong,
+.more-row-copy strong {
+  color:#e7edf5;
+  font-weight:620;
+  letter-spacing:-.012em;
+}
+
+/* Sharper icon containers */
+.command-metric-icon,
+.customer-avatar,
+.conversation-avatar,
+.more-row-icon,
+.inbox-app-empty > span,
+.inbox-all-caught-up > span {
+  border-radius:10px;
+}
+
+/* Mobile typography refinement */
+@media(max-width:800px){
+  h1,
+  .section-header h1,
+  .inbox-app-head h1,
+  .onboarding-copy h1 {
+    font-size:27px !important;
+    font-weight:640;
+    line-height:1.04 !important;
+    letter-spacing:-.045em !important;
+  }
+
+  .eyebrow {
+    font-size:8px;
+    letter-spacing:.13em;
+  }
+
+  .command-business-name {
+    font-size:18px;
+  }
+
+  .command-date {
+    font-size:9px;
+  }
+
+  .command-agent-status,
+  .command-alert,
+  .section-stat,
+  .inbox-app-status {
+    min-height:29px;
+    padding:0 8px;
+    border-radius:7px !important;
+    font-size:8px;
+  }
+
+  .schedule-status,
+  .customer-lead-pill,
+  .conversation-status,
+  .inbox-state,
+  .context-value-pill {
+    min-height:22px;
+    padding:0 7px;
+    border-radius:7px !important;
+    font-size:8px;
+  }
+}
