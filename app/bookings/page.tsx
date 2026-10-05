@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { CalendarDays, Clock3, History, UserRound } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
@@ -36,7 +37,7 @@ export default async function BookingsPage(){
     const resource=Array.isArray(booking.resources)?booking.resources[0]:booking.resources;
 
     return (
-      <div className="schedule-row">
+      <Link href={`/bookings/${booking.id}`} className="schedule-row">
         <div className="schedule-date">
           <strong>{new Date(booking.starts_at).toLocaleDateString("en-ZA",{day:"2-digit"})}</strong>
           <span>{new Date(booking.starts_at).toLocaleDateString("en-ZA",{month:"short"})}</span>
@@ -53,7 +54,7 @@ export default async function BookingsPage(){
         </div>
 
         <div className="schedule-status">{booking.status}</div>
-      </div>
+      </Link>
     );
   }
 
