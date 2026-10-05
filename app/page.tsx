@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { MarketingMotion } from "@/components/MarketingMotion";
 import {
   ArrowRight,
   Bot,
@@ -22,6 +23,7 @@ const industries = ["Dental", "Padel", "Salons", "Restaurants", "Home services"]
 
 export default function HomePage() {
   return (
+    <MarketingMotion>
     <main className="marketing-page">
       <header className="marketing-nav">
         <Link href="/" className="marketing-brand" aria-label="InMotion home">
@@ -244,5 +246,6 @@ export default function HomePage() {
         <span>© {new Date().getFullYear()} InMotion Agents</span>
       </footer>
     </main>
+    </MarketingMotion>
   );
 }
