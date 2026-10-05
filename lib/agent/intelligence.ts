@@ -1,7 +1,11 @@
 import OpenAI from "openai";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
-const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+function getOpenAIClient() {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) return null;
+  return new OpenAI({ apiKey });
+}
 
 export async function generateHandoverSummary(input: {
   businessId: string;
@@ -30,7 +34,9 @@ export async function generateHandoverSummary(input: {
     raw_summary: ""
   };
 
-  if (process.env.OPENAI_API_KEY && transcript) {
+  const client = getOpenAIClient();
+
+  if (client && transcript) {
     try {
       const response = await client.chat.completions.create({
         model: process.env.OPENAI_MODEL || "gpt-5-mini",
