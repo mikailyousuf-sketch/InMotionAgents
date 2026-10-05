@@ -47,7 +47,6 @@ export function ProductNavigation({ collapsed = false }: { collapsed?: boolean }
   const moreActive = moreRoutes.some(route => active(route));
 
   return (
-    <>
       <nav className="product-nav command-nav primary-product-nav" aria-label="Primary navigation">
         <div className="nav-cluster-label">Workspace</div>
 
@@ -77,28 +76,39 @@ export function ProductNavigation({ collapsed = false }: { collapsed?: boolean }
           <span className="nav-label">More</span>
         </Link>
       </nav>
+  );
+}
 
-      <nav className="mobile-nav" aria-label="Primary mobile navigation">
-        <Link href="/dashboard" className={active("/dashboard") ? "active" : ""}>
-          <Gauge size={19} strokeWidth={1.8} />
-          <small>Home</small>
-        </Link>
+export function MobileNavigation() {
+  const pathname = usePathname();
 
-        <Link href="/conversations" className={active("/conversations") ? "active" : ""}>
-          <Inbox size={19} strokeWidth={1.8} />
-          <small>Inbox</small>
-        </Link>
+  function active(href:string){
+    return pathname === href || pathname.startsWith(`${href}/`);
+  }
 
-        <Link href="/receptionist" className={active("/receptionist") ? "active" : ""}>
-          <Bot size={19} strokeWidth={1.8} />
-          <small>Receptionist</small>
-        </Link>
+  const moreActive = moreRoutes.some(route => active(route));
 
-        <Link href="/more" className={moreActive ? "active" : ""}>
-          <MoreHorizontal size={20} strokeWidth={1.8} />
-          <small>More</small>
-        </Link>
-      </nav>
-    </>
+  return (
+    <nav className="mobile-nav" aria-label="Primary mobile navigation">
+      <Link href="/dashboard" className={active("/dashboard") ? "active" : ""}>
+        <Gauge size={19} strokeWidth={1.8} />
+        <small>Home</small>
+      </Link>
+
+      <Link href="/conversations" className={active("/conversations") ? "active" : ""}>
+        <Inbox size={19} strokeWidth={1.8} />
+        <small>Inbox</small>
+      </Link>
+
+      <Link href="/receptionist" className={active("/receptionist") ? "active" : ""}>
+        <Bot size={19} strokeWidth={1.8} />
+        <small>Receptionist</small>
+      </Link>
+
+      <Link href="/more" className={moreActive ? "active" : ""}>
+        <MoreHorizontal size={20} strokeWidth={1.8} />
+        <small>More</small>
+      </Link>
+    </nav>
   );
 }
