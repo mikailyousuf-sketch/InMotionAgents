@@ -11360,7 +11360,6 @@ p {
     0 0 80px rgba(62,98,255,.08),
     inset 0 0 0 5px #0b1119;
   transform:rotateY(-9deg) rotateX(2deg) rotateZ(2deg);
-  animation:marketingPhoneFloat 7s ease-in-out infinite;
 }
 
 .marketing-phone::before {
@@ -11547,20 +11546,17 @@ p {
   left:2%;
   top:16%;
   transform:rotate(-3deg);
-  animation:marketingCardDrift 6.5s ease-in-out infinite;
 }
 
 .stage-card-two {
   right:-1%;
   top:43%;
   border-color:rgba(80,227,164,.19);
-  animation:marketingCardDrift 7.5s ease-in-out infinite reverse;
 }
 
 .stage-card-three {
   left:3%;
   bottom:11%;
-  animation:marketingCardDrift 8.3s ease-in-out infinite;
 }
 
 .marketing-trust-band {
