@@ -17,7 +17,17 @@ export default async function BookingsPage(){
     .limit(200);
 
   const now=Date.now();
+  const startOfToday=new Date();
+  startOfToday.setHours(0,0,0,0);
+  const startOfTomorrow=new Date(startOfToday);
+  startOfTomorrow.setDate(startOfTomorrow.getDate()+1);
+
   const upcoming=(bookings??[]).filter((booking:any)=>new Date(booking.starts_at).getTime()>=now && !["cancelled","completed"].includes(booking.status));
+  const today=upcoming.filter((booking:any)=>{
+    const time=new Date(booking.starts_at).getTime();
+    return time>=startOfToday.getTime() && time<startOfTomorrow.getTime();
+  });
+  const later=upcoming.filter((booking:any)=>!today.some((item:any)=>item.id===booking.id));
   const past=(bookings??[]).filter((booking:any)=>!upcoming.some((u:any)=>u.id===booking.id)).slice(-30).reverse();
 
   function BookingRow({booking}:{booking:any}){
@@ -63,6 +73,8 @@ export default async function BookingsPage(){
 
           <div className="section-stat glass-chip">
             <CalendarDays size={15} strokeWidth={1.7}/>
+            <span><strong>{today.length}</strong> today</span>
+            <i/>
             <span><strong>{upcoming.length}</strong> upcoming</span>
           </div>
         </header>
@@ -71,22 +83,31 @@ export default async function BookingsPage(){
           <section className="section-panel glass-surface">
             <div className="section-panel-head">
               <div>
-                <h2>Upcoming</h2>
-                <p>Your next scheduled appointments.</p>
+                <h2>Today</h2>
+                <p>{today.length ? "Your appointments for today." : "Nothing scheduled for today."}</p>
               </div>
-              <CalendarDays size={17} strokeWidth={1.6}/>
+              <Clock3 size={17} strokeWidth={1.6}/>
             </div>
 
-            {!upcoming.length ? (
-              <div className="section-empty">
-                <span><CalendarDays size={21} strokeWidth={1.5}/></span>
-                <strong>No upcoming bookings</strong>
-                <p>New appointments will appear here automatically.</p>
+            {!today.length ? (
+              <div className="section-empty compact">
+                <span><Clock3 size={20} strokeWidth={1.5}/></span>
+                <strong>No appointments today</strong>
+                <p>Your next bookings are shown below.</p>
               </div>
             ) : (
               <div className="schedule-list">
-                {upcoming.map((booking:any)=><BookingRow key={booking.id} booking={booking}/>)}
+                {today.map((booking:any)=><BookingRow key={booking.id} booking={booking}/>)}
               </div>
+            )}
+
+            {later.length > 0 && (
+              <>
+                <div className="schedule-subhead">Coming up next</div>
+                <div className="schedule-list">
+                  {later.slice(0,8).map((booking:any)=><BookingRow key={booking.id} booking={booking}/>)}
+                </div>
+              </>
             )}
           </section>
 
