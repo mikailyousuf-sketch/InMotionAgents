@@ -193,23 +193,6 @@ export default async function DashboardPage() {
 
           <aside className="command-side">
             <GlowingEffect>
-              <section className="command-panel glance-panel glass-surface">
-              <div className="command-panel-head compact">
-                <div>
-                  <h2>Today at a glance</h2>
-                  <p>Only the essentials.</p>
-                </div>
-              </div>
-              <div className="glance-list">
-                <div><span>Conversations</span><strong>{todayConversations ?? 0}</strong></div>
-                <div><span>Bookings</span><strong>{todayBookings ?? 0}</strong></div>
-                <div><span>Active leads</span><strong>{activeLeads ?? 0}</strong></div>
-                <div><span>Handovers</span><strong>{handovers ?? 0}</strong></div>
-              </div>
-              </section>
-            </GlowingEffect>
-
-            <GlowingEffect>
               <section className="command-panel quick-panel glass-surface">
               <div className="command-panel-head compact">
                 <div><h2>Quick actions</h2></div>
