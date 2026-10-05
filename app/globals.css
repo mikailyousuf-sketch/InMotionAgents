@@ -12887,3 +12887,484 @@ p {
     animation:none !important;
   }
 }
+
+
+/* ===== Full hero rebuild ===== */
+.marketing-hero {
+  min-height:860px;
+  grid-template-columns:minmax(0,.86fr) minmax(600px,1.14fr);
+  gap:64px;
+  padding:72px 0 132px;
+}
+
+.marketing-hero-copy {
+  max-width:690px;
+}
+
+.marketing-hero-kicker {
+  margin-bottom:20px;
+  color:#7d8da3;
+}
+
+.marketing-hero h1 {
+  max-width:760px;
+  font-size:clamp(66px,6vw,98px);
+  line-height:.9;
+}
+
+.marketing-hero-gradient-line {
+  margin-top:8px !important;
+  background:linear-gradient(90deg,#ffffff 0%,#c8d4ff 42%,#8e87ff 78%,#6f7fff 100%) !important;
+  -webkit-background-clip:text !important;
+  background-clip:text !important;
+  color:transparent !important;
+  filter:drop-shadow(0 8px 34px rgba(92,102,255,.14));
+}
+
+.marketing-hero-rotator {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-top:24px;
+  min-height:34px;
+  color:#6f7f95;
+  font-family:var(--im-font-display);
+}
+
+.marketing-hero-rotator-label {
+  font-size:17px;
+  font-weight:600;
+}
+
+.marketing-hero-rotator-window {
+  position:relative;
+  height:32px;
+  overflow:hidden;
+}
+
+.marketing-hero-rotator-track {
+  display:grid;
+  animation:imHeroRotator 8s cubic-bezier(.77,0,.18,1) infinite;
+}
+
+.marketing-hero-rotator-track strong {
+  height:32px;
+  display:flex;
+  align-items:center;
+  color:#c9d2df;
+  font-size:17px;
+  font-weight:620;
+  letter-spacing:-.025em;
+}
+
+.marketing-hero-copy > p {
+  max-width:620px;
+  margin-top:18px;
+  font-size:15px;
+}
+
+.marketing-phone-stage {
+  min-height:680px;
+  overflow:visible;
+}
+
+.marketing-stage-aura {
+  position:absolute;
+  width:540px;
+  height:540px;
+  border-radius:50%;
+  background:
+    radial-gradient(circle,rgba(98,112,255,.17) 0%,rgba(80,85,255,.075) 34%,transparent 69%);
+  filter:blur(10px);
+  animation:imHeroAura 7s ease-in-out infinite alternate;
+  z-index:-1;
+}
+
+.marketing-hero-orbit {
+  position:absolute;
+  pointer-events:none;
+  border:1px solid rgba(99,118,167,.08);
+  border-radius:50%;
+}
+
+.marketing-hero-orbit-one {
+  width:680px;
+  height:680px;
+  right:-85px;
+  top:52px;
+}
+
+.marketing-hero-orbit-two {
+  width:500px;
+  height:500px;
+  right:8px;
+  top:142px;
+  border-color:rgba(124,94,255,.07);
+}
+
+.marketing-hero-orbit-one::before,
+.marketing-hero-orbit-two::before {
+  content:"";
+  position:absolute;
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  background:#758cff;
+  box-shadow:0 0 18px rgba(117,140,255,.7);
+}
+
+.marketing-hero-orbit-one::before {
+  top:16%;
+  left:13%;
+}
+
+.marketing-hero-orbit-two::before {
+  right:18%;
+  bottom:12%;
+  background:#a079ff;
+}
+
+.marketing-phone-shell {
+  position:relative;
+  z-index:3;
+  transform-style:preserve-3d;
+}
+
+.marketing-phone-reflection {
+  position:absolute;
+  inset:-24px -34px;
+  border-radius:58px;
+  background:
+    linear-gradient(120deg,rgba(255,255,255,.08),transparent 22%,transparent 72%,rgba(116,98,255,.035));
+  filter:blur(18px);
+  opacity:.45;
+  pointer-events:none;
+  z-index:-1;
+}
+
+.marketing-phone {
+  width:368px;
+  min-height:636px;
+  transform:rotateY(-8deg) rotateX(2deg) rotateZ(1.5deg);
+}
+
+.marketing-stage-card {
+  width:230px;
+  display:grid;
+  grid-template-columns:34px 1fr;
+  gap:10px;
+  align-items:center;
+  padding:12px;
+  border-radius:15px;
+}
+
+.marketing-stage-card-icon {
+  width:34px;
+  height:34px;
+  display:grid;
+  place-items:center;
+  border:1px solid #22344a;
+  border-radius:10px;
+  background:#101924;
+  color:#8ea8d6;
+}
+
+.marketing-stage-card-icon.success {
+  border-color:rgba(80,227,164,.17);
+  background:rgba(29,74,56,.32);
+  color:#65dcb0;
+}
+
+.marketing-stage-card span,
+.marketing-stage-card strong {
+  margin:0;
+}
+
+.marketing-stage-card span {
+  font-size:7px;
+}
+
+.marketing-stage-card strong {
+  margin-top:4px;
+  font-size:9px;
+}
+
+.stage-card-one {
+  left:-4%;
+  top:19%;
+}
+
+.stage-card-two {
+  right:-5%;
+  top:42%;
+}
+
+.stage-card-three {
+  left:-1%;
+  bottom:10%;
+}
+
+.marketing-live-rail {
+  position:absolute;
+  right:-3%;
+  bottom:4%;
+  z-index:5;
+  width:205px;
+  padding:12px;
+  border:1px solid rgba(46,65,91,.8);
+  border-radius:15px;
+  background:rgba(8,14,22,.88);
+  backdrop-filter:blur(18px);
+  box-shadow:0 22px 70px rgba(0,0,0,.34);
+}
+
+.marketing-live-rail-head {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:2px 2px 10px;
+  color:#718198;
+  font-size:7px;
+  font-weight:800;
+  letter-spacing:.11em;
+  text-transform:uppercase;
+}
+
+.marketing-live-rail-head .status-orb {
+  width:6px;
+  height:6px;
+}
+
+.marketing-live-event {
+  min-height:44px;
+  display:grid;
+  grid-template-columns:22px 1fr;
+  gap:8px;
+  align-items:center;
+  border-top:1px solid rgba(35,50,70,.75);
+  color:#7187aa;
+}
+
+.marketing-live-event > div {
+  min-width:0;
+  display:grid;
+  gap:2px;
+}
+
+.marketing-live-event strong {
+  color:#dbe3ee;
+  font-size:8px;
+}
+
+.marketing-live-event small {
+  color:#53647b;
+  font-size:7px;
+}
+
+.marketing-hero-ticker {
+  position:absolute;
+  left:50%;
+  bottom:18px;
+  width:100vw;
+  overflow:hidden;
+  transform:translateX(-50%);
+  border-top:1px solid rgba(27,39,56,.72);
+  border-bottom:1px solid rgba(27,39,56,.72);
+  background:rgba(5,9,14,.46);
+  backdrop-filter:blur(10px);
+}
+
+.marketing-hero-ticker-track {
+  width:max-content;
+  min-height:66px;
+  display:flex;
+  align-items:center;
+  gap:25px;
+  animation:imHeroTicker 22s linear infinite;
+}
+
+.marketing-hero-ticker-track span {
+  color:#74849a;
+  font-family:var(--im-font-display);
+  font-size:14px;
+  font-weight:650;
+  letter-spacing:.11em;
+}
+
+.marketing-hero-ticker-track i {
+  color:#465b86;
+  font-style:normal;
+  font-size:10px;
+}
+
+@keyframes imHeroRotator {
+  0%,20% { transform:translateY(0); }
+  25%,45% { transform:translateY(-32px); }
+  50%,70% { transform:translateY(-64px); }
+  75%,95% { transform:translateY(-96px); }
+  100% { transform:translateY(0); }
+}
+
+@keyframes imHeroAura {
+  from { transform:scale(.94); opacity:.72; }
+  to { transform:scale(1.08); opacity:1; }
+}
+
+@keyframes imHeroTicker {
+  from { transform:translateX(0); }
+  to { transform:translateX(-50%); }
+}
+
+@media(max-width:1150px){
+  .marketing-hero {
+    grid-template-columns:minmax(0,.9fr) minmax(500px,1.1fr);
+    gap:34px;
+  }
+
+  .marketing-phone {
+    width:330px;
+    min-height:595px;
+  }
+
+  .marketing-live-rail {
+    right:-1%;
+  }
+}
+
+@media(max-width:800px){
+  .marketing-hero {
+    grid-template-columns:1fr;
+    min-height:auto;
+    gap:58px;
+    padding:64px 0 118px;
+  }
+
+  .marketing-hero-copy {
+    max-width:none;
+  }
+
+  .marketing-hero h1 {
+    font-size:clamp(52px,14.5vw,72px);
+  }
+
+  .marketing-hero-rotator {
+    margin-top:18px;
+  }
+
+  .marketing-hero-rotator-label,
+  .marketing-hero-rotator-track strong {
+    font-size:14px;
+  }
+
+  .marketing-hero-copy > p {
+    font-size:13px;
+  }
+
+  .marketing-hero-orbit-one {
+    width:470px;
+    height:470px;
+    top:auto;
+    right:50%;
+    bottom:76px;
+    transform:translateX(50%);
+  }
+
+  .marketing-hero-orbit-two {
+    width:350px;
+    height:350px;
+    top:auto;
+    right:50%;
+    bottom:136px;
+    transform:translateX(50%);
+  }
+
+  .marketing-phone-stage {
+    min-height:610px;
+  }
+
+  .marketing-stage-aura {
+    width:420px;
+    height:420px;
+  }
+
+  .marketing-phone {
+    width:min(306px,86vw);
+    min-height:552px;
+  }
+
+  .marketing-live-rail {
+    width:172px;
+    right:-4px;
+    bottom:0;
+  }
+
+  .marketing-stage-card {
+    width:174px;
+  }
+
+  .marketing-hero-ticker {
+    bottom:10px;
+  }
+
+  .marketing-hero-ticker-track {
+    min-height:56px;
+    gap:19px;
+  }
+
+  .marketing-hero-ticker-track span {
+    font-size:11px;
+  }
+}
+
+@media(max-width:520px){
+  .marketing-hero {
+    gap:42px;
+  }
+
+  .marketing-hero-actions {
+    grid-template-columns:1fr;
+  }
+
+  .marketing-phone-stage {
+    min-height:565px;
+  }
+
+  .marketing-phone {
+    width:min(292px,90vw);
+    min-height:535px;
+  }
+
+  .marketing-stage-card,
+  .marketing-live-rail {
+    display:none;
+  }
+
+  .marketing-hero-orbit-one {
+    width:390px;
+    height:390px;
+    bottom:84px;
+  }
+
+  .marketing-hero-orbit-two {
+    width:290px;
+    height:290px;
+    bottom:134px;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  .marketing-hero-rotator-track,
+  .marketing-hero-ticker-track,
+  .marketing-stage-aura {
+    animation:none !important;
+  }
+
+  .marketing-hero-rotator-window {
+    height:auto;
+    overflow:visible;
+  }
+
+  .marketing-hero-rotator-track strong:not(:first-child) {
+    display:none;
+  }
+}
