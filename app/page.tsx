@@ -55,38 +55,55 @@ export default function HomePage() {
       <section className="marketing-hero">
         <div className="marketing-hero-glow marketing-hero-glow-one" />
         <div className="marketing-hero-glow marketing-hero-glow-two" />
+        <div className="marketing-hero-orbit marketing-hero-orbit-one" aria-hidden="true" />
+        <div className="marketing-hero-orbit marketing-hero-orbit-two" aria-hidden="true" />
 
         <div className="marketing-hero-copy">
-          <div className="marketing-kicker">
+          <div className="marketing-kicker marketing-hero-kicker">
             <span className="status-orb" />
-            AI receptionist for WhatsApp
+            Live AI front desk · WhatsApp-first
           </div>
 
           <h1>
-            Your business is already talking.
-            <span>InMotion keeps it moving.</span>
+            Your front desk.
+            <span className="marketing-hero-gradient-line">Always in motion.</span>
           </h1>
 
+          <div className="marketing-hero-rotator" aria-label="InMotion capabilities">
+            <span className="marketing-hero-rotator-label">It</span>
+            <div className="marketing-hero-rotator-window">
+              <div className="marketing-hero-rotator-track">
+                <strong>answers instantly.</strong>
+                <strong>books customers.</strong>
+                <strong>qualifies leads.</strong>
+                <strong>remembers context.</strong>
+              </div>
+            </div>
+          </div>
+
           <p>
-            Answer enquiries, book appointments, qualify leads and hand over to your team —
-            without turning customer service into another full-time job.
+            InMotion handles customer conversations from first message to confirmed action —
+            using your business rules, availability and customer history.
           </p>
 
           <div className="marketing-hero-actions">
             <Link href="/login" className="marketing-primary-button large">
               Start Now <ArrowRight size={16} />
             </Link>
-            <a href="#product" className="marketing-secondary-button">See how it works</a>
+            <a href="#product" className="marketing-secondary-button">
+              Watch it work <Sparkles size={15} />
+            </a>
           </div>
 
           <div className="marketing-proof-strip">
-            <span><Check size={13} /> WhatsApp-first</span>
-            <span><Check size={13} /> Human handover</span>
-            <span><Check size={13} /> Bookings + CRM memory</span>
+            <span><Check size={13} /> 24/7 response</span>
+            <span><Check size={13} /> Human takeover</span>
+            <span><Check size={13} /> Booking + CRM memory</span>
           </div>
         </div>
 
         <div className="marketing-phone-stage" aria-label="InMotion product preview">
+          <div className="marketing-stage-aura" aria-hidden="true" />
           <div className="marketing-stage-frame" aria-hidden="true">
             <span className="marketing-stage-corner top-left" />
             <span className="marketing-stage-corner top-right" />
@@ -100,56 +117,102 @@ export default function HomePage() {
           </div>
 
           <div className="marketing-stage-card stage-card-one">
-            <span>New enquiry</span>
-            <strong>“Do you have anything available tomorrow?”</strong>
+            <div className="marketing-stage-card-icon"><MessageSquareText size={14} /></div>
+            <div>
+              <span>New enquiry</span>
+              <strong>“Anything available tomorrow?”</strong>
+            </div>
           </div>
 
-          <div className="marketing-phone">
-            <div className="marketing-phone-top">
-              <div>
-                <span className="marketing-avatar"><Bot size={14} /></span>
+          <div className="marketing-phone-shell">
+            <div className="marketing-phone-reflection" aria-hidden="true" />
+            <div className="marketing-phone">
+              <div className="marketing-phone-top">
                 <div>
-                  <strong>InMotion</strong>
-                  <small><i className="status-orb" /> AI receptionist online</small>
+                  <span className="marketing-avatar"><Bot size={14} /></span>
+                  <div>
+                    <strong>InMotion</strong>
+                    <small><i className="status-orb" /> AI receptionist online</small>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div className="marketing-chat">
-              <div className="marketing-message incoming">
-                Hi, do you have anything available tomorrow afternoon?
-              </div>
-              <div className="marketing-message outgoing">
-                Yes — I have 15:30 and 16:15 available. Which works better?
-              </div>
-              <div className="marketing-message incoming small">
-                15:30 please.
-              </div>
+              <div className="marketing-chat">
+                <div className="marketing-message incoming marketing-chat-step">
+                  Hi, do you have anything available tomorrow afternoon?
+                </div>
+                <div className="marketing-message outgoing marketing-chat-step">
+                  Yes — I have 15:30 and 16:15 available. Which works better?
+                </div>
+                <div className="marketing-message incoming small marketing-chat-step">
+                  15:30 please.
+                </div>
 
-              <div className="marketing-booking-card">
-                <div className="marketing-booking-icon"><CalendarDays size={18} /></div>
-                <div>
-                  <span>Booking confirmed</span>
-                  <strong>Tomorrow · 15:30</strong>
-                  <small>Customer and booking saved automatically.</small>
+                <div className="marketing-booking-card marketing-chat-step">
+                  <div className="marketing-booking-icon"><CalendarDays size={18} /></div>
+                  <div>
+                    <span>Booking confirmed</span>
+                    <strong>Tomorrow · 15:30</strong>
+                    <small>Customer and booking saved automatically.</small>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div className="marketing-phone-composer">
-              <span>Message…</span>
-              <Sparkles size={14} />
+              <div className="marketing-phone-composer">
+                <span>Message…</span>
+                <Sparkles size={14} />
+              </div>
             </div>
           </div>
 
           <div className="marketing-stage-card stage-card-two">
-            <span>Booking confirmed</span>
-            <strong>Tomorrow · 15:30</strong>
+            <div className="marketing-stage-card-icon success"><CalendarDays size={14} /></div>
+            <div>
+              <span>Booking confirmed</span>
+              <strong>Tomorrow · 15:30</strong>
+            </div>
           </div>
 
           <div className="marketing-stage-card stage-card-three">
-            <span>Customer remembered</span>
-            <strong>Returning client · Warm lead</strong>
+            <div className="marketing-stage-card-icon"><UsersRound size={14} /></div>
+            <div>
+              <span>Customer remembered</span>
+              <strong>Returning client · Warm lead</strong>
+            </div>
+          </div>
+
+          <div className="marketing-live-rail">
+            <div className="marketing-live-rail-head">
+              <span>Live activity</span>
+              <i className="status-orb" />
+            </div>
+            <div className="marketing-live-event">
+              <MessageSquareText size={13} />
+              <div><strong>New enquiry</strong><small>just now</small></div>
+            </div>
+            <div className="marketing-live-event">
+              <CalendarDays size={13} />
+              <div><strong>Booking created</strong><small>8 sec ago</small></div>
+            </div>
+            <div className="marketing-live-event">
+              <UserRoundCheck size={13} />
+              <div><strong>Lead qualified</strong><small>22 sec ago</small></div>
+            </div>
+          </div>
+        </div>
+
+        <div className="marketing-hero-ticker" aria-hidden="true">
+          <div className="marketing-hero-ticker-track">
+            <span>ANSWERS</span><i>✦</i>
+            <span>BOOKS</span><i>✦</i>
+            <span>QUALIFIES</span><i>✦</i>
+            <span>REMEMBERS</span><i>✦</i>
+            <span>HANDS OVER</span><i>✦</i>
+            <span>ANSWERS</span><i>✦</i>
+            <span>BOOKS</span><i>✦</i>
+            <span>QUALIFIES</span><i>✦</i>
+            <span>REMEMBERS</span><i>✦</i>
+            <span>HANDS OVER</span><i>✦</i>
           </div>
         </div>
       </section>
