@@ -15,6 +15,7 @@ import {
   Sparkles,
   UserRoundCheck,
   UsersRound,
+  ExternalLink,
   X
 } from "lucide-react";
 
@@ -145,6 +146,16 @@ export default function ConversationDetailClient({ conversationId }: { conversat
           </div>
 
           <div className="conversation-controls">
+            {channel === "whatsapp" && customer?.phone && (
+              <a
+                className="conversation-action ghost whatsapp-jump"
+                href={`https://wa.me/${String(customer.phone).replace(/\D/g,"")}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                <ExternalLink size={14} /> Open in WhatsApp
+              </a>
+            )}
             <div className={`conversation-status ${human ? "human" : status}`}>
               <span className="state-dot" />
               {human ? "Human handling" : closed ? "Closed" : "AI handling"}
