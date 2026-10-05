@@ -9434,3 +9434,233 @@ body {
     min-height:160px;
   }
 }
+
+
+/* ===== WhatsApp-style split conversation workspace ===== */
+.conversation-split-page {
+  max-width:none;
+  display:grid;
+  grid-template-columns:minmax(280px,340px) minmax(0,1fr);
+  gap:14px;
+  align-items:start;
+}
+
+.conversation-split-list {
+  position:sticky;
+  top:18px;
+  height:calc(100dvh - 36px);
+  overflow:hidden;
+  display:grid;
+  grid-template-rows:auto minmax(0,1fr);
+  border:1px solid #172536;
+  border-radius:16px;
+  background:#0a1119;
+}
+
+.conversation-split-list-head {
+  min-height:76px;
+  display:grid;
+  gap:8px;
+  padding:12px 13px;
+  border-bottom:1px solid #172536;
+  background:#0d141d;
+}
+
+.conversation-split-list-head > div {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+
+.conversation-split-list-head strong {
+  font-size:12px;
+}
+
+.conversation-split-list-head span {
+  color:#68778c;
+  font-size:9px;
+}
+
+.conversation-split-scroll {
+  min-height:0;
+  overflow:auto;
+}
+
+.conversation-split-row {
+  min-height:68px;
+  display:grid;
+  grid-template-columns:38px minmax(0,1fr) auto;
+  align-items:center;
+  gap:10px;
+  padding:9px 10px;
+  border-bottom:1px solid #152231;
+  color:#d9e2ee;
+}
+
+.conversation-split-row:last-child {
+  border-bottom:0;
+}
+
+.conversation-split-row:hover {
+  background:#101924;
+}
+
+.conversation-split-row.selected {
+  background:linear-gradient(90deg,rgba(116,143,255,.10),rgba(116,143,255,.025));
+}
+
+.conversation-split-row.human {
+  background-image:linear-gradient(90deg,rgba(255,173,102,.055),transparent);
+}
+
+.conversation-split-avatar {
+  width:38px;
+  height:38px;
+  display:grid;
+  place-items:center;
+  border:1px solid #1b2a3b;
+  border-radius:12px;
+  background:#111925;
+  color:#8399bc;
+}
+
+.conversation-split-avatar.human {
+  border-color:rgba(255,173,102,.22);
+  color:#efad73;
+}
+
+.conversation-split-copy {
+  min-width:0;
+  display:grid;
+  gap:4px;
+}
+
+.conversation-split-name {
+  min-width:0;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+}
+
+.conversation-split-name strong {
+  overflow:hidden;
+  font-size:10px;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.conversation-split-name time,
+.conversation-split-state {
+  color:#65758a;
+  font-size:8px;
+}
+
+.conversation-split-state {
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.conversation-split-row.human .conversation-split-state {
+  color:#bd8c63;
+}
+
+.conversation-split-unread {
+  min-width:19px;
+  height:19px;
+  display:grid;
+  place-items:center;
+  padding:0 5px;
+  border-radius:999px;
+  background:#7b92f8;
+  color:#fff;
+  font-size:8px;
+}
+
+.conversation-split-bot {
+  color:#6f84d9;
+}
+
+.conversation-split-chat {
+  min-width:0;
+}
+
+.conversation-split-chat .conversation-page-head {
+  display:none;
+}
+
+.conversation-split-chat .conversation-workspace {
+  grid-template-columns:minmax(0,1fr) minmax(250px,300px);
+  gap:12px;
+}
+
+.whatsapp-jump {
+  text-decoration:none;
+}
+
+@media(max-width:1050px){
+  .conversation-split-page {
+    grid-template-columns:280px minmax(0,1fr);
+  }
+
+  .conversation-split-chat .conversation-workspace {
+    grid-template-columns:1fr;
+  }
+
+  .conversation-split-chat .conversation-context-column {
+    display:none;
+  }
+}
+
+@media(max-width:800px){
+  .conversation-split-page {
+    display:block;
+    padding:0 !important;
+  }
+
+  .conversation-split-list {
+    display:none;
+  }
+
+  .conversation-split-chat {
+    width:100%;
+  }
+
+  .conversation-split-chat .conversation-workspace {
+    display:block;
+  }
+
+  .conversation-split-chat .conversation-main-column {
+    width:100%;
+  }
+
+  .conversation-split-chat .conversation-toolbar {
+    position:sticky;
+    top:64px;
+    z-index:24;
+    border-radius:0;
+    border-left:0;
+    border-right:0;
+    background:rgba(10,17,25,.97);
+  }
+
+  .conversation-split-chat .conversation-toolbar::before {
+    content:"";
+  }
+
+  .conversation-split-chat .conversation-thread-panel {
+    border-radius:0;
+    border-left:0;
+    border-right:0;
+  }
+
+  .conversation-split-chat .conversation-thread {
+    min-height:calc(100dvh - 330px);
+  }
+
+  .conversation-controls .whatsapp-jump {
+    display:none;
+  }
+}
