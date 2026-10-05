@@ -60,6 +60,12 @@ export default async function CustomerPage({ params }: { params: Promise<{ id: s
     .sort((a:any,b:any)=>new Date(a.starts_at).getTime()-new Date(b.starts_at).getTime());
 
   const nextBooking=upcoming[0] ?? null;
+  const nextService=nextBooking
+    ? (Array.isArray(nextBooking.services) ? nextBooking.services[0] : nextBooking.services)
+    : null;
+  const nextResource=nextBooking
+    ? (Array.isArray(nextBooking.resources) ? nextBooking.resources[0] : nextBooking.resources)
+    : null;
   const latestConversation=(conversations??[])[0] ?? null;
   const phoneDigits=String(customer.phone||"").replace(/\D/g,"");
 
@@ -137,10 +143,10 @@ export default async function CustomerPage({ params }: { params: Promise<{ id: s
                   <span>{new Date(nextBooking.starts_at).toLocaleDateString("en-ZA",{month:"short"})}</span>
                 </div>
                 <div>
-                  <strong>{nextBooking.services?.name ?? "Booking"}</strong>
+                  <strong>{nextService?.name ?? "Booking"}</strong>
                   <span>
                     {new Date(nextBooking.starts_at).toLocaleTimeString("en-ZA",{hour:"2-digit",minute:"2-digit"})}
-                    {nextBooking.resources?.name ? ` · ${nextBooking.resources.name}` : ""}
+                    {nextResource?.name ? ` · ${nextResource.name}` : ""}
                   </span>
                 </div>
                 <span className="schedule-status">{nextBooking.status}</span>
@@ -183,15 +189,18 @@ export default async function CustomerPage({ params }: { params: Promise<{ id: s
               </div>
             </div>
 
-            {(bookings ?? []).slice(0,10).map((booking:any)=>(
-              <Link href={`/bookings/${booking.id}`} className="profile-list-row" key={booking.id}>
-                <div>
-                  <strong>{booking.services?.name ?? "Booking"}</strong>
-                  <span>{new Date(booking.starts_at).toLocaleString("en-ZA")}</span>
-                </div>
-                <span className="schedule-status">{booking.status}</span>
-              </Link>
-            ))}
+            {(bookings ?? []).slice(0,10).map((booking:any)=>{
+              const service=Array.isArray(booking.services)?booking.services[0]:booking.services;
+              return (
+                <Link href={`/bookings/${booking.id}`} className="profile-list-row" key={booking.id}>
+                  <div>
+                    <strong>{service?.name ?? "Booking"}</strong>
+                    <span>{new Date(booking.starts_at).toLocaleString("en-ZA")}</span>
+                  </div>
+                  <span className="schedule-status">{booking.status}</span>
+                </Link>
+              );
+            })}
           </section>
         )}
       </div>
