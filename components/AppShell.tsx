@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { WorkspaceSwitcher } from "@/components/WorkspaceSwitcher";
-import { ProductNavigation } from "@/components/ProductNavigation";
+import { MobileNavigation, ProductNavigation } from "@/components/ProductNavigation";
 import { PageSurface } from "@/components/PageSurface";
 import { BackgroundGradientAnimation } from "@/components/BackgroundGradientAnimation";
 
@@ -76,6 +76,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <main className="main command-main">
         <PageSurface>{children}</PageSurface>
       </main>
+
+      <MobileNavigation />
     </div>
   );
 }
