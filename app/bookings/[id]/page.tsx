@@ -29,9 +29,9 @@ export default async function BookingDetailPage({ params }:{ params:Promise<{id:
 
   if(!booking) notFound();
 
-  const customer = Array.isArray(booking.customers) ? booking.customers[0] : booking.customers;
-  const service = Array.isArray(booking.services) ? booking.services[0] : booking.services;
-  const resource = Array.isArray(booking.resources) ? booking.resources[0] : booking.resources;
+  const customer:any = Array.isArray(booking.customers) ? booking.customers[0] : booking.customers;
+  const service:any = Array.isArray(booking.services) ? booking.services[0] : booking.services;
+  const resource:any = Array.isArray(booking.resources) ? booking.resources[0] : booking.resources;
 
   const { data: conversation } = customer?.id
     ? await supabase
