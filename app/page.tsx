@@ -19,7 +19,13 @@ const capabilities = [
   { icon: UserRoundCheck, title: "Hands over cleanly", copy: "Moves complex conversations to your team with the context intact." }
 ];
 
-const industries = ["Dental", "Padel", "Salons", "Restaurants", "Home services"];
+const industries = [
+  { name: "Dental", example: "“Can I book a cleaning tomorrow?”" },
+  { name: "Padel", example: "“Any courts open after work?”" },
+  { name: "Salons", example: "“Can I book colour for Saturday?”" },
+  { name: "Restaurants", example: "“Table for four at 7?”" },
+  { name: "Home services", example: "“Can someone come out today?”" }
+];
 
 export default function HomePage() {
   return (
@@ -79,6 +85,18 @@ export default function HomePage() {
         </div>
 
         <div className="marketing-phone-stage" aria-label="InMotion product preview">
+          <div className="marketing-stage-frame" aria-hidden="true">
+            <span className="marketing-stage-corner top-left" />
+            <span className="marketing-stage-corner top-right" />
+            <span className="marketing-stage-corner bottom-left" />
+            <span className="marketing-stage-corner bottom-right" />
+          </div>
+
+          <div className="marketing-stage-label" aria-hidden="true">
+            <span className="status-orb" />
+            Live front desk
+          </div>
+
           <div className="marketing-stage-card stage-card-one">
             <span>New enquiry</span>
             <strong>“Do you have anything available tomorrow?”</strong>
@@ -134,8 +152,16 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="marketing-trust-band">
-        <p>Built for businesses where conversations turn into bookings, leads and revenue.</p>
+      <section className="marketing-trust-band" aria-label="Core product capabilities">
+        <span>Answers</span>
+        <i />
+        <span>Qualifies</span>
+        <i />
+        <span>Books</span>
+        <i />
+        <span>Remembers</span>
+        <i />
+        <span>Hands over</span>
       </section>
 
       <section className="marketing-product" id="product">
@@ -146,9 +172,12 @@ export default function HomePage() {
         </div>
 
         <div className="marketing-capability-grid">
-          {capabilities.map(({ icon: Icon, title, copy }) => (
+          {capabilities.map(({ icon: Icon, title, copy }, index) => (
             <article key={title} className="marketing-capability-card">
-              <span><Icon size={19} strokeWidth={1.7} /></span>
+              <div className="marketing-capability-top">
+                <span><Icon size={19} strokeWidth={1.7} /></span>
+                <small>0{index + 1}</small>
+              </div>
               <h3>{title}</h3>
               <p>{copy}</p>
             </article>
@@ -216,7 +245,12 @@ export default function HomePage() {
         </div>
 
         <div className="marketing-industry-list">
-          {industries.map((industry) => <span key={industry}>{industry}</span>)}
+          {industries.map((industry) => (
+            <div className="marketing-industry-row" key={industry.name}>
+              <span>{industry.name}</span>
+              <small>{industry.example}</small>
+            </div>
+          ))}
         </div>
       </section>
 
