@@ -32,7 +32,7 @@ export default function HomePage() {
   return (
     <MarketingMotion>
     <main className="marketing-page">
-      <AnimatedGradient variant="aurora" speed={0.82} opacity={1} className="marketing-background" />
+      <AnimatedGradient variant="prism" speed={0.92} opacity={1} className="marketing-background" />
       <header className="marketing-nav">
         <Link href="/" className="marketing-brand" aria-label="InMotion home">
           <img src="/inmotion-logo-floating.webp" alt="InMotion" />
