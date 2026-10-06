@@ -55,8 +55,16 @@ export default function HomePage() {
       <section className="marketing-hero">
         <div className="marketing-hero-glow marketing-hero-glow-one" />
         <div className="marketing-hero-glow marketing-hero-glow-two" />
-        <div className="marketing-hero-orbit marketing-hero-orbit-one" aria-hidden="true" />
-        <div className="marketing-hero-orbit marketing-hero-orbit-two" aria-hidden="true" />
+
+        <div className="marketing-hero-energy" aria-hidden="true">
+          <span className="marketing-energy-ribbon ribbon-one" />
+          <span className="marketing-energy-ribbon ribbon-two" />
+          <span className="marketing-energy-ribbon ribbon-three" />
+          <span className="marketing-energy-beam beam-one" />
+          <span className="marketing-energy-beam beam-two" />
+          <span className="marketing-energy-flare flare-one" />
+          <span className="marketing-energy-flare flare-two" />
+        </div>
 
         <div className="marketing-hero-copy">
           <div className="marketing-kicker marketing-hero-kicker">
@@ -104,24 +112,17 @@ export default function HomePage() {
 
         <div className="marketing-phone-stage" aria-label="InMotion product preview">
           <div className="marketing-stage-aura" aria-hidden="true" />
-          <div className="marketing-stage-frame" aria-hidden="true">
-            <span className="marketing-stage-corner top-left" />
-            <span className="marketing-stage-corner top-right" />
-            <span className="marketing-stage-corner bottom-left" />
-            <span className="marketing-stage-corner bottom-right" />
+          <div className="marketing-signal-field" aria-hidden="true">
+            <span className="marketing-signal-trail trail-one" />
+            <span className="marketing-signal-trail trail-two" />
+            <span className="marketing-signal-trail trail-three" />
+            <span className="marketing-signal-glint glint-one" />
+            <span className="marketing-signal-glint glint-two" />
           </div>
 
           <div className="marketing-stage-label" aria-hidden="true">
             <span className="status-orb" />
             Live front desk
-          </div>
-
-          <div className="marketing-stage-card stage-card-one">
-            <div className="marketing-stage-card-icon"><MessageSquareText size={14} /></div>
-            <div>
-              <span>New enquiry</span>
-              <strong>“Anything available tomorrow?”</strong>
-            </div>
           </div>
 
           <div className="marketing-phone-shell">
@@ -165,39 +166,14 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="marketing-stage-card stage-card-two">
-            <div className="marketing-stage-card-icon success"><CalendarDays size={14} /></div>
-            <div>
-              <span>Booking confirmed</span>
-              <strong>Tomorrow · 15:30</strong>
-            </div>
+          <div className="marketing-phone-status marketing-phone-status-top">
+            <span className="status-orb" />
+            17 conversations handled today
           </div>
 
-          <div className="marketing-stage-card stage-card-three">
-            <div className="marketing-stage-card-icon"><UsersRound size={14} /></div>
-            <div>
-              <span>Customer remembered</span>
-              <strong>Returning client · Warm lead</strong>
-            </div>
-          </div>
-
-          <div className="marketing-live-rail">
-            <div className="marketing-live-rail-head">
-              <span>Live activity</span>
-              <i className="status-orb" />
-            </div>
-            <div className="marketing-live-event">
-              <MessageSquareText size={13} />
-              <div><strong>New enquiry</strong><small>just now</small></div>
-            </div>
-            <div className="marketing-live-event">
-              <CalendarDays size={13} />
-              <div><strong>Booking created</strong><small>8 sec ago</small></div>
-            </div>
-            <div className="marketing-live-event">
-              <UserRoundCheck size={13} />
-              <div><strong>Lead qualified</strong><small>22 sec ago</small></div>
-            </div>
+          <div className="marketing-phone-status marketing-phone-status-bottom">
+            <Sparkles size={12} />
+            Booking completed in 18 sec
           </div>
         </div>
 
@@ -215,18 +191,6 @@ export default function HomePage() {
             <span>HANDS OVER</span><i>✦</i>
           </div>
         </div>
-      </section>
-
-      <section className="marketing-trust-band" aria-label="Core product capabilities">
-        <span>Answers</span>
-        <i />
-        <span>Qualifies</span>
-        <i />
-        <span>Books</span>
-        <i />
-        <span>Remembers</span>
-        <i />
-        <span>Hands over</span>
       </section>
 
       <section className="marketing-product" id="product">
