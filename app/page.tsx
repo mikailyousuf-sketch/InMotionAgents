@@ -53,9 +53,7 @@ export default function HomePage() {
       </header>
 
       <section className="marketing-hero">
-        <div className="marketing-hero-glow marketing-hero-glow-one" />
-        <div className="marketing-hero-glow marketing-hero-glow-two" />
-
+        <div className="marketing-hero-backdrop-word" aria-hidden="true">INMOTION</div>
         <div className="marketing-hero-energy" aria-hidden="true">
           <span className="marketing-energy-ribbon ribbon-one" />
           <span className="marketing-energy-ribbon ribbon-two" />
@@ -168,29 +166,15 @@ export default function HomePage() {
 
           <div className="marketing-phone-status marketing-phone-status-top">
             <span className="status-orb" />
-            17 conversations handled today
+            Live · 17 conversations today
           </div>
 
           <div className="marketing-phone-status marketing-phone-status-bottom">
             <Sparkles size={12} />
-            Booking completed in 18 sec
+            Booked · 18 sec
           </div>
         </div>
 
-        <div className="marketing-hero-ticker" aria-hidden="true">
-          <div className="marketing-hero-ticker-track">
-            <span>ANSWERS</span><i>✦</i>
-            <span>BOOKS</span><i>✦</i>
-            <span>QUALIFIES</span><i>✦</i>
-            <span>REMEMBERS</span><i>✦</i>
-            <span>HANDS OVER</span><i>✦</i>
-            <span>ANSWERS</span><i>✦</i>
-            <span>BOOKS</span><i>✦</i>
-            <span>QUALIFIES</span><i>✦</i>
-            <span>REMEMBERS</span><i>✦</i>
-            <span>HANDS OVER</span><i>✦</i>
-          </div>
-        </div>
       </section>
 
       <section className="marketing-product" id="product">
