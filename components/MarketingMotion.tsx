@@ -63,8 +63,8 @@ export function MarketingMotion({ children }: Props) {
         }, "-=1.05");
 
       gsap.to(".marketing-phone-shell", {
-        yPercent: -4,
-        rotateY: -4,
+        yPercent: -5,
+        rotateY: -3,
         ease: "none",
         scrollTrigger: {
           trigger: ".marketing-hero",
@@ -101,8 +101,8 @@ export function MarketingMotion({ children }: Props) {
       });
 
       gsap.to(".marketing-signal-field", {
-        yPercent: -7,
-        scale: 1.045,
+        yPercent: -9,
+        scale: 1.055,
         ease: "none",
         scrollTrigger: {
           trigger: ".marketing-hero",
@@ -133,6 +133,18 @@ export function MarketingMotion({ children }: Props) {
           start: "top center",
           end: "bottom top",
           scrub: 1
+        }
+      });
+
+      gsap.to(".marketing-hero-backdrop-word", {
+        xPercent: -9,
+        autoAlpha: .075,
+        ease: "none",
+        scrollTrigger: {
+          trigger: ".marketing-hero",
+          start: "top top",
+          end: "bottom top",
+          scrub: 1.4
         }
       });
 
@@ -199,7 +211,38 @@ export function MarketingMotion({ children }: Props) {
         }
       });
 
+      const page = root.current?.querySelector<HTMLElement>(".marketing-page");
+      const heroEl = root.current?.querySelector<HTMLElement>(".marketing-hero");
+      const phone = root.current?.querySelector<HTMLElement>(".marketing-phone");
+
+      const handlePointerMove = (event: PointerEvent) => {
+        if (!page) return;
+        const x = (event.clientX / window.innerWidth) * 100;
+        const y = (event.clientY / window.innerHeight) * 100;
+        page.style.setProperty("--hero-pointer-x", `${x}%`);
+        page.style.setProperty("--hero-pointer-y", `${y}%`);
+
+        if (heroEl && phone && window.innerWidth > 900) {
+          const rect = heroEl.getBoundingClientRect();
+          const nx = Math.max(-1, Math.min(1, (event.clientX - (rect.left + rect.width / 2)) / (rect.width / 2)));
+          const ny = Math.max(-1, Math.min(1, (event.clientY - (rect.top + rect.height / 2)) / (rect.height / 2)));
+          gsap.to(phone, {
+            rotateY: -7 + nx * 4.5,
+            rotateX: 1.5 - ny * 3.5,
+            duration: .9,
+            ease: "power3.out",
+            overwrite: "auto"
+          });
+        }
+      };
+
+      window.addEventListener("pointermove", handlePointerMove, { passive: true });
+
       ScrollTrigger.refresh();
+
+      return () => {
+        window.removeEventListener("pointermove", handlePointerMove);
+      };
     }, root);
 
     return () => ctx.revert();
