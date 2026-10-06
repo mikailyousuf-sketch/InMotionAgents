@@ -48,18 +48,19 @@ export function MarketingMotion({ children }: Props) {
           stagger: 0.11,
           duration: 0.45
         }, "-=0.55")
-        .from(".marketing-stage-card", {
-          scale: 0.9,
-          y: 12,
+        .from(".marketing-phone-status", {
+          y: 10,
           autoAlpha: 0,
-          stagger: 0.11,
-          duration: 0.58
-        }, "-=0.45")
-        .from(".marketing-live-rail", {
-          x: 26,
+          stagger: 0.12,
+          duration: 0.55
+        }, "-=0.42")
+        .from(".marketing-energy-ribbon", {
+          scaleX: .72,
           autoAlpha: 0,
-          duration: 0.65
-        }, "-=0.45");
+          stagger: 0.08,
+          duration: 1.1,
+          ease: "power2.out"
+        }, "-=1.05");
 
       gsap.to(".marketing-phone-shell", {
         yPercent: -4,
@@ -73,50 +74,65 @@ export function MarketingMotion({ children }: Props) {
         }
       });
 
-      gsap.to(".stage-card-one", {
-        y: -48,
-        x: -14,
-        ease: "none",
-        scrollTrigger: {
-          trigger: ".marketing-hero",
-          start: "top center",
-          end: "bottom top",
-          scrub: true
-        }
-      });
-
-      gsap.to(".stage-card-two", {
-        y: 48,
-        x: 20,
-        ease: "none",
-        scrollTrigger: {
-          trigger: ".marketing-hero",
-          start: "top center",
-          end: "bottom top",
-          scrub: true
-        }
-      });
-
-      gsap.to(".marketing-live-rail", {
-        y: -30,
-        ease: "none",
-        scrollTrigger: {
-          trigger: ".marketing-hero",
-          start: "top center",
-          end: "bottom top",
-          scrub: true
-        }
-      });
-
-      gsap.to(".marketing-hero-orbit-one", {
-        rotate: 90,
-        scale: 1.06,
+      gsap.to(".ribbon-one", {
+        xPercent: 12,
+        yPercent: -8,
+        rotate: 5,
         ease: "none",
         scrollTrigger: {
           trigger: ".marketing-hero",
           start: "top top",
           end: "bottom top",
-          scrub: true
+          scrub: 1.2
+        }
+      });
+
+      gsap.to(".ribbon-two", {
+        xPercent: -16,
+        yPercent: 10,
+        rotate: -4,
+        ease: "none",
+        scrollTrigger: {
+          trigger: ".marketing-hero",
+          start: "top top",
+          end: "bottom top",
+          scrub: 1.4
+        }
+      });
+
+      gsap.to(".marketing-signal-field", {
+        yPercent: -7,
+        scale: 1.045,
+        ease: "none",
+        scrollTrigger: {
+          trigger: ".marketing-hero",
+          start: "top top",
+          end: "bottom top",
+          scrub: 1.1
+        }
+      });
+
+      gsap.to(".marketing-phone-status-top", {
+        y: -26,
+        x: 8,
+        ease: "none",
+        scrollTrigger: {
+          trigger: ".marketing-hero",
+          start: "top center",
+          end: "bottom top",
+          scrub: 1
+        }
+      });
+
+      gsap.to(".marketing-phone-status-bottom", {
+        y: 22,
+        x: -10,
+        ease: "none",
+        scrollTrigger: {
+          trigger: ".marketing-hero",
+          start: "top center",
+          end: "bottom top",
+          scrub: 1
         }
       });
 
