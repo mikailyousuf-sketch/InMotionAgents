@@ -30,6 +30,8 @@ export function AnimatedGradient({
       <div className="im-animated-gradient-layer im-gradient-layer-a" />
       <div className="im-animated-gradient-layer im-gradient-layer-b" />
       <div className="im-animated-gradient-layer im-gradient-layer-c" />
+      <div className="im-animated-gradient-layer im-gradient-layer-d" />
+      <div className="im-animated-gradient-sweep" />
       <div className="im-animated-gradient-vignette" />
       <div className="im-animated-gradient-content">{children}</div>
     </div>
