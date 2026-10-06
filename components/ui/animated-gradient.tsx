@@ -3,7 +3,7 @@ import { ReactNode } from "react";
 type AnimatedGradientProps = {
   children?: ReactNode;
   className?: string;
-  variant?: "mist" | "aurora" | "halo";
+  variant?: "mist" | "aurora" | "halo" | "prism";
   speed?: number;
   opacity?: number;
 };
