@@ -14242,3 +14242,411 @@ p {
     opacity:.34 !important;
   }
 }
+
+
+/* ===== Screenshot-driven hero correction ===== */
+.marketing-page {
+  --hero-pointer-x:72%;
+  --hero-pointer-y:28%;
+  background:#070609 !important;
+}
+
+.marketing-page::after {
+  content:"";
+  position:fixed;
+  z-index:0;
+  inset:0;
+  pointer-events:none;
+  background:
+    radial-gradient(
+      560px circle at var(--hero-pointer-x) var(--hero-pointer-y),
+      rgba(183,143,255,.085),
+      rgba(128,84,255,.035) 34%,
+      transparent 70%
+    );
+  mix-blend-mode:screen;
+}
+
+.marketing-nav {
+  width:min(1460px,calc(100% - 64px)) !important;
+  min-height:94px !important;
+}
+
+.marketing-brand img {
+  width:174px !important;
+  height:52px !important;
+}
+
+.marketing-nav-links a,
+.marketing-login {
+  font-size:13px !important;
+}
+
+.marketing-nav::after {
+  opacity:.36 !important;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.08) 18%,rgba(255,255,255,.08) 82%,transparent) !important;
+}
+
+.marketing-hero {
+  width:min(1460px,calc(100% - 64px)) !important;
+  min-height:760px !important;
+  grid-template-columns:minmax(520px,.9fr) minmax(650px,1.1fr) !important;
+  gap:8px !important;
+  padding:52px 0 70px !important;
+  align-items:center !important;
+}
+
+.marketing-hero-copy {
+  max-width:620px !important;
+  padding-left:0 !important;
+  align-self:center;
+}
+
+.marketing-hero-kicker {
+  margin-bottom:18px !important;
+  color:#9b96a4 !important;
+  font-size:10px !important;
+}
+
+.marketing-hero h1 {
+  max-width:620px !important;
+  font-size:clamp(76px,5.35vw,103px) !important;
+  line-height:.88 !important;
+  letter-spacing:-.07em !important;
+  text-wrap:initial !important;
+}
+
+.marketing-hero h1 .marketing-hero-gradient-line {
+  display:block !important;
+  width:auto !important;
+  margin-top:12px !important;
+  padding:0 !important;
+  background:none !important;
+  color:#d7c8ff !important;
+  -webkit-text-fill-color:#d7c8ff !important;
+  -webkit-background-clip:border-box !important;
+  background-clip:border-box !important;
+  font-size:.76em !important;
+  line-height:.96 !important;
+  letter-spacing:-.055em !important;
+  filter:none !important;
+  text-shadow:
+    0 0 28px rgba(174,132,255,.14),
+    0 10px 38px rgba(0,0,0,.28);
+}
+
+.marketing-hero-rotator {
+  margin-top:28px !important;
+  min-height:36px !important;
+}
+
+.marketing-hero-rotator-label,
+.marketing-hero-rotator-track strong {
+  font-size:18px !important;
+}
+
+.marketing-hero-rotator-label {
+  color:#77717f !important;
+}
+
+.marketing-hero-rotator-track strong {
+  color:#e3dde9 !important;
+}
+
+.marketing-hero-copy > p {
+  max-width:575px !important;
+  margin-top:20px !important;
+  color:#9e98a6 !important;
+  font-size:16px !important;
+  line-height:1.62 !important;
+}
+
+.marketing-hero-actions {
+  margin-top:32px !important;
+  gap:12px !important;
+}
+
+.marketing-hero-actions .marketing-primary-button.large,
+.marketing-hero-actions .marketing-secondary-button {
+  min-height:52px !important;
+  padding:0 22px !important;
+  border-radius:12px !important;
+  font-size:12px !important;
+}
+
+.marketing-secondary-button {
+  background:rgba(15,13,18,.58) !important;
+  border-color:rgba(255,255,255,.09) !important;
+  color:#b8b0bf !important;
+  backdrop-filter:blur(16px);
+}
+
+.marketing-proof-strip {
+  gap:22px !important;
+  margin-top:26px !important;
+}
+
+.marketing-proof-strip span {
+  color:#77717f !important;
+  font-size:10px !important;
+}
+
+.marketing-proof-strip svg {
+  color:#a88cff !important;
+}
+
+.marketing-hero-backdrop-word {
+  position:absolute;
+  z-index:-2;
+  top:29%;
+  right:-4%;
+  transform:translateY(-50%);
+  color:transparent;
+  -webkit-text-stroke:1px rgba(225,211,255,.055);
+  font-family:var(--im-font-display);
+  font-size:clamp(150px,12.5vw,240px);
+  font-weight:700;
+  letter-spacing:-.085em;
+  white-space:nowrap;
+  user-select:none;
+  pointer-events:none;
+}
+
+.marketing-hero-energy {
+  inset:-20px -9vw -34px 25% !important;
+  opacity:.75;
+}
+
+.marketing-energy-ribbon {
+  height:110px !important;
+  filter:blur(5px) !important;
+}
+
+.ribbon-one {
+  top:19% !important;
+  opacity:.52 !important;
+}
+
+.ribbon-two {
+  top:55% !important;
+  opacity:.34 !important;
+}
+
+.ribbon-three,
+.flare-two,
+.beam-two {
+  display:none !important;
+}
+
+.flare-one {
+  top:34% !important;
+  right:10% !important;
+  width:420px !important;
+  opacity:.16 !important;
+}
+
+.marketing-phone-stage {
+  min-height:720px !important;
+  margin-right:-28px;
+}
+
+.marketing-stage-label {
+  top:3% !important;
+  left:58% !important;
+  padding:8px 12px !important;
+  color:#a9a2b0 !important;
+  font-size:8px !important;
+}
+
+.marketing-stage-aura {
+  width:760px !important;
+  height:560px !important;
+  left:56% !important;
+  top:51% !important;
+  background:
+    radial-gradient(ellipse at center,
+      rgba(255,255,255,.055) 0%,
+      rgba(196,164,255,.095) 20%,
+      rgba(139,91,255,.105) 38%,
+      rgba(96,57,174,.045) 56%,
+      transparent 74%) !important;
+  filter:blur(28px) !important;
+  opacity:.86 !important;
+}
+
+.marketing-phone-shell {
+  left:57% !important;
+  top:51% !important;
+}
+
+.marketing-phone {
+  width:430px !important;
+  min-height:690px !important;
+  transform:rotateY(-7deg) rotateX(1.5deg) rotateZ(.8deg);
+  box-shadow:
+    0 84px 150px rgba(0,0,0,.66),
+    0 0 0 1px rgba(255,255,255,.13),
+    0 0 100px rgba(157,111,255,.10) !important;
+}
+
+.marketing-phone-reflection {
+  inset:-45px -70px !important;
+  opacity:.7 !important;
+}
+
+.marketing-signal-field {
+  inset:4% -4% 0 5% !important;
+  opacity:.72;
+}
+
+.marketing-signal-trail {
+  height:1px !important;
+  opacity:.34 !important;
+}
+
+.marketing-signal-glint {
+  opacity:.82 !important;
+}
+
+.marketing-phone-status {
+  min-height:34px !important;
+  padding:8px 12px !important;
+  background:rgba(12,10,15,.78) !important;
+  border-color:rgba(255,255,255,.11) !important;
+  color:#c7c0cd !important;
+  font-size:9px !important;
+  box-shadow:0 18px 50px rgba(0,0,0,.3) !important;
+}
+
+.marketing-phone-status-top {
+  top:20% !important;
+  right:1% !important;
+}
+
+.marketing-phone-status-bottom {
+  left:4% !important;
+  bottom:20% !important;
+}
+
+.marketing-product {
+  padding-top:92px !important;
+}
+
+/* Existing ticker styles remain for older builds, but the element is intentionally removed. */
+.marketing-hero-ticker {
+  display:none !important;
+}
+
+@media(max-width:1180px){
+  .marketing-nav,
+  .marketing-hero {
+    width:min(1180px,calc(100% - 42px)) !important;
+  }
+
+  .marketing-hero {
+    grid-template-columns:minmax(460px,.92fr) minmax(520px,1.08fr) !important;
+    gap:4px !important;
+  }
+
+  .marketing-hero h1 {
+    font-size:clamp(68px,6.4vw,88px) !important;
+  }
+
+  .marketing-phone {
+    width:370px !important;
+    min-height:640px !important;
+  }
+
+  .marketing-phone-stage {
+    min-height:670px !important;
+    margin-right:0;
+  }
+}
+
+@media(max-width:800px){
+  .marketing-nav {
+    width:calc(100% - 28px) !important;
+    min-height:72px !important;
+  }
+
+  .marketing-brand img {
+    width:132px !important;
+    height:40px !important;
+  }
+
+  .marketing-hero {
+    width:calc(100% - 28px) !important;
+    min-height:auto !important;
+    grid-template-columns:1fr !important;
+    gap:34px !important;
+    padding:54px 0 62px !important;
+  }
+
+  .marketing-hero-copy {
+    max-width:none !important;
+  }
+
+  .marketing-hero h1 {
+    max-width:560px !important;
+    font-size:clamp(58px,15vw,76px) !important;
+    line-height:.9 !important;
+  }
+
+  .marketing-hero h1 .marketing-hero-gradient-line {
+    margin-top:8px !important;
+    font-size:.76em !important;
+  }
+
+  .marketing-hero-rotator {
+    margin-top:23px !important;
+  }
+
+  .marketing-hero-rotator-label,
+  .marketing-hero-rotator-track strong {
+    font-size:15px !important;
+  }
+
+  .marketing-hero-copy > p {
+    max-width:540px !important;
+    font-size:14px !important;
+  }
+
+  .marketing-hero-backdrop-word {
+    top:58%;
+    right:-48%;
+    font-size:128px;
+    opacity:.5;
+  }
+
+  .marketing-phone-stage {
+    min-height:610px !important;
+  }
+
+  .marketing-phone-shell {
+    left:50% !important;
+    top:50% !important;
+  }
+
+  .marketing-stage-aura {
+    left:50% !important;
+    width:520px !important;
+    height:410px !important;
+  }
+
+  .marketing-phone {
+    width:min(320px,88vw) !important;
+    min-height:565px !important;
+  }
+
+  .marketing-phone-status {
+    display:none !important;
+  }
+
+  .marketing-stage-label {
+    left:50% !important;
+  }
+
+  .marketing-product {
+    padding-top:76px !important;
+  }
+}
