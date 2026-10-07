@@ -19,6 +19,8 @@ export default function OutlookConnectPage() {
   const [connected, setConnected] = useState<any>(null);
   const [checking, setChecking] = useState(true);
   const [busy, setBusy] = useState(false);
+  const [calendars, setCalendars] = useState<any[]>([]);
+  const [calendarStatus, setCalendarStatus] = useState("");
 
   useEffect(() => {
     async function load() {
@@ -39,6 +41,10 @@ export default function OutlookConnectPage() {
         if (live.state === "connected") {
           setConnected(live.meta);
           setStatus("Outlook Calendar is connected and ready.");
+          const list = await fetch(`/api/integrations/outlook/calendars?businessId=${id}`, {
+            cache: "no-store"
+          }).then(r => r.json()).catch(() => ({ calendars: [] }));
+          setCalendars(list.calendars || []);
         } else {
           setConnected(null);
           setStatus(live.reason || "Connect Outlook so InMotion can see busy times and create appointments.");
@@ -59,6 +65,32 @@ export default function OutlookConnectPage() {
 
     load();
   }, []);
+
+  async function selectCalendar(calendarId: string) {
+    if (!businessId || !calendarId || busy) return;
+    setBusy(true);
+    setCalendarStatus("Switching calendar…");
+
+    const response = await fetch("/api/integrations/outlook/calendars", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ businessId, calendarId })
+    });
+    const data = await response.json();
+
+    if (response.ok) {
+      setConnected((current: any) => ({
+        ...(current || {}),
+        calendar_id: data.calendar.id,
+        calendar_name: data.calendar.name
+      }));
+      setCalendarStatus("Calendar updated.");
+    } else {
+      setCalendarStatus(data.error || "Could not switch calendar.");
+    }
+
+    setBusy(false);
+  }
 
   async function disconnect() {
     if (!businessId || busy) return;
@@ -126,6 +158,7 @@ export default function OutlookConnectPage() {
             </div>
 
             {connected ? (
+              <>
               <div className="whatsapp-connected-details">
                 <div>
                   <span>Microsoft account</span>
@@ -144,6 +177,27 @@ export default function OutlookConnectPage() {
                   <strong><CheckCircle2 size={13} /> Outlook + InMotion</strong>
                 </div>
               </div>
+
+              {calendars.length > 0 && (
+                <div className="app-expand-fields" style={{ marginTop: 18 }}>
+                  <label>
+                    <span>Calendar InMotion should use</span>
+                    <select
+                      value={connected.calendar_id || ""}
+                      onChange={(event) => selectCalendar(event.target.value)}
+                      disabled={!editable || busy}
+                    >
+                      {calendars.filter(calendar => calendar.canEdit).map(calendar => (
+                        <option key={calendar.id} value={calendar.id}>
+                          {calendar.name}{calendar.isDefault ? " · Default" : ""}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  {calendarStatus && <span className="app-action-status">{calendarStatus}</span>}
+                </div>
+              )}
+              </>
             ) : (
               <div className="whatsapp-steps">
                 <div>
