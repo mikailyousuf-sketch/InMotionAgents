@@ -1,9 +1,7 @@
 import { createAuthServerClient } from "@/lib/supabase/auth-server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getPrimaryUserBusiness } from "@/lib/auth/access";
-import { InMotionBookingProvider } from "@/lib/booking/inmotion-provider";
-
-const provider = new InMotionBookingProvider();
+import { getBookingProvider } from "@/lib/booking/provider-router";
 
 async function requireAuthenticatedWorkspace() {
   const auth = await createAuthServerClient();
@@ -57,6 +55,7 @@ export async function GET(request: Request) {
   }
 
   try {
+    const provider = await getBookingProvider(access.current.business.id);
     const slots = await provider.getAvailability({
       businessId:access.current.business.id,
       serviceId,
@@ -108,6 +107,7 @@ export async function POST(request: Request) {
   }
 
   try {
+    const provider = await getBookingProvider(businessId);
     const booking = await provider.createBooking({
       businessId,
       customerId,
@@ -137,6 +137,7 @@ export async function PATCH(request: Request) {
   if (!bookingId) return Response.json({ error:"bookingId is required" },{ status:400 });
 
   try {
+    const provider = await getBookingProvider(access.current.business.id);
     if (action === "cancel") {
       const booking = await provider.cancelBooking({
         businessId:access.current.business.id,
