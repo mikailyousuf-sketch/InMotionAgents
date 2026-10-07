@@ -65,9 +65,10 @@ const catalog = [
     short: "O",
     logo: "https://cdn.simpleicons.org/microsoftoutlook/0078D4",
     category: "Calendar",
-    description: "Connect Microsoft Outlook scheduling.",
+    description: "Use Microsoft 365 or Outlook for live availability and appointments.",
     icon: CalendarDays,
-    fields: [{ key: "calendar_id", label: "Calendar ID" }]
+    href: "/integrations/outlook",
+    fields: []
   },
   {
     provider: "playtomic",
@@ -99,6 +100,7 @@ export default function IntegrationsPage() {
   const [expanded, setExpanded] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [whatsappHealth, setWhatsappHealth] = useState<any>(null);
+  const [outlookHealth, setOutlookHealth] = useState<any>(null);
 
   useEffect(() => { load(); }, []);
 
@@ -111,9 +113,12 @@ export default function IntegrationsPage() {
 
       setBusinessId(id);
 
-      const [data, wa] = await Promise.all([
+      const [data, wa, outlook] = await Promise.all([
         fetch(`/api/integrations?businessId=${id}`, { cache: "no-store" }).then(r => r.json()),
         fetch(`/api/integrations/whatsapp/status?businessId=${id}`, { cache: "no-store" })
+          .then(r => r.json())
+          .catch(() => null),
+        fetch(`/api/integrations/outlook/status?businessId=${id}`, { cache: "no-store" })
           .then(r => r.json())
           .catch(() => null)
       ]);
@@ -121,6 +126,7 @@ export default function IntegrationsPage() {
       setRole(data.role || "");
       setIntegrations(data.integrations ?? []);
       setWhatsappHealth(wa);
+      setOutlookHealth(outlook);
 
       const nextDrafts: Record<string, Record<string,string>> = {};
       for (const integration of data.integrations ?? []) {
@@ -141,9 +147,10 @@ export default function IntegrationsPage() {
   const connectedItems = useMemo(() => {
     return catalog.filter(item => {
       if (item.provider === "whatsapp") return whatsappHealth?.state === "connected";
+      if (item.provider === "outlook") return outlookHealth?.state === "connected";
       return byProvider[item.provider]?.status === "connected";
     });
-  }, [byProvider, whatsappHealth]);
+  }, [byProvider, whatsappHealth, outlookHealth]);
 
   function healthFor(provider: string) {
     if (provider === "whatsapp") {
@@ -151,6 +158,12 @@ export default function IntegrationsPage() {
       if (byProvider.whatsapp?.status === "connected" || whatsappHealth?.state === "needs_reconnection") {
         return { label: "Needs attention", kind: "warning" };
       }
+      return { label: "Not connected", kind: "idle" };
+    }
+
+    if (provider === "outlook") {
+      if (outlookHealth?.state === "connected") return { label: "Healthy", kind: "healthy" };
+      if (outlookHealth?.state === "needs_reconnection") return { label: "Reconnect", kind: "warning" };
       return { label: "Not connected", kind: "idle" };
     }
 
@@ -280,7 +293,9 @@ export default function IntegrationsPage() {
             const existing = byProvider[item.provider];
             const connected = item.provider === "whatsapp"
               ? whatsappHealth?.state === "connected"
-              : existing?.status === "connected";
+              : item.provider === "outlook"
+                ? outlookHealth?.state === "connected"
+                : existing?.status === "connected";
             const health = healthFor(item.provider);
             const Icon = item.icon;
 
@@ -346,6 +361,11 @@ export default function IntegrationsPage() {
                   {item.provider === "whatsapp" ? (
                     <a href="/integrations/whatsapp" className="connection-primary">
                       {connected ? "Manage WhatsApp" : "Connect WhatsApp"}
+                      <ArrowUpRight size={13} />
+                    </a>
+                  ) : item.provider === "outlook" ? (
+                    <a href="/integrations/outlook" className="connection-primary">
+                      {connected ? "Manage Outlook" : "Connect Outlook"}
                       <ArrowUpRight size={13} />
                     </a>
                   ) : editable ? (
