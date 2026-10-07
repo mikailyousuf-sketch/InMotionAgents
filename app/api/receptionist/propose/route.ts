@@ -3,7 +3,11 @@ import { createAuthServerClient } from "@/lib/supabase/auth-server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getPrimaryUserBusiness } from "@/lib/auth/access";
 
-const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+function getOpenAIClient() {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) return null;
+  return new OpenAI({ apiKey });
+}
 
 export async function POST(request: Request) {
   const auth = await createAuthServerClient();
@@ -19,7 +23,8 @@ export async function POST(request: Request) {
   const instruction = String(body?.instruction || "").trim();
 
   if (!instruction) return Response.json({ error: "Instruction is required" }, { status: 400 });
-  if (!process.env.OPENAI_API_KEY) return Response.json({ error: "AI is not configured" }, { status: 500 });
+  const client = getOpenAIClient();
+  if (!client) return Response.json({ error: "AI is not configured" }, { status: 500 });
 
   const completion = await client.chat.completions.create({
     model: process.env.OPENAI_MODEL || "gpt-5-mini",
