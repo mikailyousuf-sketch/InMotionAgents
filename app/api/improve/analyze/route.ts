@@ -3,7 +3,11 @@ import { createAuthServerClient } from "@/lib/supabase/auth-server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getPrimaryUserBusiness } from "@/lib/auth/access";
 
-const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+function getOpenAIClient() {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) return null;
+  return new OpenAI({ apiKey });
+}
 
 export async function POST(request: Request) {
   const auth = await createAuthServerClient();
@@ -22,7 +26,8 @@ export async function POST(request: Request) {
     return Response.json({ error: "Paste a meaningful sample of previous customer conversations." }, { status: 400 });
   }
 
-  if (!process.env.OPENAI_API_KEY) {
+  const client = getOpenAIClient();
+  if (!client) {
     return Response.json({ error: "AI analysis is not configured." }, { status: 500 });
   }
 
