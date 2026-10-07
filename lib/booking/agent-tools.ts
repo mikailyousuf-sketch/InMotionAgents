@@ -1,5 +1,5 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { InMotionBookingProvider } from "@/lib/booking/inmotion-provider";
+import { getBookingProvider } from "@/lib/booking/provider-router";
 import { recordUsage } from "@/lib/billing/usage";
 import { scheduleBookingAutomations } from "@/lib/automations/triggers";
 import { cancelPendingJobsForBooking } from "@/lib/automations/queue";
@@ -8,7 +8,6 @@ import {
   normalizeCustomerPhone
 } from "@/lib/crm/identity";
 
-const provider = new InMotionBookingProvider();
 
 async function getBookingSettings(businessId: string) {
   const supabase = createServerSupabaseClient();
@@ -59,6 +58,7 @@ export async function checkAvailability(input: {
   to: string;
 }) {
   const service = await getServiceByName(input.businessId, input.serviceName);
+  const provider = await getBookingProvider(input.businessId);
   const slots = await provider.getAvailability({
     businessId: input.businessId,
     serviceId: service.id,
@@ -83,6 +83,7 @@ export async function createBookingFromAgent(input: {
   email?: string;
 }) {
   const service = await getServiceByName(input.businessId, input.serviceName);
+  const provider = await getBookingProvider(input.businessId);
   const customer = await findOrCreateCustomerByIdentity({
     businessId: input.businessId,
     identity: {
@@ -185,6 +186,7 @@ export async function cancelBookingFromAgent(input: {
   bookingId: string;
   reason?: string;
 }) {
+  const provider = await getBookingProvider(input.businessId);
   const booking = await provider.getBooking({
     businessId: input.businessId,
     bookingId: input.bookingId
@@ -221,6 +223,7 @@ export async function rescheduleBookingFromAgent(input: {
   startsAt: string;
   resourceId?: string;
 }) {
+  const provider = await getBookingProvider(input.businessId);
   const booking = await provider.getBooking({
     businessId: input.businessId,
     bookingId: input.bookingId
