@@ -58,7 +58,6 @@ export async function POST(request:Request){
     "voice",
     "inmotion_booking",
     "google_calendar",
-    "outlook",
     "playtomic",
     "custom_api"
   ];
