@@ -38,6 +38,17 @@ export default function WhatsAppConnectPage() {
   const configId = process.env.NEXT_PUBLIC_META_WHATSAPP_EMBEDDED_SIGNUP_CONFIG_ID || "";
   const graphVersion = process.env.NEXT_PUBLIC_META_GRAPH_VERSION || "v26.0";
 
+  function reportMetaDiagnostic(payload: Record<string, unknown>) {
+    void fetch("/api/integrations/whatsapp/client-event", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...payload,
+        timestamp: new Date().toISOString()
+      })
+    }).catch(() => undefined);
+  }
+
   useEffect(() => {
     fetch("/api/workspace/current")
       .then((r) => r.json())
@@ -89,6 +100,15 @@ export default function WhatsAppConnectPage() {
 
       if (data?.type !== "WA_EMBEDDED_SIGNUP") return;
 
+      reportMetaDiagnostic({
+        source: "message",
+        eventType: data.type,
+        event: data.event || "",
+        currentStep: data.data?.current_step || "",
+        errorCode: data.data?.error_code || data.data?.error?.code || "",
+        errorMessage: data.data?.error_message || data.data?.error?.message || ""
+      });
+
       if (
         data.event === "FINISH" ||
         data.event === "FINISH_WHATSAPP_BUSINESS_APP_ONBOARDING"
@@ -105,7 +125,13 @@ export default function WhatsAppConnectPage() {
       }
 
       if (data.event === "ERROR") {
-        setStatus(data.data?.error_message || "Meta could not finish WhatsApp onboarding.");
+        const code = data.data?.error_code || data.data?.error?.code;
+        const message = data.data?.error_message || data.data?.error?.message;
+        setStatus(
+          [message || "Meta could not finish WhatsApp onboarding.", code ? `Code: ${code}` : ""]
+            .filter(Boolean)
+            .join(" ")
+        );
       }
     };
 
@@ -196,8 +222,24 @@ export default function WhatsAppConnectPage() {
     window.FB.login(
       (response: any) => {
         const code = response?.authResponse?.code;
+
+        reportMetaDiagnostic({
+          source: "fb_login_callback",
+          fbStatus: response?.status || "",
+          hasAuthResponse: Boolean(response?.authResponse),
+          errorCode: response?.error?.code || response?.error_code || "",
+          errorMessage: response?.error?.message || response?.error_message || ""
+        });
+
         if (!code) {
-          setStatus("Meta signup closed before authorization completed.");
+          const errorCode = response?.error?.code || response?.error_code;
+          const errorMessage = response?.error?.message || response?.error_message;
+          setStatus(
+            [
+              errorMessage || "Meta signup closed before authorization completed.",
+              errorCode ? `Code: ${errorCode}` : ""
+            ].filter(Boolean).join(" ")
+          );
           return;
         }
 
@@ -218,10 +260,10 @@ export default function WhatsAppConnectPage() {
         config_id: configId,
         response_type: "code",
         override_default_response_type: true,
-        auth_type: "rerequest",
         extras: {
           setup: {},
-          featureType: "whatsapp_business_app_onboarding"
+          sessionInfoVersion: "3",
+          version: "v4"
         }
       }
     );
