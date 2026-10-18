@@ -203,13 +203,13 @@ export default function WhatsAppConnectPage() {
 
         const waitForSession = async () => {
           for (let attempt = 0; attempt < 20; attempt += 1) {
-            if (sessionRef.current.waba_id && sessionRef.current.phone_number_id) {
+            if (sessionRef.current.waba_id) {
               await finishConnection(code);
               return;
             }
             await new Promise((resolve) => setTimeout(resolve, 250));
           }
-          setStatus("Meta authorized the app, but did not return the WhatsApp number details. Please run the connection again.");
+          setStatus("Meta authorized the app, but did not return the WhatsApp account details. Please run the connection again.");
         };
 
         waitForSession();
@@ -218,10 +218,10 @@ export default function WhatsAppConnectPage() {
         config_id: configId,
         response_type: "code",
         override_default_response_type: true,
+        auth_type: "rerequest",
         extras: {
           setup: {},
-          featureType: "whatsapp_business_app_onboarding",
-          sessionInfoVersion: "3"
+          featureType: "whatsapp_business_app_onboarding"
         }
       }
     );
