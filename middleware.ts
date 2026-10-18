@@ -18,8 +18,45 @@ function applySecurityHeaders(response: NextResponse) {
   return response;
 }
 
+const AUTH_REFRESH_PREFIXES = [
+  "/automations",
+  "/bookings",
+  "/calls",
+  "/conversations",
+  "/custom-work",
+  "/customers",
+  "/dashboard",
+  "/guardrails",
+  "/improve",
+  "/integrations",
+  "/lab",
+  "/more",
+  "/notification-settings",
+  "/notifications",
+  "/onboarding",
+  "/operations",
+  "/receptionist",
+  "/settings",
+  "/team",
+  "/usage",
+  "/whatsapp"
+];
+
+function shouldRefreshAuth(pathname: string) {
+  return AUTH_REFRESH_PREFIXES.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)
+  );
+}
+
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request });
+
+  // Marketing/legal/login/API routes do not need a server-side session refresh.
+  // Keeping Supabase off the public request path prevents an auth/network wobble
+  // from taking the public website offline.
+  if (!shouldRefreshAuth(request.nextUrl.pathname)) {
+    return applySecurityHeaders(response);
+  }
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -39,7 +76,19 @@ export async function middleware(request: NextRequest) {
     }
   });
 
-  await supabase.auth.getUser();
+  try {
+    await Promise.race([
+      supabase.auth.getUser(),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Supabase auth refresh timed out")), 4000)
+      )
+    ]);
+  } catch (error) {
+    console.warn(
+      "Middleware auth refresh skipped:",
+      error instanceof Error ? error.message : String(error)
+    );
+  }
 
   return applySecurityHeaders(response);
 }
