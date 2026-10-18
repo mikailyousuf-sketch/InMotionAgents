@@ -45,9 +45,9 @@ export async function POST(request: Request) {
   const phoneNumberId = String(body?.phoneNumberId || "");
   const mode = body?.mode === "coexistence" ? "coexistence" : "cloud_api";
 
-  if (!businessId || !code || !wabaId || !phoneNumberId) {
+  if (!businessId || !code || !wabaId) {
     return Response.json(
-      { error: "Meta did not return all required WhatsApp connection details." },
+      { error: "Meta did not return the required WhatsApp account details." },
       { status: 400 }
     );
   }
@@ -87,10 +87,28 @@ export async function POST(request: Request) {
       businessToken
     );
 
-    const phone = (phoneList.data || []).find((item: any) => String(item.id) === phoneNumberId);
+    const phones = Array.isArray(phoneList.data) ? phoneList.data : [];
+    let phone = phoneNumberId
+      ? phones.find((item: any) => String(item.id) === phoneNumberId)
+      : null;
+
+    // Embedded Signup v4 Coexistence can finish with the WABA ID while
+    // omitting phone_number_id from the browser session payload.
+    // When the WABA has a single number we can safely discover it server-side.
+    if (!phone && !phoneNumberId && phones.length === 1) {
+      phone = phones[0];
+    }
+
     if (!phone) {
+      if (!phoneNumberId && phones.length > 1) {
+        throw new Error(
+          "Meta connected the WhatsApp account but did not identify which phone number was selected. Please run the connection again."
+        );
+      }
       throw new Error("The selected WhatsApp phone number does not belong to the account Meta returned.");
     }
+
+    const resolvedPhoneNumberId = String(phone.id);
 
     await graphRequest(`${wabaId}/subscribed_apps`, businessToken, {
       method: "POST",
@@ -101,7 +119,7 @@ export async function POST(request: Request) {
     const admin = createServerSupabaseClient();
 
     const config = {
-      phone_number_id: phoneNumberId,
+      phone_number_id: resolvedPhoneNumberId,
       whatsapp_business_account_id: wabaId,
       display_phone_number: phone.display_phone_number || null,
       verified_name: phone.verified_name || null,
