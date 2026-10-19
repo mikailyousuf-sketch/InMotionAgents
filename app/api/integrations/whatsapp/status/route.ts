@@ -73,7 +73,7 @@ export async function GET(request: Request) {
     const version = process.env.META_GRAPH_VERSION || "v26.0";
     const [response, wabaResponse] = await Promise.all([
       fetch(
-        `https://graph.facebook.com/${version}/${phoneNumberId}?fields=id,display_phone_number,verified_name,quality_rating,code_verification_status,platform_type,health_status`,
+        `https://graph.facebook.com/${version}/${phoneNumberId}?fields=id,display_phone_number,verified_name,quality_rating,code_verification_status,platform_type,status,health_status`,
         {
           headers: { Authorization: `Bearer ${token}` },
           cache: "no-store"
@@ -101,6 +101,7 @@ export async function GET(request: Request) {
     }
 
     const verification = String(data?.code_verification_status || "").toUpperCase();
+    const phoneStatus = String(data?.status || "").toUpperCase();
 
     const healthCandidates = [data?.health_status, wabaResponse.ok ? wabaData?.health_status : null]
       .filter(Boolean);
@@ -125,7 +126,7 @@ export async function GET(request: Request) {
         : []
     );
 
-    const usable = verification === "VERIFIED" && !healthBlocked;
+    const usable = verification === "VERIFIED" && phoneStatus === "CONNECTED" && !healthBlocked;
 
     const healthReason = healthErrors
       .map((item: any) =>
@@ -138,6 +139,7 @@ export async function GET(request: Request) {
       phoneNumberId,
       wabaId,
       verification,
+      phoneStatus,
       phoneHealth: data?.health_status?.can_send_message || null,
       wabaHealth: wabaData?.health_status?.can_send_message || null,
       wabaStatus: wabaData?.status || null,
@@ -157,6 +159,7 @@ export async function GET(request: Request) {
         quality_rating: data.quality_rating || null,
         code_verification_status: data.code_verification_status || null,
         platform_type: data.platform_type || null,
+        status: data.status || null,
         health_status: data?.health_status || wabaData?.health_status || null,
         waba_status: wabaData?.status || null,
         account_review_status: wabaData?.account_review_status || null,
@@ -166,7 +169,9 @@ export async function GET(request: Request) {
         ? healthReason || "Meta has blocked outbound WhatsApp messaging for this account."
         : usable
           ? null
-          : `Meta reports phone verification as ${verification || "unknown"}.`
+          : phoneStatus !== "CONNECTED"
+            ? `Meta reports the phone as ${phoneStatus || "unknown"} instead of CONNECTED.`
+            : `Meta reports phone verification as ${verification || "unknown"}.`
     });
   } catch (error) {
     return Response.json({
