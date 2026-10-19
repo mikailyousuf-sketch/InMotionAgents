@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { encryptCredential } from "@/lib/integrations/credentials";
 
@@ -138,7 +139,7 @@ export async function completeWhatsAppEmbeddedSignup(input: {
   }
 
   const phoneList = await graphRequest(
-    `${wabaId}/phone_numbers?fields=id,display_phone_number,verified_name,quality_rating,code_verification_status,platform_type`,
+    `${wabaId}/phone_numbers?fields=id,display_phone_number,verified_name,quality_rating,code_verification_status,platform_type,status`,
     businessToken
   );
 
@@ -168,6 +169,30 @@ export async function completeWhatsAppEmbeddedSignup(input: {
     body: JSON.stringify({})
   });
 
+  let registrationPinEncrypted: ReturnType<typeof encryptCredential> | null = null;
+  const phoneStatus = String(phone.status || "").toUpperCase();
+
+  if (phoneStatus !== "CONNECTED") {
+    const registrationPin = crypto.randomInt(0, 1_000_000).toString().padStart(6, "0");
+
+    await graphRequest(`${phoneNumberId}/register`, businessToken, {
+      method: "POST",
+      body: JSON.stringify({
+        messaging_product: "whatsapp",
+        pin: registrationPin
+      })
+    });
+
+    registrationPinEncrypted = encryptCredential(registrationPin);
+
+    const refreshedPhone = await graphRequest(
+      `${phoneNumberId}?fields=id,display_phone_number,verified_name,quality_rating,code_verification_status,platform_type,status`,
+      businessToken
+    );
+
+    phone = refreshedPhone;
+  }
+
   const encrypted = encryptCredential(businessToken);
   const admin = createServerSupabaseClient();
   const config = {
@@ -178,13 +203,21 @@ export async function completeWhatsAppEmbeddedSignup(input: {
     quality_rating: phone.quality_rating || null,
     code_verification_status: phone.code_verification_status || null,
     platform_type: phone.platform_type || null,
+    phone_status: phone.status || null,
     connection_mode: input.mode || "cloud_api",
     embedded_signup_completed_at: new Date().toISOString(),
     credential: {
       ciphertext: encrypted.ciphertext,
       iv: encrypted.iv,
       tag: encrypted.tag
-    }
+    },
+    registration_pin_credential: registrationPinEncrypted
+      ? {
+          ciphertext: registrationPinEncrypted.ciphertext,
+          iv: registrationPinEncrypted.iv,
+          tag: registrationPinEncrypted.tag
+        }
+      : undefined
   };
 
   const { data: integration, error } = await admin
