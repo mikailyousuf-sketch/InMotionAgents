@@ -20,6 +20,45 @@ async function graphRequest(path: string, token: string, init?: RequestInit) {
   return data;
 }
 
+
+export async function ensureWhatsAppAppWebhook() {
+  const appId = process.env.META_APP_ID || process.env.NEXT_PUBLIC_META_APP_ID;
+  const appSecret = process.env.META_APP_SECRET;
+  const verifyToken = process.env.META_WHATSAPP_VERIFY_TOKEN;
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.inmotionagents.co.za";
+
+  if (!appId || !appSecret || !verifyToken) {
+    throw new Error("Meta webhook configuration is incomplete on the server.");
+  }
+
+  const version = process.env.META_GRAPH_VERSION || "v26.0";
+  const callbackUrl = `${baseUrl.replace(/\/$/, "")}/api/whatsapp/webhook`;
+  const params = new URLSearchParams({
+    object: "whatsapp_business_account",
+    callback_url: callbackUrl,
+    fields: "messages",
+    verify_token: verifyToken,
+    access_token: `${appId}|${appSecret}`
+  });
+
+  const response = await fetch(
+    `https://graph.facebook.com/${version}/${appId}/subscriptions`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: params.toString(),
+      cache: "no-store"
+    }
+  );
+
+  const data = await response.json().catch(() => null);
+  if (!response.ok || data?.success !== true) {
+    throw new Error(data?.error?.message || "Meta could not configure the WhatsApp webhook.");
+  }
+
+  return { callbackUrl };
+}
+
 export async function completeWhatsAppEmbeddedSignup(input: {
   businessId: string;
   code: string;
@@ -121,6 +160,8 @@ export async function completeWhatsAppEmbeddedSignup(input: {
     }
     throw new Error("The WhatsApp phone number returned by Meta is not available to this authorization.");
   }
+
+  await ensureWhatsAppAppWebhook();
 
   await graphRequest(`${wabaId}/subscribed_apps`, businessToken, {
     method: "POST",
