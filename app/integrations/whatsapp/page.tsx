@@ -33,6 +33,7 @@ export default function WhatsAppConnectPage() {
   const [connected, setConnected] = useState<any>(null);
   const [checking, setChecking] = useState(true);
   const sessionRef = useRef<SessionData>({});
+  const webhookRepairRef = useRef(false);
 
   const appId = process.env.NEXT_PUBLIC_META_APP_ID || "";
   const configId = process.env.NEXT_PUBLIC_META_WHATSAPP_EMBEDDED_SIGNUP_CONFIG_ID || "";
@@ -90,6 +91,38 @@ export default function WhatsAppConnectPage() {
       .catch(() => setStatus("Could not check the WhatsApp connection."))
       .finally(() => setChecking(false));
   }, []);
+
+  useEffect(() => {
+    if (
+      !businessId ||
+      !connected ||
+      !["owner", "admin"].includes(role) ||
+      webhookRepairRef.current
+    ) return;
+
+    webhookRepairRef.current = true;
+
+    fetch("/api/integrations/whatsapp/webhook-setup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ businessId })
+    })
+      .then(async (response) => {
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          throw new Error(data.error || "Webhook setup failed");
+        }
+        setStatus("WhatsApp is connected and webhook delivery is ready.");
+      })
+      .catch((error) => {
+        webhookRepairRef.current = false;
+        setStatus(
+          error instanceof Error
+            ? `WhatsApp is connected, but webhook setup needs attention: ${error.message}`
+            : "WhatsApp is connected, but webhook setup needs attention."
+        );
+      });
+  }, [businessId, connected, role]);
 
   useEffect(() => {
     if (!appId) return;
