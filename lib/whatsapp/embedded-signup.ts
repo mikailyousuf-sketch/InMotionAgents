@@ -57,37 +57,45 @@ export async function completeWhatsAppEmbeddedSignup(input: {
   let phoneNumberId = input.phoneNumberId || "";
 
   // Redirect-based OAuth does not rely on the browser postMessage session payload.
-  // Discover the exact WABA/phone pair authorized by the exchanged token instead.
-  if (!wabaId || !phoneNumberId) {
-    const assets = await graphRequest(
-      "me/businesses?fields=id,name,owned_whatsapp_business_accounts{id,name,phone_numbers{id,display_phone_number,verified_name,quality_rating}}",
-      businessToken
+  // The exchanged token itself carries the WABA(s) granted to our app inside
+  // granular_scopes[].target_ids for whatsapp_business_management.
+  if (!wabaId) {
+    const version = process.env.META_GRAPH_VERSION || "v26.0";
+    const appAccessToken = `${appId}|${appSecret}`;
+    const debugUrl = new URL(`https://graph.facebook.com/${version}/debug_token`);
+    debugUrl.searchParams.set("input_token", businessToken);
+    debugUrl.searchParams.set("access_token", appAccessToken);
+
+    const debugResponse = await fetch(debugUrl.toString(), { cache: "no-store" });
+    const debugData = await debugResponse.json().catch(() => null);
+
+    if (!debugResponse.ok || !debugData?.data?.is_valid) {
+      throw new Error(
+        debugData?.error?.message ||
+        "Meta returned an invalid WhatsApp authorization token."
+      );
+    }
+
+    const granularScopes = Array.isArray(debugData.data.granular_scopes)
+      ? debugData.data.granular_scopes
+      : [];
+
+    const whatsappScope = granularScopes.find(
+      (scope: any) => scope?.scope === "whatsapp_business_management"
     );
 
-    const pairs: Array<{ wabaId: string; phone: any }> = [];
-    for (const business of assets?.data || []) {
-      for (const waba of business?.owned_whatsapp_business_accounts?.data || []) {
-        for (const phone of waba?.phone_numbers?.data || []) {
-          if (waba?.id && phone?.id) pairs.push({ wabaId: String(waba.id), phone });
-        }
-      }
+    const targetIds = Array.isArray(whatsappScope?.target_ids)
+      ? whatsappScope.target_ids.map((id: unknown) => String(id)).filter(Boolean)
+      : [];
+
+    if (targetIds.length === 0) {
+      throw new Error(
+        "Meta authorized the login but did not grant access to a WhatsApp Business Account."
+      );
     }
 
-    const filtered = pairs.filter((pair) => {
-      if (wabaId && pair.wabaId !== wabaId) return false;
-      if (phoneNumberId && String(pair.phone.id) !== phoneNumberId) return false;
-      return true;
-    });
-
-    if (filtered.length === 0) {
-      throw new Error("Meta authorized the login but returned no WhatsApp phone number.");
-    }
-    if (filtered.length > 1 && !wabaId && !phoneNumberId) {
-      throw new Error("Meta authorized more than one WhatsApp number. Please reconnect and select a single WhatsApp account.");
-    }
-
-    wabaId = filtered[0].wabaId;
-    phoneNumberId = String(filtered[0].phone.id);
+    // Meta orders the most recently onboarded WABAs first.
+    wabaId = targetIds[0];
   }
 
   const phoneList = await graphRequest(
@@ -96,8 +104,21 @@ export async function completeWhatsAppEmbeddedSignup(input: {
   );
 
   const phones = Array.isArray(phoneList.data) ? phoneList.data : [];
-  const phone = phones.find((item: any) => String(item.id) === phoneNumberId);
+  let phone = phoneNumberId
+    ? phones.find((item: any) => String(item.id) === phoneNumberId)
+    : null;
+
+  if (!phone && !phoneNumberId && phones.length === 1) {
+    phone = phones[0];
+    phoneNumberId = String(phone.id);
+  }
+
   if (!phone) {
+    if (!phoneNumberId && phones.length > 1) {
+      throw new Error(
+        "Meta granted access to more than one phone number on this WhatsApp account. Please reconnect with a single-number account for this test."
+      );
+    }
     throw new Error("The WhatsApp phone number returned by Meta is not available to this authorization.");
   }
 
