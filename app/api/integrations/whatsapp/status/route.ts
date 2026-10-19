@@ -71,15 +71,25 @@ export async function GET(request: Request) {
     });
 
     const version = process.env.META_GRAPH_VERSION || "v26.0";
-    const response = await fetch(
-      `https://graph.facebook.com/${version}/${phoneNumberId}?fields=id,display_phone_number,verified_name,quality_rating,code_verification_status,platform_type`,
-      {
-        headers: { Authorization: `Bearer ${token}` },
-        cache: "no-store"
-      }
-    );
+    const [response, wabaResponse] = await Promise.all([
+      fetch(
+        `https://graph.facebook.com/${version}/${phoneNumberId}?fields=id,display_phone_number,verified_name,quality_rating,code_verification_status,platform_type,health_status`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          cache: "no-store"
+        }
+      ),
+      fetch(
+        `https://graph.facebook.com/${version}/${wabaId}?fields=id,status,account_review_status,business_verification_status,health_status`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          cache: "no-store"
+        }
+      )
+    ]);
 
     const data = await response.json();
+    const wabaData = await wabaResponse.json().catch(() => null);
 
     if (!response.ok) {
       return Response.json({
@@ -91,20 +101,72 @@ export async function GET(request: Request) {
     }
 
     const verification = String(data?.code_verification_status || "").toUpperCase();
-    const usable = verification === "VERIFIED";
+
+    const healthCandidates = [data?.health_status, wabaResponse.ok ? wabaData?.health_status : null]
+      .filter(Boolean);
+
+    const healthBlocked = healthCandidates.some(
+      (health: any) => String(health?.can_send_message || "").toUpperCase() === "BLOCKED"
+    );
+
+    const healthErrors = healthCandidates.flatMap((health: any) =>
+      Array.isArray(health?.entities)
+        ? health.entities.flatMap((entity: any) =>
+            Array.isArray(entity?.errors)
+              ? entity.errors.map((item: any) => ({
+                  entity_type: entity?.entity_type || null,
+                  entity_id: entity?.id || null,
+                  error_code: item?.error_code ?? null,
+                  error_description: item?.error_description || null,
+                  possible_solution: item?.possible_solution || null
+                }))
+              : []
+          )
+        : []
+    );
+
+    const usable = verification === "VERIFIED" && !healthBlocked;
+
+    const healthReason = healthErrors
+      .map((item: any) =>
+        [item.error_description, item.possible_solution].filter(Boolean).join(" ")
+      )
+      .filter(Boolean)
+      .join(" ");
+
+    console.info("whatsapp_connection_health", {
+      phoneNumberId,
+      wabaId,
+      verification,
+      phoneHealth: data?.health_status?.can_send_message || null,
+      wabaHealth: wabaData?.health_status?.can_send_message || null,
+      wabaStatus: wabaData?.status || null,
+      accountReviewStatus: wabaData?.account_review_status || null,
+      businessVerificationStatus: wabaData?.business_verification_status || null,
+      healthErrors
+    });
 
     return Response.json({
-      state: usable ? "connected" : "needs_reconnection",
+      state: healthBlocked ? "blocked" : usable ? "connected" : "needs_reconnection",
       role: membership.role,
       meta: {
         id: data.id,
+        waba_id: wabaId,
         display_phone_number: data.display_phone_number || config.display_phone_number || null,
         verified_name: data.verified_name || config.verified_name || null,
         quality_rating: data.quality_rating || null,
         code_verification_status: data.code_verification_status || null,
-        platform_type: data.platform_type || null
+        platform_type: data.platform_type || null,
+        health_status: data?.health_status || wabaData?.health_status || null,
+        waba_status: wabaData?.status || null,
+        account_review_status: wabaData?.account_review_status || null,
+        business_verification_status: wabaData?.business_verification_status || null
       },
-      reason: usable ? null : `Meta reports phone verification as ${verification || "unknown"}.`
+      reason: healthBlocked
+        ? healthReason || "Meta has blocked outbound WhatsApp messaging for this account."
+        : usable
+          ? null
+          : `Meta reports phone verification as ${verification || "unknown"}.`
     });
   } catch (error) {
     return Response.json({
