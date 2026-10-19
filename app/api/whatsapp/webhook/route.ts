@@ -119,6 +119,21 @@ export async function POST(request: Request) {
               metadata: { phoneNumberId, businessSlug: business.slug }
             });
           }
+            console.info("whatsapp_delivery_status", {
+              phoneNumberId,
+              externalMessageId: String(status.id ?? ""),
+              status: String(status.status ?? "unknown"),
+              recipientId: String(status.recipient_id ?? ""),
+              errors: Array.isArray(status.errors)
+                ? status.errors.map((item: any) => ({
+                    code: item?.code ?? null,
+                    title: item?.title ?? null,
+                    message: item?.message ?? null,
+                    details: item?.error_data?.details ?? null
+                  }))
+                : []
+            });
+
             await recordWhatsAppDeliveryEvent({
               businessId: business.id,
               externalMessageId: String(status.id),
