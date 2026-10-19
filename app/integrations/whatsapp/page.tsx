@@ -60,6 +60,8 @@ export default function WhatsAppConnectPage() {
           cache: "no-store"
         }).then((r) => r.json());
 
+        const params = new URLSearchParams(window.location.search);
+
         setRole(live.role || "");
 
         if (live.state === "connected") {
@@ -70,12 +72,18 @@ export default function WhatsAppConnectPage() {
               connection_mode: "coexistence"
             }
           });
-          setStatus("WhatsApp is connected and ready.");
+          setStatus(
+            params.get("connected") === "1"
+              ? "WhatsApp connected successfully."
+              : "WhatsApp is connected and ready."
+          );
         } else {
           setConnected(null);
+          const error = params.get("error");
           setStatus(
-            live.reason ||
-            "Connect WhatsApp through Meta to activate this channel."
+            error
+              ? "Meta returned to InMotion, but the connection could not be completed."
+              : live.reason || "Connect WhatsApp through Meta to activate this channel."
           );
         }
       })
@@ -347,20 +355,22 @@ export default function WhatsAppConnectPage() {
             )}
 
             <div className="whatsapp-action-row">
-              <button
-                className="whatsapp-connect-button"
-                onClick={connect}
-                disabled={!editable || !sdkReady || Boolean(connected)}
-              >
-                {connected ? (
-                  <><Check size={15} /> WhatsApp connected</>
-                ) : (
-                  <><Link2 size={15} /> Connect with Meta</>
-                )}
-              </button>
-
-              {!sdkReady && !connected && (
-                <span className="whatsapp-sdk-state">Preparing Meta login…</span>
+              {connected ? (
+                <button className="whatsapp-connect-button" disabled>
+                  <Check size={15} /> WhatsApp connected
+                </button>
+              ) : (
+                <a
+                  className="whatsapp-connect-button"
+                  href={
+                    editable && businessId
+                      ? `/api/integrations/whatsapp/oauth/start?businessId=${encodeURIComponent(businessId)}`
+                      : undefined
+                  }
+                  aria-disabled={!editable || !businessId}
+                >
+                  <Link2 size={15} /> Connect with Meta
+                </a>
               )}
             </div>
 
