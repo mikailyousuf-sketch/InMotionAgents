@@ -87,7 +87,7 @@ export default function WhatsAppConnectPage() {
     if (!appId) return;
 
     const receiveMessage = (event: MessageEvent) => {
-      if (!["https://www.facebook.com", "https://web.facebook.com"].includes(event.origin)) return;
+      if (!event.origin.endsWith("facebook.com")) return;
 
       let data = event.data;
       if (typeof data === "string") {
@@ -141,8 +141,10 @@ export default function WhatsAppConnectPage() {
       window.FB?.init({
         appId,
         autoLogAppEvents: true,
-        xfbml: false,
-        version: graphVersion
+        xfbml: true,
+        // Meta's current Tech Provider sample initializes the JS SDK on v24.0
+        // for Embedded Signup. Server-side Graph API calls remain on v26.0.
+        version: "v24.0"
       });
       setSdkReady(true);
     };
@@ -228,7 +230,8 @@ export default function WhatsAppConnectPage() {
           fbStatus: response?.status || "",
           hasAuthResponse: Boolean(response?.authResponse),
           errorCode: response?.error?.code || response?.error_code || "",
-          errorMessage: response?.error?.message || response?.error_message || ""
+          errorMessage: response?.error?.message || response?.error_message || "",
+          event: Object.keys(response || {}).sort().join(",")
         });
 
         if (!code) {
