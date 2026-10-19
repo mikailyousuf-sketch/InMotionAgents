@@ -1,6 +1,6 @@
 import { createAuthServerClient } from "@/lib/supabase/auth-server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { encryptCredential } from "@/lib/integrations/credentials";
+import { completeWhatsAppEmbeddedSignup } from "@/lib/whatsapp/embedded-signup";
 
 async function membershipFor(userId: string, businessId: string) {
   const admin = createServerSupabaseClient();
@@ -11,25 +11,6 @@ async function membershipFor(userId: string, businessId: string) {
     .eq("user_id", userId)
     .maybeSingle();
 
-  return data;
-}
-
-async function graphRequest(path: string, token: string, init?: RequestInit) {
-  const version = process.env.META_GRAPH_VERSION || "v26.0";
-  const response = await fetch(`https://graph.facebook.com/${version}/${path}`, {
-    ...init,
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-      ...(init?.headers || {})
-    },
-    cache: "no-store"
-  });
-
-  const data = await response.json();
-  if (!response.ok) {
-    throw new Error(data?.error?.message || `Meta request failed (${response.status})`);
-  }
   return data;
 }
 
@@ -45,9 +26,9 @@ export async function POST(request: Request) {
   const phoneNumberId = String(body?.phoneNumberId || "");
   const mode = body?.mode === "coexistence" ? "coexistence" : "cloud_api";
 
-  if (!businessId || !code || !wabaId) {
+  if (!businessId || !code) {
     return Response.json(
-      { error: "Meta did not return the required WhatsApp account details." },
+      { error: "Meta did not return the required authorization code." },
       { status: 400 }
     );
   }
@@ -57,107 +38,16 @@ export async function POST(request: Request) {
     return Response.json({ error: "Owner or admin access required" }, { status: 403 });
   }
 
-  const appId = process.env.META_APP_ID || process.env.NEXT_PUBLIC_META_APP_ID;
-  const appSecret = process.env.META_APP_SECRET;
-  if (!appId || !appSecret) {
-    return Response.json({ error: "Meta app credentials are not configured on the server." }, { status: 500 });
-  }
-
   try {
-    const params = new URLSearchParams({
-      client_id: appId,
-      client_secret: appSecret,
-      code
+    const integration = await completeWhatsAppEmbeddedSignup({
+      businessId,
+      code,
+      wabaId: wabaId || undefined,
+      phoneNumberId: phoneNumberId || undefined,
+      mode
     });
 
-    const exchange = await fetch(
-      `https://graph.facebook.com/${process.env.META_GRAPH_VERSION || "v26.0"}/oauth/access_token?${params.toString()}`,
-      { cache: "no-store" }
-    );
-
-    const tokenData = await exchange.json();
-    if (!exchange.ok || !tokenData?.access_token) {
-      throw new Error(tokenData?.error?.message || "Meta token exchange failed");
-    }
-
-    const businessToken = String(tokenData.access_token);
-
-    const phoneList = await graphRequest(
-      `${wabaId}/phone_numbers?fields=id,display_phone_number,verified_name,quality_rating,code_verification_status,platform_type`,
-      businessToken
-    );
-
-    const phones = Array.isArray(phoneList.data) ? phoneList.data : [];
-    let phone = phoneNumberId
-      ? phones.find((item: any) => String(item.id) === phoneNumberId)
-      : null;
-
-    // Embedded Signup v4 Coexistence can finish with the WABA ID while
-    // omitting phone_number_id from the browser session payload.
-    // When the WABA has a single number we can safely discover it server-side.
-    if (!phone && !phoneNumberId && phones.length === 1) {
-      phone = phones[0];
-    }
-
-    if (!phone) {
-      if (!phoneNumberId && phones.length > 1) {
-        throw new Error(
-          "Meta connected the WhatsApp account but did not identify which phone number was selected. Please run the connection again."
-        );
-      }
-      throw new Error("The selected WhatsApp phone number does not belong to the account Meta returned.");
-    }
-
-    const resolvedPhoneNumberId = String(phone.id);
-
-    await graphRequest(`${wabaId}/subscribed_apps`, businessToken, {
-      method: "POST",
-      body: JSON.stringify({})
-    });
-
-    const encrypted = encryptCredential(businessToken);
-    const admin = createServerSupabaseClient();
-
-    const config = {
-      phone_number_id: resolvedPhoneNumberId,
-      whatsapp_business_account_id: wabaId,
-      display_phone_number: phone.display_phone_number || null,
-      verified_name: phone.verified_name || null,
-      quality_rating: phone.quality_rating || null,
-      code_verification_status: phone.code_verification_status || null,
-      platform_type: phone.platform_type || null,
-      connection_mode: mode,
-      embedded_signup_completed_at: new Date().toISOString(),
-      credential: {
-        ciphertext: encrypted.ciphertext,
-        iv: encrypted.iv,
-        tag: encrypted.tag
-      }
-    };
-
-    const { data: integration, error } = await admin
-      .from("integration_connections")
-      .upsert({
-        business_id: businessId,
-        provider: "whatsapp",
-        status: "connected",
-        config,
-        updated_at: new Date().toISOString()
-      }, { onConflict: "business_id,provider" })
-      .select("id,provider,status,config")
-      .single();
-
-    if (error) throw error;
-
-    const safeIntegration = {
-      ...integration,
-      config: {
-        ...integration.config,
-        credential: undefined
-      }
-    };
-
-    return Response.json({ integration: safeIntegration });
+    return Response.json({ integration });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     return Response.json({ error: message }, { status: 502 });
