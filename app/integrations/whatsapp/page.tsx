@@ -468,7 +468,7 @@ export default function WhatsAppConnectPage() {
               <p>Meta authorization happens in Meta&apos;s own signup window. Business credentials are encrypted and kept server-side.</p>
             </section>
 
-            {connected && editable && (
+            {editable && (
               <section className="whatsapp-side-panel glass-surface">
                 <div className="whatsapp-side-heading">
                   <ShieldCheck size={16} />
