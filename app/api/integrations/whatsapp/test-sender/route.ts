@@ -1,6 +1,7 @@
 import { createAuthServerClient } from "@/lib/supabase/auth-server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { encryptCredential } from "@/lib/integrations/credentials";
+import { ensureWhatsAppAppWebhook } from "@/lib/whatsapp/embedded-signup";
 
 export async function POST(request: Request) {
   const auth = await createAuthServerClient();
@@ -56,6 +57,72 @@ export async function POST(request: Request) {
     );
   }
 
+  const granularScopes = Array.isArray(debugData?.data?.granular_scopes)
+    ? debugData.data.granular_scopes
+    : [];
+
+  const whatsappManagement = granularScopes.find(
+    (scope: any) => scope?.scope === "whatsapp_business_management"
+  );
+  const whatsappMessaging = granularScopes.find(
+    (scope: any) => scope?.scope === "whatsapp_business_messaging"
+  );
+
+  const targetIds = [
+    ...(Array.isArray(whatsappManagement?.target_ids) ? whatsappManagement.target_ids : []),
+    ...(Array.isArray(whatsappMessaging?.target_ids) ? whatsappMessaging.target_ids : [])
+  ]
+    .map((id: unknown) => String(id))
+    .filter(Boolean);
+
+  const wabaId = targetIds.find((id: string) => id !== phoneNumberId) || targetIds[0] || "";
+
+  if (!wabaId) {
+    return Response.json(
+      { error: "Meta validated the token, but did not expose a WhatsApp Business Account for the test sender." },
+      { status: 400 }
+    );
+  }
+
+  try {
+    await ensureWhatsAppAppWebhook();
+
+    const subscribeResponse = await fetch(
+      `https://graph.facebook.com/${version}/${wabaId}/subscribed_apps`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({}),
+        cache: "no-store"
+      }
+    );
+
+    const subscribeData = await subscribeResponse.json().catch(() => null);
+    if (!subscribeResponse.ok || subscribeData?.success !== true) {
+      return Response.json(
+        {
+          error:
+            subscribeData?.error?.message ||
+            "Meta would not subscribe the test WhatsApp account to the InMotion webhook."
+        },
+        { status: 400 }
+      );
+    }
+  } catch (error) {
+    return Response.json(
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : "Could not configure the InMotion webhook for the Meta test sender."
+      },
+      { status: 400 }
+    );
+  }
+
   const { data: integration, error: readError } = await admin
     .from("integration_connections")
     .select("id,config")
@@ -73,11 +140,13 @@ export async function POST(request: Request) {
     ...currentConfig,
     test_sender: {
       phone_number_id: phoneNumberId,
+      whatsapp_business_account_id: wabaId,
       display_phone_number: null,
       verified_name: "Meta Test Number",
       code_verification_status: null,
       platform_type: "CLOUD_API",
       status: "TEST_READY",
+      webhook_subscribed_at: new Date().toISOString(),
       enabled_at: new Date().toISOString(),
       credential: {
         ciphertext: encrypted.ciphertext,
