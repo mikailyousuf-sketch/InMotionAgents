@@ -6,19 +6,14 @@ async function resolveAccessToken(phoneNumberId: string) {
   const { data } = await supabase
     .from("integration_connections")
     .select("config")
-    .eq("provider", "whatsapp");
+    .eq("provider", "whatsapp")
+    .eq("status", "connected");
 
-  const connection = (data || []).find((row: any) => {
-    const primaryPhone = String(row?.config?.phone_number_id || "");
-    const testPhone = String(row?.config?.test_sender?.phone_number_id || "");
-    return (row?.status === "connected" && primaryPhone === phoneNumberId) || testPhone === phoneNumberId;
-  });
+  const connection = (data || []).find(
+    (row: any) => String(row?.config?.phone_number_id || "") === phoneNumberId
+  );
 
-  const testSender = connection?.config?.test_sender;
-  const credential =
-    String(testSender?.phone_number_id || "") === phoneNumberId
-      ? testSender?.credential
-      : connection?.config?.credential;
+  const credential = connection?.config?.credential;
   if (credential?.ciphertext && credential?.iv && credential?.tag) {
     return decryptCredential({
       ciphertext: String(credential.ciphertext),
