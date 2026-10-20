@@ -32,9 +32,6 @@ export default function WhatsAppConnectPage() {
   const [status, setStatus] = useState("Checking connection…");
   const [connected, setConnected] = useState<any>(null);
   const [checking, setChecking] = useState(true);
-  const [testToken, setTestToken] = useState("");
-  const [testSenderStatus, setTestSenderStatus] = useState("");
-  const [savingTestSender, setSavingTestSender] = useState(false);
   const sessionRef = useRef<SessionData>({});
   const webhookRepairRef = useRef(false);
 
@@ -248,45 +245,6 @@ export default function WhatsAppConnectPage() {
     }
   }
 
-  async function enableTestSender() {
-    if (!businessId || !testToken.trim()) {
-      setTestSenderStatus("Paste the temporary Meta test token first.");
-      return;
-    }
-
-    setSavingTestSender(true);
-    setTestSenderStatus("Checking Meta test sender…");
-
-    try {
-      const response = await fetch("/api/integrations/whatsapp/test-sender", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          businessId,
-          accessToken: testToken.trim()
-        })
-      });
-
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok) {
-        throw new Error(data.error || "Could not enable the Meta test sender.");
-      }
-
-      setTestToken("");
-      setTestSenderStatus(
-        data?.sender?.display_phone_number
-          ? `Test sender ready: ${data.sender.display_phone_number}`
-          : "Meta test sender is ready."
-      );
-    } catch (error) {
-      setTestSenderStatus(
-        error instanceof Error ? error.message : "Could not enable the Meta test sender."
-      );
-    } finally {
-      setSavingTestSender(false);
-    }
-  }
-
   function connect() {
     if (!window.FB || !sdkReady) {
       setStatus("Meta is still loading. Try again in a moment.");
@@ -467,47 +425,6 @@ export default function WhatsAppConnectPage() {
               <div className="whatsapp-side-heading"><ShieldCheck size={16} /><strong>Secure by default</strong></div>
               <p>Meta authorization happens in Meta&apos;s own signup window. Business credentials are encrypted and kept server-side.</p>
             </section>
-
-            {editable && (
-              <section className="whatsapp-side-panel glass-surface">
-                <div className="whatsapp-side-heading">
-                  <ShieldCheck size={16} />
-                  <strong>Launch test sender</strong>
-                </div>
-                <p>
-                  Use Meta&apos;s working Cloud API test number for one end-to-end AI reply test.
-                  Paste the temporary token from Meta here. It is encrypted server-side and never shown again.
-                </p>
-                <input
-                  type="password"
-                  value={testToken}
-                  onChange={(event) => setTestToken(event.target.value)}
-                  placeholder="Paste temporary Meta test token"
-                  autoComplete="off"
-                  style={{
-                    width: "100%",
-                    marginTop: 10,
-                    padding: "11px 12px",
-                    borderRadius: 10,
-                    border: "1px solid rgba(255,255,255,.12)",
-                    background: "rgba(255,255,255,.04)",
-                    color: "inherit"
-                  }}
-                />
-                <button
-                  type="button"
-                  className="whatsapp-connect-button"
-                  onClick={enableTestSender}
-                  disabled={savingTestSender || !testToken.trim()}
-                  style={{ marginTop: 10, width: "100%" }}
-                >
-                  {savingTestSender ? "Checking…" : "Enable test sender"}
-                </button>
-                {testSenderStatus && (
-                  <p style={{ marginTop: 8 }}>{testSenderStatus}</p>
-                )}
-              </section>
-            )}
 
             <section className="whatsapp-side-panel quiet">
               <span>Before you connect</span>
