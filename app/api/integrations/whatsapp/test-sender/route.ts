@@ -59,15 +59,8 @@ export async function POST(request: Request) {
     return Response.json({ error: readError.message }, { status: 500 });
   }
 
-  if (!integration) {
-    return Response.json(
-      { error: "Connect WhatsApp once before enabling the Meta test sender." },
-      { status: 400 }
-    );
-  }
-
   const encrypted = encryptCredential(accessToken);
-  const currentConfig: any = integration.config || {};
+  const currentConfig: any = integration?.config || {};
   const nextConfig = {
     ...currentConfig,
     test_sender: {
@@ -86,16 +79,26 @@ export async function POST(request: Request) {
     }
   };
 
-  const { error: updateError } = await admin
-    .from("integration_connections")
-    .update({
-      config: nextConfig,
-      updated_at: new Date().toISOString()
-    })
-    .eq("id", integration.id);
+  const writeResult = integration
+    ? await admin
+        .from("integration_connections")
+        .update({
+          config: nextConfig,
+          updated_at: new Date().toISOString()
+        })
+        .eq("id", integration.id)
+    : await admin
+        .from("integration_connections")
+        .upsert({
+          business_id: businessId,
+          provider: "whatsapp",
+          status: "not_connected",
+          config: nextConfig,
+          updated_at: new Date().toISOString()
+        }, { onConflict: "business_id,provider" });
 
-  if (updateError) {
-    return Response.json({ error: updateError.message }, { status: 500 });
+  if (writeResult.error) {
+    return Response.json({ error: writeResult.error.message }, { status: 500 });
   }
 
   return Response.json({
