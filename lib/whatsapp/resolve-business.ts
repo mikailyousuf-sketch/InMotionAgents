@@ -6,13 +6,12 @@ export async function resolveWhatsAppBusiness(phoneNumberId: string) {
   const { data: connections } = await supabase
     .from("integration_connections")
     .select("business_id,config")
-    .eq("provider", "whatsapp")
-    .eq("status", "connected");
+    .eq("provider", "whatsapp");
 
   const connection = (connections ?? []).find((row: any) => {
     const primaryPhone = String(row?.config?.phone_number_id || "");
     const testPhone = String(row?.config?.test_sender?.phone_number_id || "");
-    return primaryPhone === phoneNumberId || testPhone === phoneNumberId;
+    return (row?.status === "connected" && primaryPhone === phoneNumberId) || testPhone === phoneNumberId;
   });
 
   if (connection?.business_id) {
