@@ -31,19 +31,27 @@ export async function POST(request: Request) {
     return Response.json({ error: "Owner or admin access required" }, { status: 403 });
   }
 
+  const appId = process.env.META_APP_ID || process.env.NEXT_PUBLIC_META_APP_ID || "";
+  const appSecret = process.env.META_APP_SECRET || "";
   const version = process.env.META_GRAPH_VERSION || "v26.0";
-  const metaResponse = await fetch(
-    `https://graph.facebook.com/${version}/${phoneNumberId}?fields=id,display_phone_number,verified_name,quality_rating,code_verification_status,platform_type,status`,
-    {
-      headers: { Authorization: `Bearer ${accessToken}` },
-      cache: "no-store"
-    }
-  );
 
-  const meta = await metaResponse.json().catch(() => null);
-  if (!metaResponse.ok) {
+  if (!appId || !appSecret) {
     return Response.json(
-      { error: meta?.error?.message || "Meta rejected the test sender token." },
+      { error: "Meta app credentials are not configured on the server." },
+      { status: 500 }
+    );
+  }
+
+  const debugUrl = new URL(`https://graph.facebook.com/${version}/debug_token`);
+  debugUrl.searchParams.set("input_token", accessToken);
+  debugUrl.searchParams.set("access_token", `${appId}|${appSecret}`);
+
+  const debugResponse = await fetch(debugUrl.toString(), { cache: "no-store" });
+  const debugData = await debugResponse.json().catch(() => null);
+
+  if (!debugResponse.ok || !debugData?.data?.is_valid) {
+    return Response.json(
+      { error: debugData?.error?.message || "Meta rejected the temporary test token." },
       { status: 400 }
     );
   }
@@ -65,11 +73,11 @@ export async function POST(request: Request) {
     ...currentConfig,
     test_sender: {
       phone_number_id: phoneNumberId,
-      display_phone_number: meta?.display_phone_number || null,
-      verified_name: meta?.verified_name || "Meta Test Number",
-      code_verification_status: meta?.code_verification_status || null,
-      platform_type: meta?.platform_type || null,
-      status: meta?.status || null,
+      display_phone_number: null,
+      verified_name: "Meta Test Number",
+      code_verification_status: null,
+      platform_type: "CLOUD_API",
+      status: "TEST_READY",
       enabled_at: new Date().toISOString(),
       credential: {
         ciphertext: encrypted.ciphertext,
@@ -105,8 +113,8 @@ export async function POST(request: Request) {
     ok: true,
     sender: {
       phone_number_id: phoneNumberId,
-      display_phone_number: meta?.display_phone_number || null,
-      verified_name: meta?.verified_name || "Meta Test Number"
+      display_phone_number: null,
+      verified_name: "Meta Test Number"
     }
   });
 }
