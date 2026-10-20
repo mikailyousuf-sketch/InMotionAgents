@@ -9,9 +9,11 @@ export async function resolveWhatsAppBusiness(phoneNumberId: string) {
     .eq("provider", "whatsapp")
     .eq("status", "connected");
 
-  const connection = (connections ?? []).find(
-    (row: any) => row?.config?.phone_number_id === phoneNumberId
-  );
+  const connection = (connections ?? []).find((row: any) => {
+    const primaryPhone = String(row?.config?.phone_number_id || "");
+    const testPhone = String(row?.config?.test_sender?.phone_number_id || "");
+    return primaryPhone === phoneNumberId || testPhone === phoneNumberId;
+  });
 
   if (connection?.business_id) {
     const { data: business, error } = await supabase
